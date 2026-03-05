@@ -1,0 +1,2 @@
+const server_repo = "https://github.com/jrodparker-dev/pokemon-showdown.git";
+module.exports = server_repo;
