@@ -92,9 +92,6 @@ export class Pokemon implements PokemonDetails, PokemonHealth {
 	prevItemEffect = '';
 	terastallized: string | '' = '';
 	teraType = '';
-	newTypes?: [string, string?];
-	baseStats?: Partial<{hp: number, atk: number, def: number, spa: number, spd: number, spe: number}>;
-	apparentType = '';
 
 	boosts: {[stat: string]: number} = {};
 	status: StatusName | 'tox' | '' | '???' = '';
@@ -545,16 +542,7 @@ export class Pokemon implements PokemonDetails, PokemonHealth {
 			(serverPokemon ? serverPokemon.speciesForme : this.speciesForme);
 	}
 	getSpecies(serverPokemon?: ServerPokemon) {
-		const species = this.side.battle.dex.species.get(this.getSpeciesForme(serverPokemon));
-		if (!serverPokemon?.baseStats && !serverPokemon?.types) return species;
-		return {
-			...species,
-			baseStats: {
-				...species.baseStats,
-				...(serverPokemon.baseStats || {}),
-			},
-			types: serverPokemon.types || species.types,
-		};
+		return this.side.battle.dex.species.get(this.getSpeciesForme(serverPokemon));
 	}
 	getBaseSpecies() {
 		return this.side.battle.dex.species.get(this.speciesForme);
@@ -768,9 +756,6 @@ export class Side {
 			poke.item = oldPokemon.item;
 			poke.baseAbility = oldPokemon.baseAbility;
 			poke.teraType = oldPokemon.teraType;
-			poke.newTypes = oldPokemon.newTypes ? [...oldPokemon.newTypes] as [string, string?] : undefined;
-			poke.baseStats = oldPokemon.baseStats ? {...oldPokemon.baseStats} : undefined;
-			poke.apparentType = oldPokemon.apparentType;
 		}
 
 		if (!poke.ability && poke.baseAbility) poke.ability = poke.baseAbility;
@@ -1017,17 +1002,6 @@ export interface ServerPokemon extends PokemonDetails, PokemonHealth {
 		spd: number,
 		spe: number,
 	};
-	/** optional base stats override from team data */
-	baseStats?: Partial<{
-		hp: number,
-		atk: number,
-		def: number,
-		spa: number,
-		spd: number,
-		spe: number,
-	}>;
-	/** optional typing override from team data */
-	types?: readonly string[];
 	/** currently an ID, will revise to name */
 	moves: string[];
 	/** currently an ID, will revise to name */
@@ -3657,13 +3631,6 @@ export class Battle {
 					pokemon.rememberMove(move, 0);
 				}
 				if (set.teraType) pokemon.teraType = set.teraType;
-				if (set.newTypes?.[0]) {
-					pokemon.newTypes = [set.newTypes[0], set.newTypes[1]];
-					pokemon.apparentType = pokemon.newTypes.filter(Boolean).join('/');
-				}
-				if (set.baseStats) {
-					pokemon.baseStats = {...set.baseStats};
-				}
 			}
 			this.log(args, kwArgs);
 			break;

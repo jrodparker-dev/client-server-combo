@@ -1291,9 +1291,9 @@ const Teams = new class {
 			j = buf.indexOf(']', i);
 			let misc;
 			if (j < 0) {
-				if (i < buf.length) misc = buf.substring(i).split(',', 9);
+				if (i < buf.length) misc = buf.substring(i).split(',', 6);
 			} else {
-				if (i !== j) misc = buf.substring(i, j).split(',', 9);
+				if (i !== j) misc = buf.substring(i, j).split(',', 6);
 			}
 			if (misc) {
 				set.happiness = (misc[0] ? Number(misc[0]) : 255);
@@ -1302,21 +1302,6 @@ const Teams = new class {
 				set.gigantamax = !!misc[3];
 				set.dynamaxLevel = (misc[4] ? Number(misc[4]) : 10);
 				set.teraType = misc[5];
-				if (misc[6]) {
-					const packedStats = misc[6].split(',', 6);
-					const statNames: StatName[] = ['hp', 'atk', 'def', 'spa', 'spd', 'spe'];
-					const baseStats: {[stat: string]: number} = {};
-					for (let k = 0; k < statNames.length; k++) {
-						if (packedStats[k] === undefined || packedStats[k] === '') continue;
-						const statValue = Number(packedStats[k]);
-						if (!isNaN(statValue)) baseStats[statNames[k]] = statValue;
-					}
-					if (Object.keys(baseStats).length) (set as any).baseStats = baseStats;
-				}
-				if (misc[7]) {
-					(set as any).newTypes = [misc[7]];
-					if (misc[8]) (set as any).newTypes.push(misc[8]);
-				}
 			}
 			if (j < 0) break;
 			i = j + 1;

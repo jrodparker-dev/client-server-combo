@@ -303,35 +303,8 @@ class BattlePanel extends PSRoomPanel<BattleRoom> {
 		BattleChoiceBuilder.fixRequest(request, room.battle);
 
 		if (request.side) {
-						room.battle.myPokemon = request.side.pokemon;
+			room.battle.myPokemon = request.side.pokemon;
 			room.battle.setViewpoint(request.side.id);
-			// Ensure packed custom team data (edited base stats / typings) is copied onto the live BattlePokemon objects
-			// so battle-tooltips and any in-battle calculations can see it.
-			try {
-				const clientSide: any = (room.battle as any).mySide;
-				const serverTeam: any[] = (request.side as any).pokemon || [];
-				if (clientSide && clientSide.pokemon && Array.isArray(clientSide.pokemon)) {
-					for (let i = 0; i < serverTeam.length && i < clientSide.pokemon.length; i++) {
-						const serverP: any = serverTeam[i];
-						const clientP: any = clientSide.pokemon[i];
-						if (!clientP || !serverP) continue;
-						if (serverP.baseStats) {
-							clientP.baseStats = serverP.baseStats;
-							clientP.set = clientP.set || {};
-							clientP.set.baseStats = serverP.baseStats;
-						}
-						// Server packs overridden typing as `types` array in request data.
-						if (serverP.types && Array.isArray(serverP.types) && serverP.types.length) {
-							clientP.newTypes = [serverP.types[0], serverP.types[1]];
-							clientP.set = clientP.set || {};
-							clientP.set.newTypes = [serverP.types[0], serverP.types[1]];
-						}
-						if (serverP.teraType) clientP.teraType = serverP.teraType;
-					}
-				}
-			} catch {
-				// ignore injection failures
-			}
 			room.side = request.side;
 		}
 
@@ -568,32 +541,7 @@ class BattlePanel extends PSRoomPanel<BattleRoom> {
 				{this.renderTeamList()}
 			</div>;
 		}
-		if (request.side) {
-			room.battle.myPokemon = request.side.pokemon;
-			// Keep BattlePokemon objects synced with any packed custom stats/types in the request.
-			try {
-				const clientSide: any = (room.battle as any).mySide;
-				const serverTeam: any[] = (request.side as any).pokemon || [];
-				if (clientSide && clientSide.pokemon && Array.isArray(clientSide.pokemon)) {
-					for (let i = 0; i < serverTeam.length && i < clientSide.pokemon.length; i++) {
-						const serverP: any = serverTeam[i];
-						const clientP: any = clientSide.pokemon[i];
-						if (!clientP || !serverP) continue;
-						if (serverP.baseStats) {
-							clientP.baseStats = serverP.baseStats;
-							clientP.set = clientP.set || {};
-							clientP.set.baseStats = serverP.baseStats;
-						}
-						if (serverP.types && Array.isArray(serverP.types) && serverP.types.length) {
-							clientP.newTypes = [serverP.types[0], serverP.types[1]];
-							clientP.set = clientP.set || {};
-							clientP.set.newTypes = [serverP.types[0], serverP.types[1]];
-						}
-						if (serverP.teraType) clientP.teraType = serverP.teraType;
-					}
-				}
-			} catch {}
-		}
+		if (request.side) room.battle.myPokemon = request.side.pokemon;
 		switch (request.requestType) {
 		case 'move': {
 			const index = choices.index();

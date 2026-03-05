@@ -139,7 +139,6 @@ class ModifiableValue {
 
 class BattleTooltips {
 	battle: Battle;
-	static DH2_TOOLTIP_ERROR_PREFIX = 'DH2 Tooltip Data Error';
 
 	constructor(battle: Battle) {
 		this.battle = battle;
@@ -330,14 +329,16 @@ class BattleTooltips {
 			break;
 		}
 		case 'switchpokemon': { // switchpokemon|POKEMON
-			// mouse over your team (bench) Pokemon
-			const activeIndex = parseInt(args[1], 10);
-			let pokemon: Pokemon | null = null;
-			// Prefer the client-side BattlePokemon object so injected baseStats/newTypes are visible in tooltips.
-			if (this.battle.mySide && this.battle.mySide.pokemon && activeIndex >= 0 && activeIndex < this.battle.mySide.pokemon.length) {
-				pokemon = this.battle.mySide.pokemon[activeIndex] || null;
-			}
-			const serverPokemon = this.battle.myPokemon ? this.battle.myPokemon[activeIndex] : null;
+			// mouse over switchable pokemon
+			// serverPokemon definitely exists, sidePokemon maybe
+			// let side = this.battle.mySide;
+			let activeIndex = parseInt(args[1], 10);
+			let pokemon = null;
+			/* if (activeIndex < side.active.length && activeIndex < this.battle.pokemonControlled) {
+				pokemon = side.active[activeIndex];
+				if (pokemon && pokemon.side === side.ally) pokemon = null;
+			} */
+			let serverPokemon = this.battle.myPokemon![activeIndex];
 			buf = this.showPokemonTooltip(pokemon, serverPokemon);
 			break;
 		}
@@ -804,36 +805,19 @@ class BattleTooltips {
 				}
 			}
 
+			let types = serverPokemon?.terastallized ? [serverPokemon.teraType] : this.getPokemonTypes(pokemon);
 			let knownPokemon = serverPokemon || clientPokemon!;
-			const sourcePokemon = this.getTooltipSourcePokemon(clientPokemon, serverPokemon) || pokemon;
-			const strictPackedTypes = this.hasPackedCustomData(sourcePokemon);
-			const packedTypeData = this.getPackedTypes(sourcePokemon, strictPackedTypes);
-			const packedTypes = packedTypeData.types;
 
 			if (pokemon.terastallized) {
 				text += `<small>(Terastallized)</small><br />`;
 			} else if (clientPokemon?.volatiles.typechange || clientPokemon?.volatiles.typeadd) {
 				text += `<small>(Type changed)</small><br />`;
 			}
-			if (!packedTypes.length && strictPackedTypes) {
-				text += `<small>${BattleLog.escapeHTML(packedTypeData.error)}</small>`;
-			} else {
-				let types = serverPokemon?.terastallized ? [serverPokemon.teraType] : packedTypes;
-				if (clientPokemon && (clientPokemon.volatiles.typechange || clientPokemon.volatiles.typeadd)) {
-					types = clientPokemon.getTypeList(undefined, false);
-				}
-				text += `<span class="textaligned-typeicons">${types.map(type => Dex.getTypeIcon(type)).join(' ')}</span>`;
-				if (pokemon.terastallized) {
-					const basePackedTypeData = this.getPackedTypes(sourcePokemon, strictPackedTypes);
-					const basePackedTypes = basePackedTypeData.types;
-					if (basePackedTypes.length || !strictPackedTypes) {
-						text += `&nbsp; &nbsp; <small>(base: <span class="textaligned-typeicons">${basePackedTypes.map(type => Dex.getTypeIcon(type)).join(' ')}</span>)</small>`;
-					} else {
-						text += `&nbsp; &nbsp; <small>${BattleLog.escapeHTML(basePackedTypeData.error.replace('[MISSING_CUSTOM_TYPING]', '[MISSING_CUSTOM_TYPING_BASE]'))}</small>`;
-					}
-				} else if (knownPokemon.teraType && !this.battle.rules['Terastal Clause']) {
-					text += `&nbsp; &nbsp; <small>(Tera Type: <span class="textaligned-typeicons">${Dex.getTypeIcon(knownPokemon.teraType)}</span>)</small>`;
-				}
+			text += `<span class="textaligned-typeicons">${types.map(type => Dex.getTypeIcon(type)).join(' ')}</span>`;
+			if (pokemon.terastallized) {
+				text += `&nbsp; &nbsp; <small>(base: <span class="textaligned-typeicons">${this.getPokemonTypes(pokemon, true).map(type => Dex.getTypeIcon(type)).join(' ')}</span>)</small>`;
+			} else if (knownPokemon.teraType && !this.battle.rules['Terastal Clause']) {
+				text += `&nbsp; &nbsp; <small>(Tera Type: <span class="textaligned-typeicons">${Dex.getTypeIcon(knownPokemon.teraType)}</span>)</small>`;
 			}
 			text += `</h2>`;
 		}
@@ -998,8 +982,7 @@ class BattleTooltips {
 	}
 
 	calculateModifiedStats(clientPokemon: Pokemon | null, serverPokemon: ServerPokemon, statStagesOnly?: boolean) {
-		const rawStats = this.getPokemonStatTable(clientPokemon, serverPokemon);
-		let stats = {...rawStats};
+		let stats = {...serverPokemon.stats};
 		let pokemon = clientPokemon || serverPokemon;
 		const isPowerTrick = clientPokemon?.volatiles['powertrick'];
 		for (const statName of Dex.statNamesExceptHP) {
@@ -1008,7 +991,7 @@ class BattleTooltips {
 				if (statName === 'atk') sourceStatName = 'def';
 				if (statName === 'def') sourceStatName = 'atk';
 			}
-			stats[statName] = rawStats[sourceStatName];
+			stats[statName] = serverPokemon.stats[sourceStatName];
 			if (!clientPokemon) continue;
 
 			const clientStatName = clientPokemon.boosts.spc && (statName === 'spa' || statName === 'spd') ? 'spc' : statName;
@@ -1353,128 +1336,14 @@ if (pokemon.status === 'frb') {
 		return stats;
 	}
 
-	parseStatSource(statSource: unknown) {
-		const parsedStats: {[stat: string]: number} = {};
-		if (!statSource) return parsedStats;
-		const addStat = (rawStatName: string, rawStatValue: unknown) => {
-			const statAlias: {[k: string]: StatName} = {spatk: 'spa', spdef: 'spd', spatk: 'spa', spdefense: 'spd'};
-			let statName = toID(rawStatName);
-			if (statAlias[statName]) statName = statAlias[statName];
-			if (!Dex.statNames.includes(statName as StatName)) return;
-			const statValue = Number(rawStatValue);
-			if (!isNaN(statValue) && statValue > 0) parsedStats[statName] = statValue;
-		};
-		const addPackedNumberList = (values: unknown[]) => {
-			const packedValues = values.map(value => Number(value));
-			if (!packedValues.some(value => !isNaN(value) && value > 0)) return;
-			if (packedValues.length >= Dex.statNames.length) {
-				for (let i = 0; i < Dex.statNames.length; i++) {
-					addStat(Dex.statNames[i], packedValues[i]);
-				}
-				return;
-			}
-			if (packedValues.length >= Dex.statNamesExceptHP.length) {
-				for (let i = 0; i < Dex.statNamesExceptHP.length; i++) {
-					addStat(Dex.statNamesExceptHP[i], packedValues[i]);
-				}
-			}
-		};
-		if (typeof statSource === 'string') {
-			const normalizedSource = statSource.trim();
-			if (!normalizedSource) return parsedStats;
-			if (normalizedSource.startsWith('{') || normalizedSource.startsWith('[')) {
-				try {
-					return this.parseStatSource(JSON.parse(normalizedSource));
-				} catch {}
-			}
-			addPackedNumberList(normalizedSource.split(/[\/,|]/));
-			for (const statEntry of statSource.split(/[\s,|/]+/)) {
-				const [rawStatName, rawStatValue] = statEntry.split(':');
-				if (!rawStatName || !rawStatValue) continue;
-				addStat(rawStatName, rawStatValue);
-			}
-			for (const match of normalizedSource.matchAll(/(hp|atk|def|spa|spd|spe|sp\.?a(?:tk)?|sp\.?d(?:ef)?|specialattack|specialdefense)\s*[:= ]\s*(-?\d+(?:\.\d+)?)/gi)) {
-				addStat(match[1], match[2]);
-			}
-			return parsedStats;
-		}
-		if (Array.isArray(statSource)) {
-			addPackedNumberList(statSource);
-			return parsedStats;
-		}
-		for (const statName of Dex.statNames) {
-			addStat(statName, (statSource as {[stat: string]: number | string})[statName]);
-		}
-		for (const [rawStatName, rawStatValue] of Object.entries(statSource as {[k: string]: number | string})) {
-			addStat(rawStatName, rawStatValue);
-		}
-		return parsedStats;
-	}
-
-	getPackedTooltipError(reasonCode: string, details: string) {
-		// Suppress debug/error strings in tooltips (keep logic silent).
-		return '';
-	}
-
-	getTooltipSourcePokemon(clientPokemon: Pokemon | null, serverPokemon?: ServerPokemon | null) {
-		return serverPokemon || clientPokemon || null;
-	}
-
-	hasPackedCustomData(sourcePokemon: Pokemon | ServerPokemon | null | undefined) {
-		if (!sourcePokemon) return false;
-		if ((sourcePokemon as any).newTypes || (sourcePokemon as any).baseStats) return true;
-		if ((sourcePokemon as any).apparentType) return true;
-		if ((sourcePokemon as any).set?.newTypes || (sourcePokemon as any).set?.baseStats) return true;
-		return false;
-	}
-
-	getPackedStatTable(sourcePokemon: Pokemon | ServerPokemon | null | undefined, strict = true) {
-		const parsedSourceStats = this.parseStatSource((sourcePokemon as any)?.stats || (sourcePokemon as any)?.set?.stats);
-		const stats: {[stat: string]: number} = {};
-		for (const statName of Dex.statNamesExceptHP) {
-			const customStat = parsedSourceStats[statName];
-			if (customStat) stats[statName] = customStat;
-		}
-		if (Dex.statNamesExceptHP.every(statName => stats[statName])) {
-			return {stats: stats as ServerPokemon['stats'], error: ''};
-		}
-		if (!strict) {
-			const fallbackStats = (sourcePokemon as any)?.stats || {atk: 0, def: 0, spa: 0, spd: 0, spe: 0};
-			return {stats: fallbackStats as ServerPokemon['stats'], error: ''};
-		}
-		const pokemonName = sourcePokemon?.name || 'Unknown Pokemon';
-		const missingStats = Dex.statNamesExceptHP.filter(statName => !stats[statName]).join(', ');
-		return {
-			stats: null,
-			error: this.getPackedTooltipError(
-				'MISSING_CUSTOM_STATS',
-				`${pokemonName} is missing packed custom stats for: ${missingStats}.`,
-			),
-		};
-	}
-
-
-	getPokemonStatTable(clientPokemon: Pokemon | null, serverPokemon?: ServerPokemon | null) {
-		const sourcePokemon = this.getTooltipSourcePokemon(clientPokemon, serverPokemon);
-		const strict = this.hasPackedCustomData(sourcePokemon);
-		const {stats} = this.getPackedStatTable(sourcePokemon, strict);
-		return stats || {atk: 0, def: 0, spa: 0, spd: 0, spe: 0};
-	}
-
 	renderStats(clientPokemon: Pokemon | null, serverPokemon?: ServerPokemon | null, short?: boolean) {
-		const sourcePokemon = this.getTooltipSourcePokemon(clientPokemon, serverPokemon);
-		const strict = this.hasPackedCustomData(sourcePokemon);
-		const packedStatTable = this.getPackedStatTable(sourcePokemon, strict);
-		if (!packedStatTable.stats) {
-			return `<p class="tooltip-section"><small>${BattleLog.escapeHTML(packedStatTable.error)}</small></p>`;
-		}
 		const isTransformed = clientPokemon?.volatiles.transform;
 		if (!serverPokemon || isTransformed) {
 			if (!clientPokemon) throw new Error('Must pass either clientPokemon or serverPokemon');
-			let [min, max] = this.getSpeedRange(clientPokemon, serverPokemon);
+			let [min, max] = this.getSpeedRange(clientPokemon);
 			return '<p><small>Spe</small> ' + min + ' to ' + max + ' <small>(before items/abilities/modifiers)</small></p>';
 		}
-		const stats = packedStatTable.stats;
+		const stats = serverPokemon.stats;
 		const modifiedStats = this.calculateModifiedStats(clientPokemon, serverPokemon);
 
 		let buf = '<p>';
@@ -1548,30 +1417,14 @@ if (pokemon.status === 'frb') {
 	/**
 	 * Calculates possible Speed stat range of an opponent
 	 */
-	getSpeedRange(pokemon: Pokemon, serverPokemon?: ServerPokemon | null): [number, number] {
+	getSpeedRange(pokemon: Pokemon): [number, number] {
 		const tr = Math.trunc || Math.floor;
-		const strict = this.hasPackedCustomData(pokemon);
-		const packedStatTable = this.getPackedStatTable(pokemon, strict);
-		const stats = packedStatTable.stats || {atk: 0, def: 0, spa: 0, spd: 0, spe: 0};
-		const exactSpe = Number(stats.spe);
-		if (!isNaN(exactSpe) && exactSpe > 0) {
-			return [exactSpe, exactSpe];
-		}
-		const species = pokemon.getSpecies(serverPokemon || undefined);
-		const effectiveBaseStats = {...species.baseStats};
-		const parsedClientBaseStats = this.parseStatSource((pokemon as any).baseStats || (pokemon as any).set?.baseStats);
-		const parsedServerBaseStats = this.parseStatSource((serverPokemon as any)?.baseStats || (serverPokemon as any)?.set?.baseStats);
-		for (const statName of Dex.statNames) {
-			const customValue = parsedClientBaseStats[statName] || parsedServerBaseStats[statName];
-			if (customValue) effectiveBaseStats[statName] = customValue;
-		}
-		let baseSpe = effectiveBaseStats.spe;
+		const species = pokemon.getSpecies();
+		let baseSpe = species.baseStats.spe;
 		if (this.battle.rules['Scalemons Mod']) {
-			const effectiveBst = effectiveBaseStats.hp + effectiveBaseStats.atk + effectiveBaseStats.def +
-				effectiveBaseStats.spa + effectiveBaseStats.spd + effectiveBaseStats.spe;
-			const bstWithoutHp = effectiveBst - effectiveBaseStats.hp;
-			const scale = 600 - effectiveBaseStats.hp;
-			if (bstWithoutHp > 0) baseSpe = tr(baseSpe * scale / bstWithoutHp);
+			const bstWithoutHp = species.bst - species.baseStats.hp;
+			const scale = 600 - species.baseStats.hp;
+			baseSpe = tr(baseSpe * scale / bstWithoutHp);
 			if (baseSpe < 1) baseSpe = 1;
 			if (baseSpe > 255) baseSpe = 255;
 		}
@@ -1601,7 +1454,6 @@ if (pokemon.status === 'frb') {
 		return [min, max];
 	}
 
-
 	/**
 	 * Gets the proper current type for moves with a variable type.
 	 */
@@ -1615,7 +1467,7 @@ if (pokemon.status === 'frb') {
 		// can happen in obscure situations
 		if (!pokemon) return [moveType, category];
 
-		let pokemonTypes = this.getPokemonTypes(pokemon, false, serverPokemon);
+		let pokemonTypes = pokemon.getTypeList(serverPokemon);
 		value.reset();
 		if (move.id === 'revelationdance') {
 			moveType = pokemonTypes[0];
@@ -2403,117 +2255,13 @@ if (pokemon.status === 'frb') {
 		}
 		return value;
 	}
+	getPokemonTypes(pokemon: Pokemon | ServerPokemon, preterastallized = false): ReadonlyArray<TypeName> {
+		if (!(pokemon as Pokemon).getTypes) {
+			return this.battle.dex.species.get(pokemon.speciesForme).types;
+		}
 
-	getPackedTypes(
-		sourcePokemon: Pokemon | ServerPokemon,
-		strict = true,
-	): {types: TypeName[], error: string} {
-		const parseTypeSource = (source: unknown): TypeName[] => {
-			if (!source) return [];
-			const values = Array.isArray(source) ? source :
-				typeof source === 'string' ? [source] :
-				typeof source === 'object' ? Object.values(source as {[k: string]: unknown}) : [];
-			const types: TypeName[] = [];
-			for (const value of values) {
-				for (const rawToken of String(value).split(/[^A-Za-z?]+/)) {
-					if (!rawToken) continue;
-					const normalizedType = Dex.types.get(rawToken.trim()).name;
-					if (!Dex.types.isName(normalizedType)) continue;
-					const type = normalizedType as TypeName;
-					if (types.includes(type)) continue;
-					types.push(type);
-					if (types.length >= 2) return types;
-				}
-			}
-			return types;
-		};
-		const pokemonList = [sourcePokemon];
-		for (const currentPokemon of pokemonList) {
-			const injectedTypeSources = [
-				(currentPokemon as any).newTypes,
-				(currentPokemon as any).set?.newTypes,
-				(currentPokemon as any).apparentType,
-			];
-			const types: TypeName[] = [];
-			let hasCustomTypeSource = false;
-			for (const source of injectedTypeSources) {
-				const customTypeList = Array.isArray(source) ? source :
-					typeof source === 'string' ? [source] :
-					typeof source === 'object' ? Object.values(source as {[k: string]: unknown}) : [];
-				if (customTypeList.length) hasCustomTypeSource = true;
-				const sourceTypes = parseTypeSource(source);
-				for (const type of sourceTypes) {
-					if (types.includes(type)) continue;
-					types.push(type);
-					if (types.length >= 2) return {types, error: ''};
-				}
-			}
-			if (types.length) return {types, error: ''};
-			if (hasCustomTypeSource) {
-				return {
-					types: [],
-					error: this.getPackedTooltipError(
-						'INVALID_CUSTOM_TYPING',
-						`${currentPokemon.name || currentPokemon.speciesForme || 'Unknown Pokemon'} has packed typing data, but no valid types were parsed.`,
-					),
-				};
-			}
-		}
-		if (!strict) {
-			return {types: this.getPokemonTypes(sourcePokemon, false, undefined, false) as TypeName[], error: ''};
-		}
-		return {
-			types: [],
-			error: this.getPackedTooltipError(
-				'MISSING_CUSTOM_TYPING',
-				`${sourcePokemon.name || sourcePokemon.speciesForme || 'Unknown Pokemon'} has no packed custom typing data (newTypes/apparentType).`,
-			),
-		};
+		return (pokemon as Pokemon).getTypeList(undefined, preterastallized);
 	}
-
-	getPokemonTypes(
-		pokemon: Pokemon | ServerPokemon,
-		preterastallized = false,
-		fallbackPokemon?: Pokemon | ServerPokemon | null,
-		strictCustomData = false,
-	): ReadonlyArray<TypeName> {
-		const pokemonList = [pokemon, fallbackPokemon].filter(poke => !!poke) as (Pokemon | ServerPokemon)[];
-		for (const currentPokemon of pokemonList) {
-			const injectedTypeSources = [
-				(currentPokemon as any).newTypes,
-				(currentPokemon as any).set?.newTypes,
-				(currentPokemon as any).apparentType,
-				(currentPokemon as any).types,
-			];
-			const types: TypeName[] = [];
-			for (const source of injectedTypeSources) {
-				const customTypeList = Array.isArray(source) ? source :
-					typeof source === 'string' ? [source] : [];
-				for (const typeEntry of customTypeList) {
-					for (const typeName of String(typeEntry).split(/[^A-Za-z?]+/)) {
-						if (!typeName) continue;
-						const normalizedType = Dex.types.get(typeName.trim()).name;
-						if (!Dex.types.isName(normalizedType)) continue;
-						const type = normalizedType as TypeName;
-						if (types.includes(type)) continue;
-						types.push(type);
-						if (types.length >= 2) return types;
-					}
-				}
-			}
-			if (types.length) return types;
-		}
-		if (strictCustomData) return [];
-		if ('getTypeList' in pokemon) {
-			return pokemon.getTypeList(undefined, preterastallized);
-		}
-		if (fallbackPokemon && 'getTypeList' in fallbackPokemon) {
-			return fallbackPokemon.getTypeList(undefined, preterastallized);
-		}
-
-		return this.battle.dex.species.get(pokemon.speciesForme).types;
-	}
-
 	pokemonHasType(pokemon: Pokemon | ServerPokemon, type: TypeName, types?: ReadonlyArray<TypeName>) {
 		if (!types) types = this.getPokemonTypes(pokemon);
 		for (const curType of types) {
