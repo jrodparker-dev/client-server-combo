@@ -1380,7 +1380,7 @@ export class Battle {
 				if (!side.pokemonLeft) continue;
 				const switchTable = side.active.map(pokemon => !!pokemon?.switchFlag);
 				if (switchTable.some(Boolean)) {
-					requests[i] = { forceSwitch: switchTable, side: side.getRequestData() };
+					requests[i] = { forceSwitch: switchTable, side: side.getRequestData(), foe: side.foe.getRequestData(true) };
 				}
 			}
 			break;
@@ -1389,7 +1389,7 @@ export class Battle {
 			for (let i = 0; i < this.sides.length; i++) {
 				const side = this.sides[i];
 				const maxChosenTeamSize = this.ruleTable.pickedTeamSize || undefined;
-				requests[i] = { teamPreview: true, maxChosenTeamSize, side: side.getRequestData() };
+				requests[i] = { teamPreview: true, maxChosenTeamSize, side: side.getRequestData(), foe: side.foe.getRequestData(true) };
 			}
 			break;
 
@@ -1398,7 +1398,7 @@ export class Battle {
 				const side = this.sides[i];
 				if (!side.pokemonLeft) continue;
 				const activeData = side.active.map(pokemon => pokemon?.getMoveRequestData());
-				requests[i] = { active: activeData, side: side.getRequestData() };
+				requests[i] = { active: activeData, side: side.getRequestData(), foe: side.foe.getRequestData(true) };
 				if (side.allySide) {
 					(requests[i] as MoveRequest).ally = side.allySide.getRequestData(true);
 				}
@@ -1411,7 +1411,7 @@ export class Battle {
 			if (requests[i]) {
 				if (!this.supportCancel || !multipleRequestsExist) requests[i].noCancel = true;
 			} else {
-				requests[i] = { wait: true, side: this.sides[i].getRequestData() };
+				requests[i] = { wait: true, side: this.sides[i].getRequestData(), foe: this.sides[i].foe.getRequestData(true) };
 			}
 		}
 
