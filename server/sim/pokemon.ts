@@ -1373,6 +1373,7 @@ export class Pokemon {
 		}
 
 		this.setType(types, true);
+		if (!isTransform && species.id === this.baseSpecies.id) this.baseTypes = [...types];
 		this.apparentType = types.join('/');
 		this.addedType = species.addedType || '';
 		this.knownType = true;

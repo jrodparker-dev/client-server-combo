@@ -51,6 +51,7 @@ interface BattleMoveRequest {
 	requestType: 'move';
 	rqid: number;
 	side: BattleRequestSideInfo;
+	foe?: BattleRequestSideInfo;
 	active: (BattleRequestActivePokemon | null)[];
 	noCancel?: boolean;
 }
@@ -58,6 +59,7 @@ interface BattleSwitchRequest {
 	requestType: 'switch';
 	rqid: number;
 	side: BattleRequestSideInfo;
+	foe?: BattleRequestSideInfo;
 	forceSwitch: boolean[];
 	noCancel?: boolean;
 }
@@ -65,6 +67,7 @@ interface BattleTeamRequest {
 	requestType: 'team';
 	rqid: number;
 	side: BattleRequestSideInfo;
+	foe?: BattleRequestSideInfo;
 	maxTeamSize?: number;
 	noCancel?: boolean;
 }
@@ -72,6 +75,7 @@ interface BattleWaitRequest {
 	requestType: 'wait';
 	rqid: number;
 	side: undefined;
+	foe?: BattleRequestSideInfo;
 	noCancel?: boolean;
 }
 type BattleRequest = BattleMoveRequest | BattleSwitchRequest | BattleTeamRequest | BattleWaitRequest;
@@ -475,6 +479,12 @@ class BattleChoiceBuilder {
 		if (request.requestType === 'wait') request.noCancel = true;
 		if (request.side) {
 			for (const serverPokemon of request.side.pokemon) {
+				battle.parseDetails(serverPokemon.ident.substr(4), serverPokemon.ident, serverPokemon.details, serverPokemon);
+				battle.parseHealth(serverPokemon.condition, serverPokemon);
+			}
+		}
+		if (request.foe) {
+			for (const serverPokemon of request.foe.pokemon) {
 				battle.parseDetails(serverPokemon.ident.substr(4), serverPokemon.ident, serverPokemon.details, serverPokemon);
 				battle.parseHealth(serverPokemon.condition, serverPokemon);
 			}

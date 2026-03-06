@@ -393,6 +393,9 @@
 				if (this.request.ally) {
 					this.addAlly(this.request.ally);
 				}
+				if (this.request.foe) {
+					this.addFoe(this.request.foe);
+				}
 
 				act = this.request.requestType;
 				if (this.request.side) {
@@ -1283,6 +1286,7 @@ try {
 		updateSide: function () {
 			var sideData = this.request.side;
 			this.battle.myPokemon = sideData.pokemon;
+			this.battle.foePokemon = this.request.foe ? this.request.foe.pokemon : null;
 			this.battle.setViewpoint(sideData.id);
 			for (var i = 0; i < sideData.pokemon.length; i++) {
 				var pokemonData = sideData.pokemon[i];
@@ -1294,6 +1298,21 @@ try {
 				pokemonData.getFormattedRange = Pokemon.prototype.getFormattedRange;
 				pokemonData.getHPColorClass = Pokemon.prototype.getHPColorClass;
 				pokemonData.getHPColor = Pokemon.prototype.getHPColor;
+			}
+		},
+
+		addFoe: function (foeData) {
+			this.battle.foePokemon = foeData.pokemon;
+			for (var i = 0; i < foeData.pokemon.length; i++) {
+				var pokemonData = foeData.pokemon[i];
+				this.battle.parseDetails(pokemonData.ident.substr(4), pokemonData.ident, pokemonData.details, pokemonData);
+				this.battle.parseHealth(pokemonData.condition, pokemonData);
+				pokemonData.hpDisplay = Pokemon.prototype.hpDisplay;
+				pokemonData.getPixelRange = Pokemon.prototype.getPixelRange;
+				pokemonData.getFormattedRange = Pokemon.prototype.getFormattedRange;
+				pokemonData.getHPColorClass = Pokemon.prototype.getHPColorClass;
+				pokemonData.getHPColor = Pokemon.prototype.getHPColor;
+				pokemonData.side = this.battle.farSide;
 			}
 		},
 		addAlly: function (allyData) {
