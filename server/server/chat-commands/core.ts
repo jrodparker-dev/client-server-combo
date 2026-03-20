@@ -1515,7 +1515,7 @@ export const commands: Chat.ChatCommands = {
 		if (!user.named) {
 			return this.popupReply(this.tr`You must choose a username before you challenge the AI.`);
 		}
-		let payload: {format?: string, playerTeam?: string, aiTeam?: string} = {};
+		let payload: { format?: string, playerTeam?: string, aiTeam?: string } = {};
 		if (target.trim()) {
 			try {
 				payload = JSON.parse(target);
@@ -1533,7 +1533,7 @@ export const commands: Chat.ChatCommands = {
 		if (!playerReady) return false;
 
 		const aiTeam = format.team ? '' : (payload.aiTeam ?? '');
-		const aiValidation = await TeamValidatorAsync.get(ladder.formatid).validateTeam(aiTeam, {user: user.id});
+		const aiValidation = await TeamValidatorAsync.get(ladder.formatid).validateTeam(aiTeam, { user: user.id });
 		if (!aiValidation.startsWith('1')) {
 			connection.popup(
 				`The AI team was rejected for the following reasons:\n\n` +
@@ -1554,7 +1554,7 @@ export const commands: Chat.ChatCommands = {
 					hidden: playerReady.settings.hidden,
 				},
 				{
-					user: 'AI Opponent' as User,
+					user: 'AI Opponent',
 					team: aiValidation.slice(1),
 					ai: true,
 				},

@@ -1,6 +1,6 @@
 import { Utils } from '../lib';
 import { RoomGamePlayer, RoomGame } from "./room-game";
-import type { RoomBattlePlayerOptions, RoomBattleOptions } from './room-battle';
+import type { RoomBattlePlayerData, RoomBattlePlayerOptions, RoomBattleOptions } from './room-battle';
 import type { PrivacySetting, RoomSettings } from './rooms';
 
 const BEST_OF_IN_BETWEEN_TIME = 40;
@@ -10,7 +10,7 @@ export class BestOfPlayer extends RoomGamePlayer<BestOfGame> {
 	ready: boolean | null = null;
 	options: Omit<RoomBattlePlayerOptions, 'user'> & { user: null };
 	dcAutoloseTime: number | null = null;
-	constructor(user: User | null, game: BestOfGame, num: number, options: RoomBattlePlayerOptions) {
+	constructor(user: User | null, game: BestOfGame, num: number, options: RoomBattlePlayerOptions & { user: User }) {
 		super(user, game, num);
 		this.options = { ...options, user: null };
 	}
@@ -102,7 +102,10 @@ export class BestOfGame extends RoomGame<BestOfPlayer> {
 			players: null,
 		};
 		for (const playerOpts of options.players) {
-			this.addPlayer(playerOpts.user, playerOpts);
+			if (!playerOpts.user || typeof playerOpts.user === 'string') {
+				throw new Error(`Best-of battles require named users for every player.`);
+			}
+			this.addPlayer(playerOpts.user, { ...playerOpts, user: playerOpts.user });
 		}
 		process.nextTick(() => this.nextGame());
 	}
@@ -111,10 +114,16 @@ export class BestOfGame extends RoomGame<BestOfPlayer> {
 		player?.sendRoom('|cantleave|');
 		player?.updateReadyButton();
 	}
-	override makePlayer(user: User | null, options: RoomBattlePlayerOptions): BestOfPlayer {
-		return new BestOfPlayer(user, this, ++this.playerNum, options);
+	override makePlayer(user: User | string | null, options: RoomBattlePlayerData): BestOfPlayer {
+		if (!user || typeof user === 'string') {
+			throw new Error(`Best-of battles require named users for every player.`);
+		}
+		return new BestOfPlayer(user, this, ++this.playerNum, { ...options, user });
 	}
-	override addPlayer(user: User, options: RoomBattlePlayerOptions) {
+	override addPlayer(user: User | string | null, options: RoomBattlePlayerData) {
+		if (!user || typeof user === 'string') {
+			throw new Error(`Best-of battles require named users for every player.`);
+		}
 		const player = super.addPlayer(user, options);
 		if (!player) throw new Error(`Failed to make player ${user} in ${this.roomid}`);
 		this.room.auth.set(user.id, Users.PLAYER_SYMBOL);

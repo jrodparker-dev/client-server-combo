@@ -68,6 +68,21 @@ describe('Rooms features', () => {
 			}
 		});
 
+		it('should allow a user to start a battle against an AI player', () => {
+			const p1 = makeUser();
+			room = Rooms.createBattle({
+				format: 'customgame',
+				players: [
+					{ user: p1, team: packedTeam },
+					{ user: 'AI Opponent', team: packedTeam, ai: true },
+				],
+				rated: false,
+			});
+			assert(room.battle.p1 && room.battle.p2);
+			assert.equal(room.battle.p2.name, 'AI Opponent');
+			assert(room.battle.p2.aiPlayer);
+		});
+
 		it('should copy auth from tournament', () => {
 			parent = Rooms.createChatRoom('parentroom');
 			parent.auth.get = () => '%';
