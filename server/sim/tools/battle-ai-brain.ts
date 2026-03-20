@@ -64,6 +64,7 @@ type PendingMove = {
 
 export class BattleAIBrain {
 	static readonly BRAIN_PATH = BRAIN_PATH;
+	static readonly REPLAY_UPLOAD_DIR = 'replays/ai-training';
 	static readonly shared = new BattleAIBrain();
 	readonly dex = Dex;
 	data: BattleAIBrainData;

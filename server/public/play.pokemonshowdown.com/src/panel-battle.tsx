@@ -981,6 +981,11 @@ class BattlePanel extends PSRoomPanel<BattleRoom> {
 					<button class="button" data-cmd="/savereplay">
 						<i class="fa fa-upload" aria-hidden></i> Upload and share replay
 					</button>
+					<br />
+					<br />
+					<button class="button" data-cmd="/uploadreplaytobrain">
+						<i class="fa fa-cloud-upload" aria-hidden></i> Upload replay to brain
+					</button>
 				</span>
 
 				<button class="button" data-cmd="/play" style="min-width:4.5em">
