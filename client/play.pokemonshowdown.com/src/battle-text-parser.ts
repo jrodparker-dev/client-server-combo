@@ -671,6 +671,15 @@ class BattleTextParser {
 
 		case '-endability': {
 			let [, pokemon, ability] = args;
+			const effect = BattleTextParser.effectId(kwArgs.from);
+			const overwritingAbilities: {[id: string]: string} = {
+				simplebeam: 'ability: Simple',
+				worryseed: 'ability: Insomnia',
+			};
+			const overwrittenAbility = overwritingAbilities[effect];
+			if (overwrittenAbility) {
+				return this.extractMessage(['-ability', pokemon, overwrittenAbility], kwArgs);
+			}
 			if (ability) return this.ability(ability, pokemon);
 			const line1 = this.maybeAbility(kwArgs.from, kwArgs.of || pokemon);
 			const template = this.template('start', 'Gastro Acid');

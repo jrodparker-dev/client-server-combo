@@ -515,6 +515,26 @@ span.header-username:hover {
 	margin: 80px auto 20px auto;
 	max-width: 320px;
 }
+
+.ai-challenge-popup {
+	width: min(360px, calc(100vw - 24px)) !important;
+	max-width: calc(100vw - 24px) !important;
+	max-height: calc(100vh - 32px);
+	overflow-y: auto;
+	box-sizing: border-box;
+}
+.ps-overlay .ai-challenge-popup {
+	margin: 12px auto;
+}
+.ai-challenge-popup .select,
+.ai-challenge-popup .button {
+	max-width: 100%;
+}
+.ai-report-card {
+	border-radius: 12px;
+	background: rgba(210, 216, 236, 0.85);
+	padding: 8px 12px;
+}
 .ps-popup p,
 .ps-popup h3 {
 	margin: 7px 0;
@@ -805,6 +825,9 @@ p.or:after {
 	padding: 0 0 0 7px;
 }
 
+.menugroup.menugroup-ai {
+	margin-top: -15px;
+}
 .mainmessage p,
 .menugroup p {
 	margin: 10px 0;
@@ -876,6 +899,9 @@ p.or:after {
 .button.mainmenu6 { background: linear-gradient(to bottom,  hsl(270,40%,72%),  hsl(270,40%,52%)); border-color: hsl(270,40%,40%); }
 .button.mainmenu6:hover { background: linear-gradient(to bottom,  hsl(270,40%,62%),  hsl(270,40%,42%)); }
 .button.mainmenu6:active { background: linear-gradient(to bottom,  hsl(270,40%,42%),  hsl(300,40%,58%)); }
+.button.mainmenu7 { background: linear-gradient(to bottom,  hsl(330,40%,72%),  hsl(330,40%,52%)); border-color: hsl(330,40%,40%); }
+.button.mainmenu7:hover { background: linear-gradient(to bottom,  hsl(330,40%,62%),  hsl(330,40%,42%)); }
+.button.mainmenu7:active { background: linear-gradient(to bottom,  hsl(330,40%,42%),  hsl(350,40%,58%)); }
 
 .rightmenu {
 	width: 294px;

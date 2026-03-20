@@ -339,6 +339,13 @@ class MainMenuPanel extends PSRoomPanel<MainMenuRoom> {
 	// 			<small>Find a random opponent</small>
 	// 		</button>
 	// 	</TeamForm>;
+	openAIChallenge = () => {
+		PS.addRoom({
+			id: 'aichallenge' as RoomID,
+			type: 'aichallenge',
+			location: 'modal-popup',
+		});
+	};
 	// }
 	render() {
 		const onlineButton = ' button' + (PS.isOffline ? ' disabled' : '');
@@ -372,6 +379,7 @@ class MainMenuPanel extends PSRoomPanel<MainMenuRoom> {
 
 						<div class="menugroup">
 							<p><button class="mainmenu2 button" name="joinRoom" value="teambuilder">Teambuilder</button></p>
+							<p><button class="mainmenu2 button" onClick={this.openAIChallenge}>Challenge AI</button></p>
 							<p><button class={"mainmenu3" + onlineButton} name="joinRoom" value="ladder">Ladder</button></p>
 						</div>
 

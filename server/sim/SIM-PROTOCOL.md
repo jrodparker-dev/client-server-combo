@@ -513,6 +513,11 @@ stat boosts are minor actions.
 > because it does not reveal abilities when used between allies in a Double or
 > Triple Battle.
 
+`|-ability|POKEMON|ABILITY|OLDABILITY|[from]EFFECT`
+
+> The `POKEMON`'s Ability changed from `OLDABILITY` to `ABILITY` due to
+> `EFFECT`.
+
 `|-ability|POKEMON|ABILITY`
 
 > `POKEMON` has just switched-in, and its ability `ABILITY` is being announced

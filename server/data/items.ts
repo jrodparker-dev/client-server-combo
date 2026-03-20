@@ -7694,19 +7694,19 @@ export const Items: import('../sim/dex-items').ItemDataTable = {
 	cookies: {
   name: "Cookies",
   shortDesc:
-    "End of each turn: heal ramps (1/16→1/8→1/4→1/2), then -1 Spe. At Spe ≤ -3, becomes Truant. After 8 turns on the field total, the holder faints.",
+    "End of each turn: heal ramps (1/16→1/8→1/4→1/2), then stops healing. Also -1 Spe each turn; at Spe ≤ -3, becomes Truant. After 8 turns on the field total, the holder faints.",
   fling: { basePower: 50 },
 
   onModifyMove(move, pokemon) {
     if (move.id !== 'fling') return;
-    move.willCrit = true; // force crit on Fling
+    move.willCrit = true;
   },
 
   // Initialize counters on first entry only (do not reset on switch-ins)
   onStart(pokemon) {
     const ist = (pokemon.itemState ??= {} as any);
-    if (ist.rampedHealStage == null) ist.rampedHealStage = 0; // 0→1→2→3
-    if (ist.activeTurns == null) ist.activeTurns = 0;         // counts end-of-turns while active
+    if (ist.rampedHealStage == null) ist.rampedHealStage = 0; // 0,1,2,3 = heal stages; 4 = finished healing
+    if (ist.activeTurns == null) ist.activeTurns = 0;
   },
 
   // Do NOT reset the counters on switch-in; we only ensure they exist
@@ -7723,38 +7723,35 @@ export const Items: import('../sim/dex-items').ItemDataTable = {
     }
   },
 
-  // same timing bucket as Leftovers
   onResidualOrder: 5,
   onResidual(pokemon) {
     const ist = (pokemon.itemState ??= {} as any);
 
-    // 1) increase heal stage (cap at 3)
-    const prev = ist.rampedHealStage ?? 0;
-    const stage = Math.min(prev + 1, 3);
-    ist.rampedHealStage = stage;
-
-    // 2) heal by stage: [1/16, 1/8, 1/4, 1/2]
+    // 1) heal using current stage, then advance it
+    // stage 0 = 1/16, 1 = 1/8, 2 = 1/4, 3 = 1/2, 4+ = no more healing
+    const stage = ist.rampedHealStage ?? 0;
     const denoms = [16, 8, 4, 2] as const;
-    const denom = denoms[stage];
-    if (denom) this.heal(pokemon.baseMaxhp / denom, pokemon, null, this.effect);
 
-    // 3) drop Speed by one stage
+    if (stage <= 3) {
+      this.heal(pokemon.baseMaxhp / denoms[stage], pokemon, null, this.effect);
+      ist.rampedHealStage = stage + 1; // after 1/2 heal, becomes 4 and stops
+    }
+
+    // 2) drop Speed by one stage
     this.boost({spe: -1}, pokemon, pokemon, this.effect);
 
-    // 4) if Speed ≤ -3, set ability to Truant (once)
+    // 3) if Speed ≤ -3, set ability to Truant (once)
     if (pokemon.boosts.spe <= -3 && pokemon.getAbility().id !== 'truant') {
       if (pokemon.setAbility('truant', pokemon, true)) {
         this.add('-ability', pokemon, 'Truant', '[from] item: Cookies');
       }
     }
 
-    // 5) track active turns on the field and faint at 8 total
-    //    (counts only when the Pokémon is actually active; persists across switches)
+    // 4) track active turns on the field and faint at 8 total
     ist.activeTurns = (ist.activeTurns ?? 0) + 1;
 
-    if (ist.activeTurns >= 7 && !pokemon.fainted) {
-      // custom flavor message then faint (attribute to item)
-      this.add('-message', '${pokemon.name} fainted from diabetes');
+    if (ist.activeTurns >= 8 && !pokemon.fainted) {
+      this.add('-message', `${pokemon.name} fainted from diabetes`);
       pokemon.faint(undefined, this.effect);
     }
   },
@@ -8442,13 +8439,13 @@ elegantband: {
 
 adrenalineshot: {
   name: "Adrenaline Shot",
-  shortDesc: "At 1/4 HP or less: +6 all stats. Faints at end of the next turn.",
+  shortDesc: "At 1/4 HP or less: +3 all stats. Faints at end of the next turn.",
   onUpdate(pokemon) {
     if (pokemon?.itemState?.adrenalineUsed || pokemon?.itemState?.adrenalineArmed) return;
     if (pokemon.hp > pokemon.maxhp / 4) return;
 
     this.add('-activate', pokemon, 'item: Adrenaline Shot');
-    this.boost({atk: 6, def: 6, spa: 6, spd: 6, spe: 6, accuracy: -1}, pokemon);
+    this.boost({atk: 3, def: 3, spa: 3, spd: 3, spe: 3, accuracy: -1}, pokemon);
 
     pokemon.itemState.adrenalineArmed = true;
     pokemon.itemState.adrenalineDueTurn = this.turn + 2;
@@ -8763,15 +8760,19 @@ isseisglove: {
     if (mem.isseiOutcome) return; // already rolled for this move
 
     const r = this.random(100);
-    if (r < 10) {
-      mem.isseiOutcome = 'raw';            // 1000 flat damage
-    } else if (r < 35) {
-      mem.isseiOutcome = 'x3';             // 3× damage
-    } else if (r < 85) {
-      mem.isseiOutcome = 'x2';             // 2× damage
-    } else {
-      mem.isseiOutcome = null;             // no effect
-    }
+
+if (r < 5) {             
+    mem.isseiOutcome = 'raw';   // 5%
+}
+else if (r < 20) {       
+    mem.isseiOutcome = 'x3';    // 15%
+}
+else if (r < 50) {       
+    mem.isseiOutcome = 'x2';    // 30%
+}
+else {                   
+    mem.isseiOutcome = null;    // 50%
+}
   },
 
   // Apply 2× / 3× (now we consume + announce the first time we apply)
@@ -8934,12 +8935,12 @@ steelfangs: {
 
 	scalefragment: {
 		name: "Scale Fragment",
-		shortDesc: "If at full HP, halved damage from attacks (Multiscale as an item).",
+		shortDesc: "If at full HP, 35% less damage from attacks (Semi-Multiscale as an item).",
 		gen: 9,
 		onSourceModifyDamage(damage, source, target, move) {
 			if (target?.hp === target?.maxhp && move.category !== 'Status') {
 				this.debug('Scale Fragment weaken');
-				return this.chainModify(0.5);
+				return this.chainModify(0.65);
 			}
 		},
 	},
@@ -8997,7 +8998,7 @@ steelfangs: {
 
 	prismpearl: {
   name: "Prism Pearl",
-  shortDesc: "First damaging move each stay becomes 2-hit at 0.75× per hit. Resets on switch.",
+  shortDesc: "First damaging move each stay becomes 2-hit at 0.65× per hit. Resets on switch.",
   gen: 9,
 
   onStart(pokemon) {
@@ -9013,15 +9014,15 @@ steelfangs: {
     if (!move || move.category === 'Status') return;
     if (this.effectState.armed && !move.multihit) {
       move.multihit = 2;
-      this.effectState.boosting = true;  // mark that THIS move should be 0.75× per hit
+      this.effectState.boosting = true;  // mark that THIS move should be 0.65× per hit
       this.add('-activate', pokemon, 'item: Prism Pearl');
     }
   },
 
   onBasePower(basePower, user, target, move) {
-    // While boosting flag is set, each hit is 0.75×
+    // While boosting flag is set, each hit is 0.65×
     if (this.effectState.boosting) {
-      return this.chainModify(0.75);
+      return this.chainModify(0.65);
     }
   },
 
@@ -9037,11 +9038,14 @@ steelfangs: {
 
 	trickball: {
   name: "Trick Ball",
-  shortDesc: "When hit by a damaging move, swap items with the attacker.",
+  shortDesc: "Once per battle, when hit by a damaging move, swap items with the attacker.",
   gen: 9,
 
   onDamagingHit(damage, target, source, move) {
     if (!source || !move || move.category === 'Status') return;
+
+    const mem = (target.m ??= {} as any);
+    if (mem.trickBallUsed) return; // already triggered this battle
 
     const tItem = target.getItem();
     const sItem = source.getItem();
@@ -9057,23 +9061,28 @@ steelfangs: {
     if (!tookT && !tookS) return;
 
     // Attempt the actual swap; track success so we can roll back
-    let okTarget = true, okSource = true;
+    let okTarget = true;
+    let okSource = true;
     if (tookS) okTarget = target.setItem(tookS);
     if (tookT) okSource = source.setItem(tookT);
 
     if (okTarget || okSource) {
+      mem.trickBallUsed = true; // consume once-per-battle trigger only on successful activation
+
       this.add('-activate', target, 'item: Trick Ball');
-      if (target.getItem()) this.add('-item', target, target.getItem(), '[from] item: Trick Ball', '[of] ' + target);
-      if (source.getItem()) this.add('-item', source, source.getItem(), '[from] item: Trick Ball', '[of] ' + target);
+      if (target.getItem()) {
+        this.add('-item', target, target.getItem(), '[from] item: Trick Ball', '[of] ' + target);
+      }
+      if (source.getItem()) {
+        this.add('-item', source, source.getItem(), '[from] item: Trick Ball', '[of] ' + target);
+      }
     } else {
-      // Roll back on failure (e.g., illegal hold)
+      // Roll back on failure
       if (tookT) target.setItem(tookT);
       if (tookS) source.setItem(tookS);
     }
   },
 },
-
-
 
 
 	rainbowcore: {
@@ -9119,16 +9128,15 @@ steelfangs: {
 
 	mimicwand: {
   name: "Mimic Wand",
-  shortDesc: "When hit by a damaging move, immediately use it back at 45% power.",
+  shortDesc: "When hit by a damaging move, if the holder survives, immediately use it back at 45% power.",
   gen: 9,
-
-  onStart(pokemon) {
-    // no per-move tracking anymore; always echoes
-  },
 
   onDamagingHit(damage, target, source, move) {
     if (!source || !move || move.category === 'Status') return;
     if (move.isZ || move.isMax) return;
+
+    // Do not trigger if the holder fainted from the hit
+    if (target.fainted || target.hp <= 0) return;
 
     // Prevent recursion if this is already a Mimic Wand echo
     if ((move as any).mimicWandEcho) return;
@@ -9161,7 +9169,6 @@ steelfangs: {
     }
   },
 },
-
 
 
 	twilightmirror: {
@@ -9518,12 +9525,11 @@ crystaltiara: {
 
   carapacegauntlet: {
     name: "Carapace Gauntlet",
-    shortDesc: "Contact moves vs holder inflict Bleed + Insect Sting.",
+    shortDesc: "Contact moves vs holder inflict Bleed",
     onDamagingHit(damage, target, source, move) {
       if (move.flags['contact'] && source.hp) {
         source.addVolatile('bleeding');
-        source.addVolatile('sting');
-        this.add('-message', `${source.name} was afflicted with bleeding and insect stings!`);
+        this.add('-message', `${source.name} was afflicted with bleeding!`);
       }
     },
   },

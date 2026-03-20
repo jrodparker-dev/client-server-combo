@@ -1929,7 +1929,7 @@ export class Pokemon {
 		this.battle.singleEvent('End', this.battle.dex.abilities.get(oldAbility), this.abilityState, this, source);
 		if (this.battle.effect && this.battle.effect.effectType === 'Move' && !isFromFormeChange) {
 			this.battle.add(
-				'-endability', this, this.battle.dex.abilities.get(oldAbility),
+				'-ability', this, ability.name, this.battle.dex.abilities.get(oldAbility).name,
 				`[from] move: ${this.battle.dex.moves.get(this.battle.effect.id)}`
 			);
 		}

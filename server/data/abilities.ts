@@ -7193,6 +7193,7 @@ flags: { breakable: 1 },
 	persistent: {
 		isNonstandard: "CAP",
 		// implemented in the corresponding move
+		shortDesc: "Increases duration of room/field effects",
 		onStart(pokemon) { 
 const cur = pokemon.getTypes(true).join('/'); // runtime types 
 const base = pokemon.species.types.join('/'); // species types 
