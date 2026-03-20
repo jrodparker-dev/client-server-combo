@@ -818,6 +818,7 @@ export class RoomBattle extends RoomGame<RoomBattlePlayer> {
 				};
 				this.requestCount++;
 				player?.sendRoom(`|request|${requestJSON}`);
+				player?.aiPlayer?.receiveLine(`|request|${requestJSON}`);
 				if (!request.update) this.timer.nextRequest(player);
 				break;
 			}
