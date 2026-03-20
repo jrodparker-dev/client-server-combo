@@ -25,6 +25,23 @@ class AIChallengePanel extends PSRoomPanel {
 		BattleAI.saveChallengeSelection(this.state as AIChallengeSelection);
 		this.forceUpdate();
 	};
+	startBattle = () => {
+		const formatid = ('' + this.state.format).toLowerCase().replace(/[^a-z0-9]+/g, '');
+		const format = BattleFormats[formatid];
+		const presetFormat = !!format?.team;
+		const playerTeam = PS.teams.byKey[this.state.playerTeamKey] || null;
+		const aiTeam = PS.teams.byKey[this.state.aiTeamKey] || null;
+		if (!presetFormat && (!playerTeam || !aiTeam)) {
+			PS.alert("Select both a player team and an AI team before starting the battle.");
+			return;
+		}
+		BattleAI.saveChallengeSelection(this.state as AIChallengeSelection);
+		PS.send(`|/challengeai ${JSON.stringify({
+			format: this.state.format,
+			playerTeam: presetFormat ? '' : playerTeam?.packedTeam || '',
+			aiTeam: presetFormat ? '' : aiTeam?.packedTeam || '',
+		})}`);
+	};
 
 	renderReport(report: AIMatchupReport) {
 		const renderOption = (option: AIScoredOption) => <li>
@@ -96,6 +113,7 @@ class AIChallengePanel extends PSRoomPanel {
 				</p>
 				<p>
 					<button class="button" type="submit"><i class="fa fa-save"></i> Save AI challenge setup</button> {}
+					<button class="button" type="button" onClick={this.startBattle}><strong>Start Battle</strong></button> {}
 					<button class="button" type="button" name="closeRoom" value={room.id}><i class="fa fa-times"></i> Close</button>
 				</p>
 				{this.renderReport(report)}

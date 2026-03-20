@@ -1511,6 +1511,64 @@ export const commands: Chat.ChatCommands = {
 		`/challenge [user], [format] - Challenges the given [user] to a battle in the given [format].`,
 	],
 
+	async challengeai(target, room, user, connection) {
+		if (!user.named) {
+			return this.popupReply(this.tr`You must choose a username before you challenge the AI.`);
+		}
+		let payload: {format?: string, playerTeam?: string, aiTeam?: string} = {};
+		if (target.trim()) {
+			try {
+				payload = JSON.parse(target);
+			} catch {
+				throw new Chat.ErrorMessage(`Invalid AI challenge payload.`);
+			}
+		}
+		if (!payload.format) throw new Chat.ErrorMessage(`You must specify a format.`);
+
+		const ladder = Ladders(payload.format);
+		const format = Dex.formats.get(ladder.formatid);
+		if (format.effectType !== 'Format') throw new Chat.ErrorMessage(`Invalid format: ${payload.format}`);
+
+		const playerReady = await ladder.prepBattle(connection, 'challenge', payload.playerTeam ?? null);
+		if (!playerReady) return false;
+
+		const aiTeam = format.team ? '' : (payload.aiTeam ?? '');
+		const aiValidation = await TeamValidatorAsync.get(ladder.formatid).validateTeam(aiTeam, {user: user.id});
+		if (!aiValidation.startsWith('1')) {
+			connection.popup(
+				`The AI team was rejected for the following reasons:\n\n` +
+				`- ` + aiValidation.slice(1).replace(/\n/g, `\n- `)
+			);
+			return false;
+		}
+
+		const battleRoom = Rooms.createBattle({
+			format: ladder.formatid,
+			challengeType: 'challenge',
+			players: [
+				{
+					user,
+					team: playerReady.settings.team,
+					rating: playerReady.rating,
+					inviteOnly: playerReady.settings.inviteOnly,
+					hidden: playerReady.settings.hidden,
+				},
+				{
+					user: 'AI Opponent' as User,
+					team: aiValidation.slice(1),
+					ai: true,
+				},
+			],
+		});
+		if (!battleRoom) return false;
+		user.joinRoom(battleRoom.roomid);
+		this.sendReply(`Starting an AI battle in <<${battleRoom.roomid}>>.`);
+		return true;
+	},
+	challengeaihelp: [
+		`/challengeai [json] - Starts a battle against the built-in AI using the provided format and packed teams.`,
+	],
+
 	bch: 'blockchallenges',
 	blockchall: 'blockchallenges',
 	blockchalls: 'blockchallenges',

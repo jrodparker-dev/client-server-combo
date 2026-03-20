@@ -12,8 +12,9 @@
  */
 
 import { execSync } from "child_process";
-import { Repl, ProcessManager, type Streams } from '../lib';
+import { Repl, ProcessManager, Streams, type Streams as StreamsNamespace } from '../lib';
 import { BattleStream } from "../sim/battle-stream";
+import { RandomPlayerAI } from '../sim/tools/random-player-ai';
 import { RoomGamePlayer, RoomGame } from "./room-game";
 import type { Tournament } from './tournaments/index';
 import type { RoomSettings } from './rooms';
@@ -57,6 +58,7 @@ const LOCKDOWN_PERIOD = 30 * 60 * 1000; // 30 minutes
 export class RoomBattlePlayer extends RoomGamePlayer<RoomBattle> {
 	readonly slot: SideID;
 	readonly channelIndex: ChannelIndex;
+	aiPlayer: RoomBattleAIPlayer | null = null;
 	request: BattleRequestTracker;
 	wantsTie: boolean;
 	wantsOpenTeamSheets: boolean | null;
@@ -466,6 +468,7 @@ export interface RoomBattlePlayerOptions {
 	rating?: number;
 	inviteOnly?: boolean;
 	hidden?: boolean;
+	ai?: boolean;
 }
 
 export interface RoomBattleOptions {
@@ -516,7 +519,7 @@ export class RoomBattle extends RoomGame<RoomBattlePlayer> {
 	 * userid that requested extraction -> playerids that accepted the extraction
 	 */
 	readonly allowExtraction: { [k: string]: Set<ID> } = {};
-	readonly stream: Streams.ObjectReadWriteStream<string>;
+	readonly stream: StreamsNamespace.ObjectReadWriteStream<string>;
 	override readonly timer: RoomBattleTimer;
 	started = false;
 	active = false;
@@ -633,7 +636,16 @@ export class RoomBattle extends RoomGame<RoomBattlePlayer> {
 		}
 		request.isWait = true;
 		request.choice = choice;
-
+		this.writeChoice(player, choice);
+	}
+	chooseAI(player: RoomBattlePlayer, choice: string) {
+		const request = player.request;
+		if (request.isWait !== false) return;
+		request.isWait = true;
+		request.choice = choice;
+		this.writeChoice(player, choice);
+	}
+	writeChoice(player: RoomBattlePlayer, choice: string) {
 		void this.stream.write(`>${player.slot} ${choice}`);
 	}
 	override undo(user: User, data: string) {
@@ -807,6 +819,7 @@ export class RoomBattle extends RoomGame<RoomBattlePlayer> {
 				break;
 			}
 			player?.sendRoom(lines[2]);
+			player?.aiPlayer?.receiveLine(lines[2]);
 			break;
 		}
 
@@ -1065,6 +1078,11 @@ export class RoomBattle extends RoomGame<RoomBattlePlayer> {
 			};
 			void this.stream.write(`>player ${slot} ${JSON.stringify(options)}`);
 			player.hasTeam = true;
+			if (playerOpts.ai) {
+				player.active = true;
+				player.knownActive = true;
+				player.aiPlayer = new RoomBattleAIPlayer(this, player);
+			}
 		}
 
 		if (user) {
@@ -1078,7 +1096,7 @@ export class RoomBattle extends RoomGame<RoomBattlePlayer> {
 		let inviteOnly = false;
 		const privacySetter = new Set<ID>([]);
 		for (const p of options.players) {
-			if (p.user) {
+			if (p.user && typeof p.user !== 'string') {
 				if (p.inviteOnly) {
 					inviteOnly = true;
 					privacySetter.add(p.user.id);
@@ -1201,13 +1219,13 @@ export class RoomBattle extends RoomGame<RoomBattlePlayer> {
 		const delayStart = this.options.delayedStart || !!this.options.inputLog;
 		const users = this.players.map(player => {
 			const user = player.getUser();
-			if (!user && !delayStart) {
+			if (!user && !player.aiPlayer && !delayStart) {
 				throw new Error(`User ${player.id} not found on ${this.roomid} battle creation`);
 			}
 			return user;
 		});
 		if (!delayStart) {
-			Rooms.global.onCreateBattleRoom(users as User[], this.room, { rated: this.rated });
+			Rooms.global.onCreateBattleRoom(users.filter(Boolean) as User[], this.room, { rated: this.rated });
 			this.started = true;
 		} else if (delayStart === 'multi') {
 			this.room.add(`|uhtml|invites|<div class="broadcast broadcast-blue"><strong>This is a 4-player challenge battle</strong><br />The players will need to add more players before the battle can start.</div>`);
@@ -1250,6 +1268,7 @@ export class RoomBattle extends RoomGame<RoomBattlePlayer> {
 			this.room.parent?.game?.onBattleWin?.(this.room, '');
 		}
 		for (const player of this.players) {
+			player.aiPlayer?.destroy();
 			player.destroy();
 		}
 		this.playerTable = {};
@@ -1306,6 +1325,35 @@ export class RoomBattle extends RoomGame<RoomBattlePlayer> {
 		});
 		const result = await logPromise;
 		return result;
+	}
+}
+
+class AIPlayerStream extends Streams.ObjectReadWriteStream<string> {
+	constructor(battle: RoomBattle, player: RoomBattlePlayer) {
+		super({
+			write(choice: string) {
+				battle.chooseAI(player, choice);
+			},
+			read() {},
+		});
+	}
+}
+
+class RoomBattleAIPlayer {
+	readonly ai: RandomPlayerAI;
+	readonly stream: AIPlayerStream;
+
+	constructor(battle: RoomBattle, player: RoomBattlePlayer) {
+		this.stream = new AIPlayerStream(battle, player);
+		this.ai = new RandomPlayerAI(this.stream);
+	}
+
+	receiveLine(line: string) {
+		this.ai.receiveLine(line);
+	}
+
+	destroy() {
+		void this.stream.destroy();
 	}
 }
 
