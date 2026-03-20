@@ -12,9 +12,10 @@
  */
 
 import { execSync } from "child_process";
-import { Repl, ProcessManager, Streams, type Streams as StreamsNamespace } from '../lib';
+import { Repl, ProcessManager, Streams, Utils, type Streams as StreamsNamespace } from '../lib';
 import { BattleStream } from "../sim/battle-stream";
 import { RandomPlayerAI } from '../sim/tools/random-player-ai';
+import { BattleAIBrain } from '../sim/tools/battle-ai-brain';
 import { RoomGamePlayer, RoomGame } from "./room-game";
 import type { Tournament } from './tournaments/index';
 import type { RoomSettings } from './rooms';
@@ -860,6 +861,18 @@ export class RoomBattle extends RoomGame<RoomBattlePlayer> {
 			p1score = 0;
 		}
 		Chat.runHandlers('onBattleEnd', this, winnerid, this.players.map(p => p.id));
+		if (!this.options.isBestOfSubBattle) {
+			void Promise.resolve().then(() => {
+				const learningPath = BattleAIBrain.BRAIN_PATH;
+				const learningStats = BattleAIBrain.shared.recordReplayLog(this.room.getLog(-1).split('\n'));
+				if (learningStats.battlesProcessed) {
+					this.room.add(
+						`|html|<div class="infobox">Battle data logged for learning in <code>${Utils.escapeHTML(learningPath)}</code></div>`
+					);
+					this.room.update();
+				}
+			});
+		}
 		if (this.room.rated && !this.options.isBestOfSubBattle) {
 			void this.updateLadder(p1score, winnerid);
 		} else if (Config.logchallenges) {

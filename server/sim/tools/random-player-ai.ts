@@ -8,9 +8,10 @@
 
 import type { ObjectReadWriteStream } from '../../lib/streams';
 import { BattlePlayer } from '../battle-stream';
-import { Dex } from '../dex';
+import { Dex, toID } from '../dex';
 import { PRNG, type PRNGSeed } from '../prng';
 import type { ChoiceRequest, PokemonMoveRequestData, PokemonSwitchRequestData, SideRequestData } from '../side';
+import { BattleAIBrain } from './battle-ai-brain';
 
 type AIMoveOption = {
 	choice: string,
@@ -30,7 +31,12 @@ export class RandomPlayerAI extends BattlePlayer {
 	protected readonly mega: number;
 	protected readonly prng: PRNG;
 	protected readonly dex = Dex;
+	protected readonly brain = BattleAIBrain.shared;
 	protected currentRequest: ChoiceRequest | null = null;
+	protected mySideId: SideID | null = null;
+	protected observedAbilities = new Map<string, ID>();
+	protected currentBattleMovePressure = new Map<string, { immunities: number, resisted: number }>();
+	protected pendingObservedMove: { moveid: ID, userIdent: string, targetIdent: string } | null = null;
 
 	constructor(
 		playerStream: ObjectReadWriteStream<string>,
@@ -50,8 +56,73 @@ export class RandomPlayerAI extends BattlePlayer {
 		throw error;
 	}
 
+	override receiveLine(line: string) {
+		super.receiveLine(line);
+		if (!line.startsWith('|')) return;
+		const parts = line.split('|');
+		switch (parts[1]) {
+		case 'move': {
+			const userIdent = parts[2] || '';
+			if (!this.mySideId || !userIdent.startsWith(this.mySideId)) {
+				this.pendingObservedMove = null;
+				break;
+			}
+			this.pendingObservedMove = {
+				moveid: toID(parts[3] || ''),
+				userIdent,
+				targetIdent: parts[4] || '',
+			};
+			break;
+		}
+		case '-ability':
+		case '-activate': {
+			const ident = parts[2] || '';
+			const abilityPart = this.parseAbilityFromParts(parts);
+			if (ident && abilityPart) this.observedAbilities.set(ident, abilityPart);
+			break;
+		}
+		case '-immune': {
+			const targetIdent = parts[2] || '';
+			if (this.pendingObservedMove && this.pendingObservedMove.targetIdent === targetIdent) {
+				const key = `${targetIdent}:${this.pendingObservedMove.moveid}`;
+				const entry = this.currentBattleMovePressure.get(key) || { immunities: 0, resisted: 0 };
+				entry.immunities++;
+				this.currentBattleMovePressure.set(key, entry);
+				const ability = this.parseAbilityFromParts(parts);
+				if (ability) this.observedAbilities.set(targetIdent, ability);
+			}
+			break;
+		}
+		case '-resisted': {
+			const targetIdent = parts[2] || '';
+			if (this.pendingObservedMove && this.pendingObservedMove.targetIdent === targetIdent) {
+				const key = `${targetIdent}:${this.pendingObservedMove.moveid}`;
+				const entry = this.currentBattleMovePressure.get(key) || { immunities: 0, resisted: 0 };
+				entry.resisted++;
+				this.currentBattleMovePressure.set(key, entry);
+			}
+			break;
+		}
+		case 'turn':
+		case 'upkeep':
+			this.pendingObservedMove = null;
+			break;
+		}
+	}
+
+	protected parseAbilityFromParts(parts: string[]): ID | '' {
+		for (let i = 3; i < parts.length; i++) {
+			const part = parts[i] || '';
+			if (part.startsWith('ability: ')) return toID(part.slice(9));
+			if (i === 3 && parts[1] === '-ability') return toID(part);
+			if (part.startsWith('[from] ability: ')) return toID(part.slice(16));
+		}
+		return '';
+	}
+
 	override receiveRequest(request: ChoiceRequest) {
 		this.currentRequest = request;
+		this.mySideId = request.side.id;
 		if (request.wait) {
 			return;
 		}
@@ -165,7 +236,11 @@ export class RandomPlayerAI extends BattlePlayer {
 		this.choose(choices.join(', '));
 	}
 
-	protected chooseTeamPreview(team: PokemonSwitchRequestData[], foeTeam: PokemonSwitchRequestData[], maxChosenTeamSize?: number): string {
+	protected chooseTeamPreview(
+		team: PokemonSwitchRequestData[],
+		foeTeam: PokemonSwitchRequestData[],
+		maxChosenTeamSize?: number
+	): string {
 		const scores = team.map((pokemon, index) => ({
 			slot: index + 1,
 			score: this.scoreLead(pokemon, foeTeam),
@@ -178,13 +253,20 @@ export class RandomPlayerAI extends BattlePlayer {
 		return bestMove.score >= 9 && this.prng.random() < Math.max(this.mega, 0.35);
 	}
 
-	protected shouldTerastallize(request: ChoiceRequest, pokemon: PokemonSwitchRequestData, bestMove: AIMoveOption): boolean {
+	protected shouldTerastallize(
+		request: ChoiceRequest,
+		pokemon: PokemonSwitchRequestData,
+		bestMove: AIMoveOption
+	): boolean {
 		if (!('active' in request) || !request.active) return false;
 		const hpRatio = this.getHPFraction(pokemon.condition);
 		if (bestMove.teraScore - bestMove.score >= 2.25) return true;
 		if (hpRatio <= 0.35) {
 			const foes = this.getActiveFoes(request.foe);
-			if (foes.some(foe => this.estimateDefensiveScore(pokemon, foe, request.active[0]?.canTerastallize) > this.estimateDefensiveScore(pokemon, foe))) {
+			if (foes.some(foe => (
+				this.estimateDefensiveScore(pokemon, foe, request.active[0]?.canTerastallize) >
+				this.estimateDefensiveScore(pokemon, foe)
+			))) {
 				return true;
 			}
 		}
@@ -209,7 +291,10 @@ export class RandomPlayerAI extends BattlePlayer {
 		return switchOffense >= currentOffense + 3 && switchPressure >= currentPressure;
 	}
 
-	protected chooseMove(active: PokemonMoveRequestData, moves: { choice: string, move: AnyObject, score?: number }[]): string {
+	protected chooseMove(
+		active: PokemonMoveRequestData,
+		moves: { choice: string, move: AnyObject, score?: number }[]
+	): string {
 		return moves.sort((a, b) => (b.score || 0) - (a.score || 0))[0]?.choice || this.prng.sample(moves).choice;
 	}
 
@@ -251,7 +336,9 @@ export class RandomPlayerAI extends BattlePlayer {
 				choice += ` ${this.chooseTarget(request, pokemonIndex, moveData.target || 'normal')}`;
 			}
 			if (moveData.target === 'adjacentAlly') choice += ` -${(pokemonIndex ^ 1) + 1}`;
-			if (moveData.target === 'adjacentAllyOrSelf') choice += hasAlly ? ` -${(pokemonIndex ^ 1) + 1}` : ` -${pokemonIndex + 1}`;
+			if (moveData.target === 'adjacentAllyOrSelf') {
+				choice += hasAlly ? ` -${(pokemonIndex ^ 1) + 1}` : ` -${pokemonIndex + 1}`;
+			}
 		}
 		if (moveData.zMove) choice += ' zmove';
 		const targets = this.getMoveTargets(request, pokemonIndex, moveData.target || 'normal');
@@ -299,7 +386,7 @@ export class RandomPlayerAI extends BattlePlayer {
 		const effectiveTypes = teraType && !user.terastallized ? [teraType] : this.getTypes(user);
 		let score = 0;
 		for (const target of targets) {
-			score += this.scoreSingleTargetMove(move, effectiveTypes, target, teraType, zMove);
+			score += this.scoreSingleTargetMove(move, user, effectiveTypes, target, teraType, zMove);
 		}
 		score /= targets.length;
 		if (active.maybeLocked && move.category === 'Status') score -= 1.5;
@@ -308,6 +395,7 @@ export class RandomPlayerAI extends BattlePlayer {
 
 	protected scoreSingleTargetMove(
 		move: AnyObject,
+		user: PokemonSwitchRequestData,
 		userTypes: string[],
 		target: PokemonSwitchRequestData,
 		teraType?: string,
@@ -319,9 +407,12 @@ export class RandomPlayerAI extends BattlePlayer {
 		const immune = !this.dex.getImmunity(moveType, targetTypes);
 		const effectiveness = immune ? -3 : this.dex.getEffectiveness(moveType, targetTypes);
 		const stab = userTypes.includes(moveType) ? (teraType && teraType === moveType ? 2.25 : 1.5) : 1;
-		const basePower = zMove ? Math.max(move.basePower || 1, 140) : (move.basePower || 0);
+		const estimatedBasePower = this.estimateMoveBasePower(move, user, target, teraType);
+		const basePower = zMove ? Math.max(estimatedBasePower || 1, 140) : estimatedBasePower;
 		let score = (basePower / 22) * stab;
 		score += effectiveness * 2.75;
+		score += this.getImmediateBattleAdjustment(move, target);
+		score += this.brain.getMoveScoreAdjustment(move, target, this.getKnownAbility(target));
 		score += ((move.accuracy === true ? 100 : move.accuracy || 100) - 100) / 40;
 		if (move.priority > 0) score += 0.75 + move.priority * 0.5;
 		if (move.flags?.heal) score += 1.2;
@@ -331,6 +422,63 @@ export class RandomPlayerAI extends BattlePlayer {
 		if (move.status === 'brn' || move.status === 'tox' || move.status === 'par') score += 1.25;
 		if (move.id === 'protect' || move.id === 'detect') score -= 1.25;
 		return score;
+	}
+
+	protected getKnownAbility(target: PokemonSwitchRequestData): string | null {
+		return this.observedAbilities.get(target.ident) || target.ability || null;
+	}
+
+	protected getImmediateBattleAdjustment(move: AnyObject, target: PokemonSwitchRequestData): number {
+		const pressure = this.currentBattleMovePressure.get(`${target.ident}:${move.id}`);
+		if (!pressure) return 0;
+		let adjustment = 0;
+		if (pressure.immunities) adjustment -= 20 * pressure.immunities;
+		if (pressure.resisted >= 2) adjustment -= 4;
+		return adjustment;
+	}
+
+	protected estimateMoveBasePower(
+		move: AnyObject,
+		user: PokemonSwitchRequestData,
+		target: PokemonSwitchRequestData,
+		teraType?: string
+	): number {
+		switch (move.id) {
+		case 'eruption':
+		case 'waterspout':
+			return 150 * this.getHPFraction(user.condition);
+		case 'heavyslam':
+		case 'heatcrash': {
+			const userWeight = this.getWeightKg(user);
+			const targetWeight = this.getWeightKg(target);
+			if (!userWeight || !targetWeight) return move.basePower || 60;
+			const ratio = userWeight / targetWeight;
+			if (ratio >= 5) return 120;
+			if (ratio >= 4) return 100;
+			if (ratio >= 3) return 80;
+			if (ratio >= 2) return 60;
+			return 40;
+		}
+		case 'grassknot':
+		case 'lowkick': {
+			const targetWeight = this.getWeightKg(target);
+			if (targetWeight >= 200) return 120;
+			if (targetWeight >= 100) return 100;
+			if (targetWeight >= 50) return 80;
+			if (targetWeight >= 25) return 60;
+			if (targetWeight >= 10) return 40;
+			return 20;
+		}
+		case 'terablast':
+			return teraType ? 80 : move.basePower || 80;
+		default:
+			return move.basePower || 0;
+		}
+	}
+
+	protected getWeightKg(pokemon: PokemonSwitchRequestData): number {
+		const species = this.dex.species.get(pokemon.details.split(',')[0]);
+		return species.weightkg || 0;
 	}
 
 	protected scoreStatusMove(move: AnyObject, target: PokemonSwitchRequestData): number {
@@ -363,7 +511,10 @@ export class RandomPlayerAI extends BattlePlayer {
 	protected scoreLead(pokemon: PokemonSwitchRequestData, foeTeam: PokemonSwitchRequestData[]): number {
 		if (!foeTeam.length) return this.scoreKnownMoves(pokemon, pokemon).score;
 		const matchupScore = foeTeam.reduce((sum, foe) => sum + this.scoreMatchup(pokemon, foe), 0) / foeTeam.length;
-		const offensiveCeiling = foeTeam.reduce((best, foe) => Math.max(best, this.scoreKnownMoves(pokemon, foe).score), -Infinity);
+		const offensiveCeiling = foeTeam.reduce(
+			(best, foe) => Math.max(best, this.scoreKnownMoves(pokemon, foe).score),
+			-Infinity
+		);
 		return matchupScore + offensiveCeiling * 0.35 + this.getSpeedTier(pokemon) * 0.02;
 	}
 
@@ -373,13 +524,16 @@ export class RandomPlayerAI extends BattlePlayer {
 		return attack + defense + this.getSpeedAdvantage(pokemon, foe) * 0.5;
 	}
 
-	protected scoreKnownMoves(pokemon: PokemonSwitchRequestData, foe: PokemonSwitchRequestData): { score: number, move: string | null } {
+	protected scoreKnownMoves(
+		pokemon: PokemonSwitchRequestData,
+		foe: PokemonSwitchRequestData
+	): { score: number, move: string | null } {
 		let bestScore = -Infinity;
 		let bestMove: string | null = null;
 		for (const moveid of pokemon.moves || []) {
 			const move = this.dex.moves.get(moveid);
 			if (!move.exists) continue;
-			const score = this.scoreSingleTargetMove(move, this.getTypes(pokemon), foe);
+			const score = this.scoreSingleTargetMove(move, pokemon, this.getTypes(pokemon), foe);
 			if (score > bestScore) {
 				bestScore = score;
 				bestMove = move.name;
@@ -393,7 +547,11 @@ export class RandomPlayerAI extends BattlePlayer {
 		return { score: bestScore, move: bestMove };
 	}
 
-	protected estimateDefensiveScore(pokemon: PokemonSwitchRequestData, foe: PokemonSwitchRequestData, teraType?: string): number {
+	protected estimateDefensiveScore(
+		pokemon: PokemonSwitchRequestData,
+		foe: PokemonSwitchRequestData,
+		teraType?: string
+	): number {
 		const defenseTypes = teraType && !pokemon.terastallized ? [teraType] : this.getTypes(pokemon);
 		const foeTypes = this.getTypes(foe);
 		let worstHit = -Infinity;
