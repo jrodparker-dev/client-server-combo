@@ -25,6 +25,14 @@ For example:
 - if `Eruption` is weak because the user is low HP, the AI now scores it using its reduced power
 - variable-power moves such as `Heavy Slam`, `Heat Crash`, `Grass Knot`, and `Low Kick` are now scored more realistically
 
+## Live server training behavior
+
+When a battle finishes on the running server, the server immediately updates the server-side brain file on that same machine.
+
+- If you are logged into the machine that hosts the server, you should see `server/config/ai-battle-brain.json` change after completed battles.
+- If you are playing from a browser or another computer, your client-side local files will **not** update, because the learning data is stored on the server host.
+- Each completed battle also posts a room message telling you the filepath used for learning.
+
 ## Training from replay files
 
 ### 1. Create a replay folder

@@ -63,6 +63,7 @@ type PendingMove = {
 };
 
 export class BattleAIBrain {
+	static readonly BRAIN_PATH = BRAIN_PATH;
 	static readonly shared = new BattleAIBrain();
 	readonly dex = Dex;
 	data: BattleAIBrainData;
