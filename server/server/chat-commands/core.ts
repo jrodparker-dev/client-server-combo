@@ -14,7 +14,8 @@
  */
 
 /* eslint no-else-return: "error" */
-import { Utils } from '../../lib';
+import { FS, Utils } from '../../lib';
+import { BattleAIBrain } from '../../sim/tools/battle-ai-brain';
 import type { UserSettings } from '../users';
 import type { GlobalPermission, RoomPermission } from '../user-groups';
 
@@ -1149,6 +1150,38 @@ export const commands: Chat.ChatCommands = {
 		await room.uploadReplay(user, connection, options);
 	},
 	savereplayhelp: [`/savereplay - Saves the replay for the current battle.`],
+
+	async uploadreplaytobrain(target, room, user) {
+		room = this.requireRoom();
+		if (!room.battle) throw new Chat.ErrorMessage(`You can only do this in battle rooms.`);
+		if (!room.battle.ended) {
+			throw new Chat.ErrorMessage(`You can only upload battle data to the brain after the battle has ended.`);
+		}
+		if (!user.named) throw new Chat.ErrorMessage(`You must be logged in to upload a replay to the brain.`);
+
+		const replayData = room.getReplayData();
+		const log = room.getLog(-1).split('\n');
+		const outputDir = FS(BattleAIBrain.REPLAY_UPLOAD_DIR);
+		await outputDir.mkdirp();
+		const outputPath = `${BattleAIBrain.REPLAY_UPLOAD_DIR}/${replayData.id}.log.json`;
+		const payload = {
+			id: replayData.id,
+			format: room.format,
+			uploadedBy: user.id,
+			uploadedAt: new Date().toISOString(),
+			log,
+		};
+		await FS(outputPath).write(JSON.stringify(payload, null, 2));
+		BattleAIBrain.shared.recordReplayLog(log);
+		room.add(
+			`|html|<div class="infobox"><strong>${Utils.escapeHTML(user.name)}</strong> uploaded this replay to the AI brain at <code>${Utils.escapeHTML(outputPath)}</code>.</div>`
+		);
+		room.update();
+		this.sendReply(`Replay stored for AI brain training at ${outputPath}.`);
+	},
+	uploadreplaytobrainhelp: [
+		`/uploadreplaytobrain - Stores the current battle replay in ${BattleAIBrain.REPLAY_UPLOAD_DIR} and feeds it to the AI brain.`,
+	],
 
 	hidereplay(target, room, user, connection) {
 		if (!room?.battle) throw new Chat.ErrorMessage(`Must be used in a battle.`);
