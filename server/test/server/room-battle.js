@@ -5,6 +5,14 @@ const assert = require('assert').strict;
 const { makeUser } = require('../users-utils');
 
 describe('Simulator abstraction layer features', () => {
+	async function waitUntil(check, message) {
+		for (let i = 0; i < 100; i++) {
+			if (check()) return;
+			await new Promise(resolve => setTimeout(resolve, 50));
+		}
+		throw new Error(message || 'Timed out waiting for condition.');
+	}
+
 	describe('Battle', () => {
 		let p1, p2, room;
 		afterEach(() => {
@@ -34,6 +42,23 @@ describe('Simulator abstraction layer features', () => {
 			for (const player of room.battle.players) {
 				assert.equal(player, room.battle.playerTable[toID(player.name)]);
 			}
+		});
+
+		it('should let a server-side AI opponent respond to battle requests', async () => {
+			p1 = makeUser("Player One");
+			room = Rooms.createBattle({
+				format: 'gen8randombattle',
+				players: [{ user: p1, team: '' }, { user: 'AI Opponent', team: '', ai: true }],
+			});
+			assert(room?.battle);
+
+			await waitUntil(() => room.battle.p1.request.rqid > 0, 'Player request never arrived.');
+			const rqid = room.battle.p1.request.rqid;
+			room.battle.choose(p1, `move 1|${rqid}`);
+
+			await waitUntil(() => room.battle.turn >= 1, 'Battle did not advance after the AI should have chosen.');
+			assert.equal(room.battle.p2.name, 'AI Opponent');
+			assert(room.battle.p2.request.isWait);
 		});
 	});
 

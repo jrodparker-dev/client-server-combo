@@ -124,7 +124,7 @@ export class BestOfGame extends RoomGame<BestOfPlayer> {
 		let inviteOnly = false;
 		const privacySetter = new Set<ID>([]);
 		for (const p of options.players) {
-			if (p.user) {
+			if (p.user && typeof p.user !== 'string') {
 				if (p.inviteOnly) {
 					inviteOnly = true;
 					privacySetter.add(p.user.id);

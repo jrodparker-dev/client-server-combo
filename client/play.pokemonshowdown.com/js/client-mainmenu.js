@@ -59,7 +59,7 @@
 			buf += '<div class="menugroup"><p><button class="button mainmenu4 onlineonly disabled" name="joinRoom" value="battles">Watch a battle</button></p>';
 			buf += '<p><button class="button mainmenu5 onlineonly disabled" name="finduser">Find a user</button></p>';
 			buf += '<p><button class="button mainmenu6 onlineonly disabled" name="send" value="/friends">Friends</button></p></div>';
-			buf += '<div class="menugroup menugroup-ai"><p><button class="button mainmenu7 onlineonly disabled" name="challengeai">Challenge AI</button></p></div>';
+			buf += '<div class="menugroup menugroup-ai"><p><button class="button mainmenu7 onlineonly" name="challengeai">Challenge AI</button></p></div>';
 
 			this.$('.mainmenu').html(buf);
 
@@ -1653,6 +1653,11 @@
 				team: team.team
 			};
 		},
+		getPackedTeam: function (teamIndex) {
+			teamIndex = +teamIndex;
+			if (teamIndex < 0 || !Storage.teams || !Storage.teams[teamIndex]) return '';
+			return '' + Storage.getPackedTeam(Storage.teams[teamIndex]);
+		},
 		getSelectedValues: function () {
 			return {
 				format: this.$('button[name=selectAIFormat]').val() || this.selection.format,
@@ -1745,7 +1750,18 @@
 		},
 		startChallengeAI: function () {
 			this.saveChallengeAI();
-			app.addPopupMessage('Starting a real AI-vs-player battle still requires simulator/server-side turn execution that is not present in this client-only repository yet. The popup now lets you configure formats (including Random Battle), choose teams where applicable, and save/train the AI setup, but full live battling still needs battle-engine integration.');
+			var values = this.getSelectedValues();
+			var presetFormat = this.isPresetTeamFormat(values.format);
+			if (!presetFormat && (values.playerTeamIndex === '' || values.aiTeamIndex === '')) {
+				app.addPopupMessage('Select both a player team and an AI team before starting the battle.');
+				return;
+			}
+			app.send('/challengeai ' + JSON.stringify({
+				format: values.format,
+				playerTeam: presetFormat ? '' : this.getPackedTeam(values.playerTeamIndex),
+				aiTeam: presetFormat ? '' : this.getPackedTeam(values.aiTeamIndex)
+			}));
+			this.close();
 		}
 	});
 
