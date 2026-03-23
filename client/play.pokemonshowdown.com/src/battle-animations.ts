@@ -615,6 +615,7 @@ export class BattleScene implements BattleSceneStub {
 	}
 	getSidebarHTML(side: Side, posStr: string): string {
 		let noShow = this.battle.hardcoreMode && this.battle.gen < 7;
+		const serverPokemonList = this.battle.getServerPokemonList(side);
 
 		let speciesOverage = this.battle.speciesClause ? Infinity : Math.max(side.pokemon.length - side.totalPokemon, 0);
 		const sidebarIcons: (
@@ -623,7 +624,11 @@ export class BattleScene implements BattleSceneStub {
 		const speciesTable: string[] = [];
 		let zoroarkRevealed = false;
 		let hasIllusion = false;
-		if (speciesOverage) {
+		if (serverPokemonList?.length) {
+			for (let i = 0; i < Math.min(side.totalPokemon, serverPokemonList.length); i++) {
+				sidebarIcons.push(['pokemon', i]);
+			}
+		} else if (speciesOverage) {
 			for (let i = 0; i < side.pokemon.length; i++) {
 				const species = side.pokemon[i].getBaseSpecies().baseSpecies;
 				if (speciesOverage && speciesTable.includes(species)) {
@@ -660,7 +665,9 @@ export class BattleScene implements BattleSceneStub {
 		let pokemonhtml = '';
 		for (let i = 0; i < sidebarIcons.length; i++) {
 			const [iconType, pokeIndex] = sidebarIcons[i];
-			const poke = pokeIndex !== null ? side.pokemon[pokeIndex] : null;
+			const poke = pokeIndex !== null ?
+				(serverPokemonList ? this.battle.findPokemonByServerSlot(side, pokeIndex) : side.pokemon[pokeIndex]) :
+				null;
 			const tooltipCode = ` class="picon has-tooltip" data-tooltip="pokemon|${side.n}|${pokeIndex}${iconType === 'pokemon-illusion' ? '|illusion' : ''}"`;
 			if (iconType === 'empty') {
 				pokemonhtml += `<span class="picon" style="` + Dex.getPokemonIcon('pokeball-none') + `"></span>`;
