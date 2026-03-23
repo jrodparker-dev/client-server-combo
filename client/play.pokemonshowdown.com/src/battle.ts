@@ -1002,10 +1002,6 @@ export interface ServerPokemon extends PokemonDetails, PokemonHealth {
 		spd: number,
 		spe: number,
 	};
-	/** Optional base stat overrides from team data. */
-	baseStats?: Partial<StatsTable>;
-	/** Optional type overrides from team data. */
-	types?: string[];
 	/** currently an ID, will revise to name */
 	moves: string[];
 	/** currently an ID, will revise to name */
@@ -1097,7 +1093,6 @@ export class Battle {
 	sides: Side[] = null!;
 	myPokemon: ServerPokemon[] | null = null;
 	myAllyPokemon: ServerPokemon[] | null = null;
-	foePokemon: ServerPokemon[] | null = null;
 	lastMove = '';
 
 	mod = '' as ID;
@@ -1297,7 +1292,6 @@ export class Battle {
 		}
 		this.myPokemon = null;
 		this.myAllyPokemon = null;
-		this.foePokemon = null;
 
 		// DOM state
 		this.scene.reset();
@@ -2404,15 +2398,8 @@ export class Battle {
 		case '-ability': {
 			let poke = this.getPokemon(args[1])!;
 			let ability = Dex.abilities.get(args[2]);
-			let oldAbility = args[3];
 			let effect = Dex.getEffect(kwArgs.from);
 			let ofpoke = this.getPokemon(kwArgs.of);
-			if (oldAbility && !oldAbility.startsWith('p1') && !oldAbility.startsWith('p2') && oldAbility !== 'boost') {
-				let oldAbilityName = Dex.abilities.get(oldAbility).name;
-				if (oldAbilityName && !poke.baseAbility) {
-					poke.baseAbility = oldAbilityName;
-				}
-			}
 			poke.rememberAbility(ability.name, effect.id && !kwArgs.fail);
 
 			if (kwArgs.silent) {
@@ -2459,18 +2446,6 @@ export class Battle {
 			// and the third arg of |-ability| for Entrainment et al
 			let poke = this.getPokemon(args[1])!;
 			let ability = Dex.abilities.get(args[2]);
-			let effect = Dex.getEffect(kwArgs.from);
-			const overwritingAbilities: {[id: string]: string} = {
-				simplebeam: 'Simple',
-				worryseed: 'Insomnia',
-			};
-			const overwrittenAbility = overwritingAbilities[effect.id || this.lastMove];
-			if (overwrittenAbility) {
-				poke.rememberAbility(overwrittenAbility, true);
-				if (!poke.baseAbility && ability.id) poke.baseAbility = ability.name;
-				this.log(args, kwArgs);
-				break;
-			}
 			poke.ability = '(suppressed)';
 
 			if (ability.id) {
