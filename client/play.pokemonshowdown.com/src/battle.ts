@@ -3351,7 +3351,8 @@ export class Battle {
 		for (const pokemon of side.pokemon) {
 			pokemon.serverSlot = -1;
 		}
-		for (const [index, serverPokemon] of serverPokemonList.entries()) {
+		for (let index = 0; index < serverPokemonList.length; index++) {
+			const serverPokemon = serverPokemonList[index];
 			const searchid = `${serverPokemon.ident}|${serverPokemon.details}`;
 			const match = side.pokemon.find(pokemon =>
 				pokemon.searchid === searchid ||
