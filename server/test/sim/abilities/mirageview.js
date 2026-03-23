@@ -22,6 +22,7 @@ describe('Mirageview', () => {
 
 		assert(battle.log.some(line => line.includes('|-start|p1a: Zoroark|typechange|Electric')));
 		assert(battle.log.some(line => line.includes('|replace|p1a: Zoroark|Zoroark')));
+		assert(battle.log.some(line => line.includes('|-ability|p1a: Zoroark|Mirageview')));
 		assert(battle.log.some(line => line.includes('|-start|p1a: Zoroark|typechange|Dark')));
 	});
 });

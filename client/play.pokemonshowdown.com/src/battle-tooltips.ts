@@ -284,19 +284,19 @@ class BattleTooltips {
 			break;
 		}
 
-		case 'pokemon': { // pokemon|SIDE|POKEMON
+		case 'pokemon': { // pokemon|SIDE|DISPLAYPOKEMON|TEAMPOKEMON
 			// mouse over sidebar pokemon
 			let sideIndex = parseInt(args[1], 10);
 			let side = this.battle.sides[sideIndex];
-			const pokemonIndex = parseInt(args[2], 10);
-			let pokemon = side.pokemon[pokemonIndex];
+			const displayIndex = parseInt(args[2], 10);
+			const pokemonIndex = args[3] ? parseInt(args[3], 10) : displayIndex;
+			let pokemon = side.pokemon[displayIndex];
 			let serverPokemon = null;
-			if (side === this.battle.mySide && this.battle.myPokemon) {
-				serverPokemon = this.getServerPokemonForClient(pokemon, this.battle.myPokemon, pokemonIndex);
-			} else if (side === this.battle.farSide && this.battle.foePokemon) {
-				serverPokemon = this.getServerPokemonForClient(pokemon, this.battle.foePokemon, pokemonIndex);
+			const serverPokemonList = this.getServerPokemonList(side);
+			if (serverPokemonList) {
+				serverPokemon = serverPokemonList[pokemonIndex] || this.getServerPokemonForClient(pokemon, serverPokemonList, pokemonIndex);
 			}
-			if (args[3] === 'illusion') {
+			if (args[4] === 'illusion') {
 				buf = '';
 				const species = pokemon.getBaseSpecies().baseSpecies;
 				let index = 1;
@@ -807,9 +807,6 @@ class BattleTooltips {
 		fallbackIndex?: number
 	) {
 		if (!serverPokemonList?.length) return null;
-		if (pokemon?.serverSlot >= 0 && pokemon.serverSlot < serverPokemonList.length) {
-			return serverPokemonList[pokemon.serverSlot];
-		}
 		if (activeIndex !== undefined) {
 			const activeServerPokemon = serverPokemonList.filter(serverPokemon => serverPokemon.active);
 			if (activeIndex >= 0 && activeIndex < activeServerPokemon.length) {
@@ -817,6 +814,12 @@ class BattleTooltips {
 			}
 		}
 		return this.getServerPokemonForClient(pokemon, serverPokemonList, fallbackIndex);
+	}
+	getServerPokemonList(side: Side) {
+		if (side === this.battle.mySide) return this.battle.myPokemon;
+		if (side === this.battle.mySide.ally) return this.battle.myAllyPokemon;
+		if (side === this.battle.farSide) return this.battle.foePokemon;
+		return null;
 	}
 
 

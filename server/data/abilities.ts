@@ -7663,6 +7663,7 @@ mirageview: {
       const details = target.getUpdatedDetails();
       this.add('replace', target, details);
       this.add('-end', target, 'Illusion');
+      this.add('-ability', target, 'Mirageview');
       if (this.ruleTable.has('illusionlevelmod')) {
         this.hint("Illusion Level Mod is active, so this Pok\u00e9mon's true level was hidden.", true);
       }

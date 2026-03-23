@@ -613,6 +613,41 @@ export class BattleScene implements BattleSceneStub {
 		}
 		return BattleLog.escapeHTML(name);
 	}
+	getSidebarServerPokemonList(side: Side) {
+		if (side === this.battle.mySide) return this.battle.myPokemon;
+		if (side === this.battle.mySide.ally) return this.battle.myAllyPokemon;
+		if (side === this.battle.farSide) return this.battle.foePokemon;
+		return null;
+	}
+	getSidebarTooltipIndex(side: Side, poke: Pokemon | null, pokeIndex: number | null) {
+		if (pokeIndex === null || !poke) return pokeIndex;
+		const serverPokemonList = this.getSidebarServerPokemonList(side);
+		if (!serverPokemonList?.length) return pokeIndex;
+		for (let i = 0; i < serverPokemonList.length; i++) {
+			const serverPokemon = serverPokemonList[i];
+			if (
+				(poke.ident && serverPokemon.ident === poke.ident) ||
+				(poke.searchid && serverPokemon.searchid === poke.searchid) ||
+				(poke.details && serverPokemon.details === poke.details)
+			) {
+				return i;
+			}
+		}
+		if (
+			pokeIndex < serverPokemonList.length &&
+			(serverPokemonList[pokeIndex].speciesForme === poke.speciesForme || serverPokemonList[pokeIndex].name === poke.name)
+		) {
+			return pokeIndex;
+		}
+		let speciesMatch = -1;
+		for (let i = 0; i < serverPokemonList.length; i++) {
+			const serverPokemon = serverPokemonList[i];
+			if (serverPokemon.speciesForme !== poke.speciesForme && serverPokemon.name !== poke.name) continue;
+			if (speciesMatch >= 0) return pokeIndex;
+			speciesMatch = i;
+		}
+		return speciesMatch >= 0 ? speciesMatch : pokeIndex;
+	}
 	getSidebarHTML(side: Side, posStr: string): string {
 		let noShow = this.battle.hardcoreMode && this.battle.gen < 7;
 		const serverPokemonList = this.battle.getServerPokemonList(side);
@@ -665,10 +700,9 @@ export class BattleScene implements BattleSceneStub {
 		let pokemonhtml = '';
 		for (let i = 0; i < sidebarIcons.length; i++) {
 			const [iconType, pokeIndex] = sidebarIcons[i];
-			const poke = pokeIndex !== null ?
-				(serverPokemonList ? this.battle.findPokemonByServerSlot(side, pokeIndex) : side.pokemon[pokeIndex]) :
-				null;
-			const tooltipCode = ` class="picon has-tooltip" data-tooltip="pokemon|${side.n}|${pokeIndex}${iconType === 'pokemon-illusion' ? '|illusion' : ''}"`;
+			const poke = pokeIndex !== null ? side.pokemon[pokeIndex] : null;
+			const tooltipIndex = this.getSidebarTooltipIndex(side, poke, pokeIndex);
+			const tooltipCode = ` class="picon has-tooltip" data-tooltip="pokemon|${side.n}|${pokeIndex}|${tooltipIndex}${iconType === 'pokemon-illusion' ? '|illusion' : ''}"`;
 			if (iconType === 'empty') {
 				pokemonhtml += `<span class="picon" style="` + Dex.getPokemonIcon('pokeball-none') + `"></span>`;
 			} else if (noShow) {
