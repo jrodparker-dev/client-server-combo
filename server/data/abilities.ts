@@ -7658,10 +7658,17 @@ mirageview: {
 
     // Break Illusion on the first connecting damaging hit
     if (target.illusion) {
-      const realName = target.species.name;
       target.illusion = null;
+
+      const details = target.getUpdatedDetails();
+      this.add('replace', target, details);
       this.add('-end', target, 'Illusion');
-      this.add('-formechange', target, realName, '[from] ability: Mirageview');
+      if (this.ruleTable.has('illusionlevelmod')) {
+        this.hint("Illusion Level Mod is active, so this Pok\u00e9mon's true level was hidden.", true);
+      }
+
+      const cur = target.getTypes(true).join('/');
+      this.add('-start', target, 'typechange', cur);
     }
   },
 
@@ -12579,4 +12586,3 @@ typethief: {
 
 
 };
-
