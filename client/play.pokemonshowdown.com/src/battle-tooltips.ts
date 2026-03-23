@@ -782,6 +782,9 @@ class BattleTooltips {
 			if (index === undefined) return null;
 			return serverPokemonList?.[index] || null;
 		}
+		if (pokemon.serverSlot >= 0 && pokemon.serverSlot < serverPokemonList.length) {
+			return serverPokemonList[pokemon.serverSlot];
+		}
 		if (pokemon.ident) {
 			const identMatch = serverPokemonList.find(serverPokemon => serverPokemon.ident === pokemon.ident);
 			if (identMatch) return identMatch;

@@ -650,6 +650,7 @@ export class BattleScene implements BattleSceneStub {
 	}
 	getSidebarHTML(side: Side, posStr: string): string {
 		let noShow = this.battle.hardcoreMode && this.battle.gen < 7;
+		const serverPokemonList = this.battle.getServerPokemonList(side);
 
 		let speciesOverage = this.battle.speciesClause ? Infinity : Math.max(side.pokemon.length - side.totalPokemon, 0);
 		const sidebarIcons: (
@@ -658,7 +659,11 @@ export class BattleScene implements BattleSceneStub {
 		const speciesTable: string[] = [];
 		let zoroarkRevealed = false;
 		let hasIllusion = false;
-		if (speciesOverage) {
+		if (serverPokemonList?.length) {
+			for (let i = 0; i < Math.min(side.totalPokemon, serverPokemonList.length); i++) {
+				sidebarIcons.push(['pokemon', i]);
+			}
+		} else if (speciesOverage) {
 			for (let i = 0; i < side.pokemon.length; i++) {
 				const species = side.pokemon[i].getBaseSpecies().baseSpecies;
 				if (speciesOverage && speciesTable.includes(species)) {
