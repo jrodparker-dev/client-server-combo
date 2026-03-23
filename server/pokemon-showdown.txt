@@ -79,6 +79,11 @@ function showHelp() {
 	console.log('');
 	console.log('  Reads a team in any format from stdin, writes the exported (human-readable) team to stdout');
 	console.log('');
+	console.log('pokemon-showdown train-ai-brain [REPLAY-DIR]');
+	console.log('');
+	console.log('  Reads replay HTML/JSON/log files from a folder and updates config/ai-battle-brain.json');
+	console.log('  (Replay dir defaults to ./replays/ai-training)');
+	console.log('');
 	console.log('pokemon-showdown help');
 	console.log('');
 	console.log('  Displays this reference');
@@ -207,6 +212,69 @@ if (!cli.positionals.length || /^[0-9]+$/.test(cli.positionals[0])) {
 			});
 			stdin.pipeTo(battleStream);
 			battleStream.pipeTo(stdout);
+		}
+		break;
+	case 'train-ai-brain':
+		{
+			build();
+			var fs = require('fs');
+			var path = require('path');
+			var BattleAIBrain = require('./dist/sim/tools/battle-ai-brain.js').BattleAIBrain;
+			var targetDir = path.resolve(process.cwd(), cli.positionals[1] || 'replays/ai-training');
+			if (!fs.existsSync(targetDir)) {
+				console.error('Training directory not found: ' + targetDir);
+				process.exit(1);
+			}
+			var entries = fs.readdirSync(targetDir).filter(function (file) {
+				return /\.(html|json|log|txt)$/i.test(file);
+			});
+			var brain = BattleAIBrain.shared;
+			var processedFiles = 0;
+			var totalBattles = 0;
+			var totalMoves = 0;
+			var totalImmunities = 0;
+			var totalDamage = 0;
+			for (var i = 0; i < entries.length; i++) {
+				var filename = entries[i];
+				var fullPath = path.join(targetDir, filename);
+				var raw = fs.readFileSync(fullPath, 'utf8');
+				var logs = [];
+				if (/\.html$/i.test(filename)) {
+					logs = brain.extractBattleLogs(raw);
+				} else if (/\.json$/i.test(filename)) {
+					try {
+						var parsed = JSON.parse(raw);
+						if (Array.isArray(parsed.log)) {
+							logs = [parsed.log.join('\n')];
+						} else if (typeof parsed.log === 'string') {
+							logs = [parsed.log];
+						} else if (Array.isArray(parsed)) {
+							logs = [parsed.join('\n')];
+						}
+					} catch (e) {}
+				} else {
+					logs = [raw];
+				}
+				for (var j = 0; j < logs.length; j++) {
+					var result = brain.recordReplayLog(logs[j].split('\n'));
+					totalBattles += result.battlesProcessed;
+					totalMoves += result.moveUses;
+					totalImmunities += result.newImmunitySamples;
+					totalDamage += result.newDamageSamples;
+				}
+				processedFiles++;
+			}
+			var report = {
+				processedFiles: processedFiles,
+				battlesProcessed: totalBattles,
+				moveUsesLearned: totalMoves,
+				immunitySamplesLearned: totalImmunities,
+				damageSamplesLearned: totalDamage,
+				brainFile: path.resolve(process.cwd(), 'config/ai-battle-brain.json'),
+				updatedAt: new Date().toISOString()
+			};
+			fs.writeFileSync(path.join(targetDir, 'ai-battle-training-report.json'), JSON.stringify(report, null, 2));
+			console.log(JSON.stringify(report, null, 2));
 		}
 		break;
 	case 'unpack-team':

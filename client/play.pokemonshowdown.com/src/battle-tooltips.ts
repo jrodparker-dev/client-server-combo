@@ -333,7 +333,10 @@ class BattleTooltips {
 			if (side === this.battle.farSide && this.battle.foePokemon) {
 				serverPokemon = this.getServerPokemonForClient(pokemon, this.battle.foePokemon, pokemonIndex);
 			}
-			if (side === this.battle.farSide && this.battle.foePokemon) {
+			if (!serverPokemon && side === this.battle.farSide && this.battle.foePokemon) {
+				// Fall back to team order only if we couldn't match by ident/searchid/details.
+				// This keeps active tooltips aligned after Illusion breaks and the active slot
+				// swaps back to Zoroark/Zorua's actual battle Pokemon data.
 				serverPokemon = this.battle.foePokemon[pokemonIndex];
 			}
 			if (!pokemon) return false;
@@ -840,8 +843,8 @@ class BattleTooltips {
 			}
 
 			const terastallizedType = serverPokemon?.terastallized || pokemon.terastallized;
-			let types = terastallizedType ? [terastallizedType] : this.getPokemonTypes(clientPokemon || serverPokemon || pokemon);
-			let knownPokemon = serverPokemon || clientPokemon!;
+			const types = terastallizedType ? [terastallizedType] : this.getPokemonTypes(clientPokemon || serverPokemon || pokemon);
+			const knownPokemon = serverPokemon || clientPokemon;
 
 			if (terastallizedType) {
 				text += `<small>(Terastallized)</small><br />`;
@@ -851,7 +854,7 @@ class BattleTooltips {
 			text += `<span class="textaligned-typeicons">${types.map(type => Dex.getTypeIcon(type)).join(' ')}</span>`;
 			if (terastallizedType) {
 				text += `&nbsp; &nbsp; <small>(base: <span class="textaligned-typeicons">${this.getPokemonTypes(pokemon, true).map(type => Dex.getTypeIcon(type)).join(' ')}</span>)</small>`;
-			} else if (!limitedFoeTooltip && knownPokemon.teraType && !this.battle.rules['Terastal Clause']) {
+			} else if (knownPokemon?.teraType && !this.battle.rules['Terastal Clause']) {
 				text += `&nbsp; &nbsp; <small>(Tera Type: <span class="textaligned-typeicons">${Dex.getTypeIcon(knownPokemon.teraType)}</span>)</small>`;
 			}
 			text += `</h2>`;
@@ -910,31 +913,7 @@ class BattleTooltips {
 			}
 		}
 
-		let itemText = '';
-		if (!limitedFoeTooltip && serverPokemon) {
-			let item = '';
-			let itemEffect = '';
-			if (clientPokemon?.prevItem) {
-				item = 'None';
-				let prevItem = Dex.items.get(clientPokemon.prevItem).name;
-				itemEffect += clientPokemon.prevItemEffect ? prevItem + ' was ' + clientPokemon.prevItemEffect : 'was ' + prevItem;
-			}
-			if (serverPokemon.item) item = Dex.items.get(serverPokemon.item).name;
-			if (itemEffect) itemEffect = ' (' + itemEffect + ')';
-			if (item) itemText = '<small>Item:</small> ' + item + itemEffect;
-		} else if (!limitedFoeTooltip && clientPokemon) {
-			let item = '';
-			let itemEffect = clientPokemon.itemEffect || '';
-			if (clientPokemon.prevItem) {
-				item = 'None';
-				if (itemEffect) itemEffect += '; ';
-				let prevItem = Dex.items.get(clientPokemon.prevItem).name;
-				itemEffect += clientPokemon.prevItemEffect ? prevItem + ' was ' + clientPokemon.prevItemEffect : 'was ' + prevItem;
-			}
-			if (pokemon.item) item = Dex.items.get(pokemon.item).name;
-			if (itemEffect) itemEffect = ' (' + itemEffect + ')';
-			if (item) itemText = '<small>Item:</small> ' + item + itemEffect;
-		}
+		const itemText = this.getPokemonItemText(clientPokemon, serverPokemon, limitedFoeTooltip);
 
 		if (abilityText || itemText) {
 			text += '<p>';
@@ -1008,6 +987,44 @@ class BattleTooltips {
 			text += `</p>`;
 		}
 		return text;
+	}
+
+	getPokemonItemText(
+		clientPokemon: Pokemon | null,
+		serverPokemon: ServerPokemon | null | undefined,
+		limitedFoeTooltip: boolean
+	) {
+		let item = '';
+		let itemEffect = '';
+		if (limitedFoeTooltip) {
+			if (!clientPokemon) return '';
+			item = clientPokemon.item ? Dex.items.get(clientPokemon.item).name : '';
+			itemEffect = clientPokemon.itemEffect || '';
+			if (clientPokemon.prevItem) {
+				item = item || 'None';
+				if (itemEffect) itemEffect += '; ';
+				const prevItem = Dex.items.get(clientPokemon.prevItem).name;
+				itemEffect += clientPokemon.prevItemEffect ? `${prevItem} was ${clientPokemon.prevItemEffect}` : `was ${prevItem}`;
+			}
+		} else if (serverPokemon) {
+			item = serverPokemon.item ? Dex.items.get(serverPokemon.item).name : '';
+			if (clientPokemon?.prevItem) {
+				item = item || 'None';
+				const prevItem = Dex.items.get(clientPokemon.prevItem).name;
+				itemEffect = clientPokemon.prevItemEffect ? `${prevItem} was ${clientPokemon.prevItemEffect}` : `was ${prevItem}`;
+			}
+		} else if (clientPokemon) {
+			item = clientPokemon.item ? Dex.items.get(clientPokemon.item).name : '';
+			itemEffect = clientPokemon.itemEffect || '';
+			if (clientPokemon.prevItem) {
+				item = item || 'None';
+				if (itemEffect) itemEffect += '; ';
+				const prevItem = Dex.items.get(clientPokemon.prevItem).name;
+				itemEffect += clientPokemon.prevItemEffect ? `${prevItem} was ${clientPokemon.prevItemEffect}` : `was ${prevItem}`;
+			}
+		}
+		if (itemEffect) itemEffect = ` (${itemEffect})`;
+		return item ? `<small>Item:</small> ${item}${itemEffect}` : '';
 	}
 
 	showFieldTooltip() {

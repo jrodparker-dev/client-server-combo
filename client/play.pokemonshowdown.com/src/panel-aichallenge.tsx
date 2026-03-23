@@ -32,7 +32,7 @@ class AIChallengePanel extends PSRoomPanel {
 		const playerTeam = PS.teams.byKey[this.state.playerTeamKey] || null;
 		const aiTeam = PS.teams.byKey[this.state.aiTeamKey] || null;
 		if (!presetFormat && (!playerTeam || !aiTeam)) {
-			alert("Select both a player team and an AI team before starting the battle.");
+			PS.alert("Select both a player team and an AI team before starting the battle.");
 			return;
 		}
 		BattleAI.saveChallengeSelection(this.state as AIChallengeSelection);

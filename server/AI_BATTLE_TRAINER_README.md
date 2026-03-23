@@ -7,7 +7,6 @@ This server now keeps the shared battle AI "brain" on the **server**, not in the
 - Brain file: `server/config/ai-battle-brain.json`
 - Runtime learner: every finished battle on the server feeds its replay log into the shared brain automatically.
 - Trainer command: `npm run train-ai-brain -- <replay-folder>`
-- Manual client upload button target folder: `server/replays/ai-training/`
 
 ## What it learns
 
@@ -33,7 +32,6 @@ When a battle finishes on the running server, the server immediately updates the
 - If you are logged into the machine that hosts the server, you should see `server/config/ai-battle-brain.json` change after completed battles.
 - If you are playing from a browser or another computer, your client-side local files will **not** update, because the learning data is stored on the server host.
 - Each completed battle also posts a room message telling you the filepath used for learning.
-- The battle client also has an **Upload replay to brain** button that stores a replay file directly in `server/replays/ai-training/`.
 
 ## Training from replay files
 
