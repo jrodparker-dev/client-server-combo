@@ -815,12 +815,6 @@ class BattleTooltips {
 		}
 		return this.getServerPokemonForClient(pokemon, serverPokemonList, fallbackIndex);
 	}
-	getServerPokemonList(side: Side) {
-		if (side === this.battle.mySide) return this.battle.myPokemon;
-		if (side === this.battle.mySide.ally) return this.battle.myAllyPokemon;
-		if (side === this.battle.farSide) return this.battle.foePokemon;
-		return null;
-	}
 
 
 	/**
