@@ -305,6 +305,8 @@ class BattlePanel extends PSRoomPanel<BattleRoom> {
 		if (request.side) {
 			room.battle.myPokemon = request.side.pokemon;
 			room.battle.setViewpoint(request.side.id);
+			room.battle.syncSideWithServerPokemon(room.battle.mySide, room.battle.myPokemon);
+			room.battle.syncSideWithServerPokemon(room.battle.farSide, room.battle.foePokemon);
 			room.side = request.side;
 		}
 

@@ -613,8 +613,44 @@ export class BattleScene implements BattleSceneStub {
 		}
 		return BattleLog.escapeHTML(name);
 	}
+	getSidebarServerPokemonList(side: Side) {
+		if (side === this.battle.mySide) return this.battle.myPokemon;
+		if (side === this.battle.mySide.ally) return this.battle.myAllyPokemon;
+		if (side === this.battle.farSide) return this.battle.foePokemon;
+		return null;
+	}
+	getSidebarTooltipIndex(side: Side, poke: Pokemon | null, pokeIndex: number | null) {
+		if (pokeIndex === null || !poke) return pokeIndex;
+		const serverPokemonList = this.getSidebarServerPokemonList(side);
+		if (!serverPokemonList?.length) return pokeIndex;
+		for (let i = 0; i < serverPokemonList.length; i++) {
+			const serverPokemon = serverPokemonList[i];
+			if (
+				(poke.ident && serverPokemon.ident === poke.ident) ||
+				(poke.searchid && serverPokemon.searchid === poke.searchid) ||
+				(poke.details && serverPokemon.details === poke.details)
+			) {
+				return i;
+			}
+		}
+		if (
+			pokeIndex < serverPokemonList.length &&
+			(serverPokemonList[pokeIndex].speciesForme === poke.speciesForme || serverPokemonList[pokeIndex].name === poke.name)
+		) {
+			return pokeIndex;
+		}
+		let speciesMatch = -1;
+		for (let i = 0; i < serverPokemonList.length; i++) {
+			const serverPokemon = serverPokemonList[i];
+			if (serverPokemon.speciesForme !== poke.speciesForme && serverPokemon.name !== poke.name) continue;
+			if (speciesMatch >= 0) return pokeIndex;
+			speciesMatch = i;
+		}
+		return speciesMatch >= 0 ? speciesMatch : pokeIndex;
+	}
 	getSidebarHTML(side: Side, posStr: string): string {
 		let noShow = this.battle.hardcoreMode && this.battle.gen < 7;
+		const serverPokemonList = this.battle.getServerPokemonList(side);
 
 		let speciesOverage = this.battle.speciesClause ? Infinity : Math.max(side.pokemon.length - side.totalPokemon, 0);
 		const sidebarIcons: (
@@ -623,7 +659,11 @@ export class BattleScene implements BattleSceneStub {
 		const speciesTable: string[] = [];
 		let zoroarkRevealed = false;
 		let hasIllusion = false;
-		if (speciesOverage) {
+		if (serverPokemonList?.length) {
+			for (let i = 0; i < Math.min(side.totalPokemon, serverPokemonList.length); i++) {
+				sidebarIcons.push(['pokemon', i]);
+			}
+		} else if (speciesOverage) {
 			for (let i = 0; i < side.pokemon.length; i++) {
 				const species = side.pokemon[i].getBaseSpecies().baseSpecies;
 				if (speciesOverage && speciesTable.includes(species)) {
@@ -661,7 +701,8 @@ export class BattleScene implements BattleSceneStub {
 		for (let i = 0; i < sidebarIcons.length; i++) {
 			const [iconType, pokeIndex] = sidebarIcons[i];
 			const poke = pokeIndex !== null ? side.pokemon[pokeIndex] : null;
-			const tooltipCode = ` class="picon has-tooltip" data-tooltip="pokemon|${side.n}|${pokeIndex}${iconType === 'pokemon-illusion' ? '|illusion' : ''}"`;
+			const tooltipIndex = this.getSidebarTooltipIndex(side, poke, pokeIndex);
+			const tooltipCode = ` class="picon has-tooltip" data-tooltip="pokemon|${side.n}|${pokeIndex}|${tooltipIndex}${iconType === 'pokemon-illusion' ? '|illusion' : ''}"`;
 			if (iconType === 'empty') {
 				pokemonhtml += `<span class="picon" style="` + Dex.getPokemonIcon('pokeball-none') + `"></span>`;
 			} else if (noShow) {

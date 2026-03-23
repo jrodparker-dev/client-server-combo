@@ -284,19 +284,19 @@ class BattleTooltips {
 			break;
 		}
 
-		case 'pokemon': { // pokemon|SIDE|POKEMON
+		case 'pokemon': { // pokemon|SIDE|DISPLAYPOKEMON|TEAMPOKEMON
 			// mouse over sidebar pokemon
 			let sideIndex = parseInt(args[1], 10);
 			let side = this.battle.sides[sideIndex];
-			const pokemonIndex = parseInt(args[2], 10);
-			let pokemon = side.pokemon[pokemonIndex];
+			const displayIndex = parseInt(args[2], 10);
+			const pokemonIndex = args[3] ? parseInt(args[3], 10) : displayIndex;
+			let pokemon = side.pokemon[displayIndex];
 			let serverPokemon = null;
-			if (side === this.battle.mySide && this.battle.myPokemon) {
-				serverPokemon = this.getServerPokemonForClient(pokemon, this.battle.myPokemon, pokemonIndex);
-			} else if (side === this.battle.farSide && this.battle.foePokemon) {
-				serverPokemon = this.getServerPokemonForClient(pokemon, this.battle.foePokemon, pokemonIndex);
+			const serverPokemonList = this.getServerPokemonList(side);
+			if (serverPokemonList) {
+				serverPokemon = serverPokemonList[pokemonIndex] || this.getServerPokemonForClient(pokemon, serverPokemonList, pokemonIndex);
 			}
-			if (args[3] === 'illusion') {
+			if (args[4] === 'illusion') {
 				buf = '';
 				const species = pokemon.getBaseSpecies().baseSpecies;
 				let index = 1;
@@ -781,6 +781,9 @@ class BattleTooltips {
 		if (!pokemon || !serverPokemonList?.length) {
 			if (index === undefined) return null;
 			return serverPokemonList?.[index] || null;
+		}
+		if (pokemon.serverSlot >= 0 && pokemon.serverSlot < serverPokemonList.length) {
+			return serverPokemonList[pokemon.serverSlot];
 		}
 		if (pokemon.ident) {
 			const identMatch = serverPokemonList.find(serverPokemon => serverPokemon.ident === pokemon.ident);
