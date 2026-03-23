@@ -3354,14 +3354,23 @@ export class Battle {
 		for (let index = 0; index < serverPokemonList.length; index++) {
 			const serverPokemon = serverPokemonList[index];
 			const searchid = `${serverPokemon.ident}|${serverPokemon.details}`;
-			const match = side.pokemon.find(pokemon =>
-				pokemon.searchid === searchid ||
-				pokemon.ident === serverPokemon.ident ||
-				pokemon.details === serverPokemon.details
-			);
+			let match = null;
+			for (const pokemon of side.pokemon) {
+				if (
+					pokemon.searchid === searchid ||
+					pokemon.ident === serverPokemon.ident ||
+					pokemon.details === serverPokemon.details
+				) {
+					match = pokemon;
+					break;
+				}
+			}
 			if (match) match.serverSlot = index;
 		}
-		const activeServerPokemon = serverPokemonList.filter(pokemon => pokemon.active);
+		const activeServerPokemon = [];
+		for (const pokemon of serverPokemonList) {
+			if (pokemon.active) activeServerPokemon.push(pokemon);
+		}
 		let activeIndex = 0;
 		for (const pokemon of side.active) {
 			if (!pokemon) continue;
