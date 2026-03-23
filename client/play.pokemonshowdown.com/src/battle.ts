@@ -105,6 +105,7 @@ export class Pokemon implements PokemonDetails, PokemonHealth {
 	moveTrack: [string, number][] = [];
 	statusData = {sleepTurns: 0, toxicTurns: 0};
 	timesAttacked = 0;
+	serverSlot = -1;
 
 	sprite: PokemonSprite;
 
@@ -3338,6 +3339,45 @@ export class Battle {
 		const {siden} = this.parsePokemonId(sideid);
 
 		return this.sides[siden].addPokemon('', '', details);
+	}
+	getServerPokemonList(side: Side) {
+		if (side === this.mySide) return this.myPokemon;
+		if (side === this.mySide.ally) return this.myAllyPokemon;
+		if (side === this.farSide) return this.foePokemon;
+		return null;
+	}
+	syncSideWithServerPokemon(side: Side, serverPokemonList: ServerPokemon[] | null | undefined) {
+		if (!serverPokemonList?.length) return;
+		for (const pokemon of side.pokemon) {
+			pokemon.serverSlot = -1;
+		}
+		for (const [index, serverPokemon] of serverPokemonList.entries()) {
+			const searchid = `${serverPokemon.ident}|${serverPokemon.details}`;
+			const match = side.pokemon.find(pokemon =>
+				pokemon.searchid === searchid ||
+				pokemon.ident === serverPokemon.ident ||
+				pokemon.details === serverPokemon.details
+			);
+			if (match) match.serverSlot = index;
+		}
+		const activeServerPokemon = serverPokemonList.filter(pokemon => pokemon.active);
+		let activeIndex = 0;
+		for (const pokemon of side.active) {
+			if (!pokemon) continue;
+			const serverPokemon = activeServerPokemon[activeIndex++];
+			if (!serverPokemon) continue;
+			const serverIndex = serverPokemonList.indexOf(serverPokemon);
+			if (serverIndex >= 0) pokemon.serverSlot = serverIndex;
+		}
+	}
+	findPokemonByServerSlot(side: Side, serverSlot: number) {
+		const matches = side.pokemon.filter(pokemon => pokemon.serverSlot === serverSlot);
+		if (!matches.length) return side.pokemon[serverSlot] || null;
+		for (const pokemon of side.active) {
+			if (pokemon && matches.includes(pokemon)) return pokemon;
+		}
+		const revealed = matches.find(pokemon => !!pokemon.ident);
+		return revealed || matches[0];
 	}
 	findCorrespondingPokemon(serverPokemon: {ident: string, details: string}) {
 		const {siden} = this.parsePokemonId(serverPokemon.ident);

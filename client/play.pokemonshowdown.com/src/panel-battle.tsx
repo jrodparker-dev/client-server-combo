@@ -306,6 +306,8 @@ class BattlePanel extends PSRoomPanel<BattleRoom> {
 			room.battle.myPokemon = request.side.pokemon;
 			room.battle.foePokemon = request.foe?.pokemon || null;
 			room.battle.setViewpoint(request.side.id);
+			room.battle.syncSideWithServerPokemon(room.battle.mySide, room.battle.myPokemon);
+			room.battle.syncSideWithServerPokemon(room.battle.farSide, room.battle.foePokemon);
 			room.side = request.side;
 		}
 
@@ -545,6 +547,8 @@ class BattlePanel extends PSRoomPanel<BattleRoom> {
 		if (request.side) {
 			room.battle.myPokemon = request.side.pokemon;
 			room.battle.foePokemon = request.foe?.pokemon || null;
+			room.battle.syncSideWithServerPokemon(room.battle.mySide, room.battle.myPokemon);
+			room.battle.syncSideWithServerPokemon(room.battle.farSide, room.battle.foePokemon);
 		}
 		switch (request.requestType) {
 		case 'move': {

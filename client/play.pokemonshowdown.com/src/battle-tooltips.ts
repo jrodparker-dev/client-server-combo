@@ -325,13 +325,13 @@ class BattleTooltips {
 			let pokemon = side.active[activeIndex];
 			let serverPokemon = null;
 			if (side === this.battle.mySide && this.battle.myPokemon) {
-				serverPokemon = this.getServerPokemonForClient(pokemon, this.battle.myPokemon, pokemonIndex);
+				serverPokemon = this.getActiveServerPokemon(pokemon, this.battle.myPokemon, activeIndex, pokemonIndex);
 			}
 			if (side === this.battle.mySide.ally && this.battle.myAllyPokemon) {
-				serverPokemon = this.getServerPokemonForClient(pokemon, this.battle.myAllyPokemon, pokemonIndex);
+				serverPokemon = this.getActiveServerPokemon(pokemon, this.battle.myAllyPokemon, activeIndex, pokemonIndex);
 			}
 			if (side === this.battle.farSide && this.battle.foePokemon) {
-				serverPokemon = this.getServerPokemonForClient(pokemon, this.battle.foePokemon, pokemonIndex);
+				serverPokemon = this.getActiveServerPokemon(pokemon, this.battle.foePokemon, activeIndex, pokemonIndex);
 			}
 			if (!serverPokemon && side === this.battle.farSide && this.battle.foePokemon) {
 				// Fall back to team order only if we couldn't match by ident/searchid/details.
@@ -782,6 +782,9 @@ class BattleTooltips {
 			if (index === undefined) return null;
 			return serverPokemonList?.[index] || null;
 		}
+		if (pokemon.serverSlot >= 0 && pokemon.serverSlot < serverPokemonList.length) {
+			return serverPokemonList[pokemon.serverSlot];
+		}
 		if (pokemon.ident) {
 			const identMatch = serverPokemonList.find(serverPokemon => serverPokemon.ident === pokemon.ident);
 			if (identMatch) return identMatch;
@@ -796,6 +799,24 @@ class BattleTooltips {
 		}
 		if (index === undefined) return null;
 		return serverPokemonList[index] || null;
+	}
+	getActiveServerPokemon(
+		pokemon: Pokemon | null,
+		serverPokemonList?: ServerPokemon[] | null,
+		activeIndex?: number,
+		fallbackIndex?: number
+	) {
+		if (!serverPokemonList?.length) return null;
+		if (pokemon?.serverSlot >= 0 && pokemon.serverSlot < serverPokemonList.length) {
+			return serverPokemonList[pokemon.serverSlot];
+		}
+		if (activeIndex !== undefined) {
+			const activeServerPokemon = serverPokemonList.filter(serverPokemon => serverPokemon.active);
+			if (activeIndex >= 0 && activeIndex < activeServerPokemon.length) {
+				return activeServerPokemon[activeIndex];
+			}
+		}
+		return this.getServerPokemonForClient(pokemon, serverPokemonList, fallbackIndex);
 	}
 
 
@@ -859,7 +880,7 @@ class BattleTooltips {
 			text += `<span class="textaligned-typeicons">${types.map(type => Dex.getTypeIcon(type)).join(' ')}</span>`;
 			if (terastallizedType) {
 				text += `&nbsp; &nbsp; <small>(base: <span class="textaligned-typeicons">${this.getBaseTooltipPokemonTypes(clientPokemon, serverPokemon, pokemon).map(type => Dex.getTypeIcon(type)).join(' ')}</span>)</small>`;
-			} else if (!isSidebarTooltip && knownPokemon?.teraType && !this.battle.rules['Terastal Clause']) {
+			} else if (!limitedTooltip && knownPokemon?.teraType && !this.battle.rules['Terastal Clause']) {
 				text += `&nbsp; &nbsp; <small>(Tera Type: <span class="textaligned-typeicons">${Dex.getTypeIcon(knownPokemon.teraType)}</span>)</small>`;
 			}
 			text += `</h2>`;
