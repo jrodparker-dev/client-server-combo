@@ -105,7 +105,6 @@ export class Pokemon implements PokemonDetails, PokemonHealth {
 	moveTrack: [string, number][] = [];
 	statusData = {sleepTurns: 0, toxicTurns: 0};
 	timesAttacked = 0;
-	serverSlot = -1;
 
 	sprite: PokemonSprite;
 
@@ -1003,6 +1002,10 @@ export interface ServerPokemon extends PokemonDetails, PokemonHealth {
 		spd: number,
 		spe: number,
 	};
+	/** Optional base stat overrides from team data. */
+	baseStats?: Partial<StatsTable>;
+	/** Optional type overrides from team data. */
+	types?: string[];
 	/** currently an ID, will revise to name */
 	moves: string[];
 	/** currently an ID, will revise to name */
@@ -1094,6 +1097,7 @@ export class Battle {
 	sides: Side[] = null!;
 	myPokemon: ServerPokemon[] | null = null;
 	myAllyPokemon: ServerPokemon[] | null = null;
+	foePokemon: ServerPokemon[] | null = null;
 	lastMove = '';
 
 	mod = '' as ID;
@@ -1293,6 +1297,7 @@ export class Battle {
 		}
 		this.myPokemon = null;
 		this.myAllyPokemon = null;
+		this.foePokemon = null;
 
 		// DOM state
 		this.scene.reset();
@@ -2399,8 +2404,15 @@ export class Battle {
 		case '-ability': {
 			let poke = this.getPokemon(args[1])!;
 			let ability = Dex.abilities.get(args[2]);
+			let oldAbility = args[3];
 			let effect = Dex.getEffect(kwArgs.from);
 			let ofpoke = this.getPokemon(kwArgs.of);
+			if (oldAbility && !oldAbility.startsWith('p1') && !oldAbility.startsWith('p2') && oldAbility !== 'boost') {
+				let oldAbilityName = Dex.abilities.get(oldAbility).name;
+				if (oldAbilityName && !poke.baseAbility) {
+					poke.baseAbility = oldAbilityName;
+				}
+			}
 			poke.rememberAbility(ability.name, effect.id && !kwArgs.fail);
 
 			if (kwArgs.silent) {
@@ -2447,6 +2459,18 @@ export class Battle {
 			// and the third arg of |-ability| for Entrainment et al
 			let poke = this.getPokemon(args[1])!;
 			let ability = Dex.abilities.get(args[2]);
+			let effect = Dex.getEffect(kwArgs.from);
+			const overwritingAbilities: {[id: string]: string} = {
+				simplebeam: 'Simple',
+				worryseed: 'Insomnia',
+			};
+			const overwrittenAbility = overwritingAbilities[effect.id || this.lastMove];
+			if (overwrittenAbility) {
+				poke.rememberAbility(overwrittenAbility, true);
+				if (!poke.baseAbility && ability.id) poke.baseAbility = ability.name;
+				this.log(args, kwArgs);
+				break;
+			}
 			poke.ability = '(suppressed)';
 
 			if (ability.id) {
@@ -3314,55 +3338,6 @@ export class Battle {
 		const {siden} = this.parsePokemonId(sideid);
 
 		return this.sides[siden].addPokemon('', '', details);
-	}
-	getServerPokemonList(side: Side) {
-		if (side === this.mySide) return this.myPokemon;
-		if (side === this.mySide.ally) return this.myAllyPokemon;
-		if (side === this.farSide) return this.foePokemon;
-		return null;
-	}
-	syncSideWithServerPokemon(side: Side, serverPokemonList: ServerPokemon[] | null | undefined) {
-		if (!serverPokemonList?.length) return;
-		for (const pokemon of side.pokemon) {
-			pokemon.serverSlot = -1;
-		}
-		for (let index = 0; index < serverPokemonList.length; index++) {
-			const serverPokemon = serverPokemonList[index];
-			const searchid = `${serverPokemon.ident}|${serverPokemon.details}`;
-			let match = null;
-			for (const pokemon of side.pokemon) {
-				if (
-					pokemon.searchid === searchid ||
-					pokemon.ident === serverPokemon.ident ||
-					pokemon.details === serverPokemon.details
-				) {
-					match = pokemon;
-					break;
-				}
-			}
-			if (match) match.serverSlot = index;
-		}
-		const activeServerPokemon = [];
-		for (const pokemon of serverPokemonList) {
-			if (pokemon.active) activeServerPokemon.push(pokemon);
-		}
-		let activeIndex = 0;
-		for (const pokemon of side.active) {
-			if (!pokemon) continue;
-			const serverPokemon = activeServerPokemon[activeIndex++];
-			if (!serverPokemon) continue;
-			const serverIndex = serverPokemonList.indexOf(serverPokemon);
-			if (serverIndex >= 0) pokemon.serverSlot = serverIndex;
-		}
-	}
-	findPokemonByServerSlot(side: Side, serverSlot: number) {
-		const matches = side.pokemon.filter(pokemon => pokemon.serverSlot === serverSlot);
-		if (!matches.length) return side.pokemon[serverSlot] || null;
-		for (const pokemon of side.active) {
-			if (pokemon && matches.includes(pokemon)) return pokemon;
-		}
-		const revealed = matches.find(pokemon => !!pokemon.ident);
-		return revealed || matches[0];
 	}
 	findCorrespondingPokemon(serverPokemon: {ident: string, details: string}) {
 		const {siden} = this.parsePokemonId(serverPokemon.ident);

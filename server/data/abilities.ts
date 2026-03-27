@@ -8598,6 +8598,11 @@ onNegateImmunity(pokemon, type) {
 berryforager: {
   name: "Berry Forager",
   shortDesc: "End of each turn: generates a random curated Berry and eats it immediately.",
+  onStart(pokemon) {
+    const cur = pokemon.getTypes(true).join('/');
+    const base = pokemon.species.types.join('/');
+    this.add('-start', pokemon, 'typechange', cur);
+  },
   onResidual(pokemon) {
     if (pokemon.fainted) return;
 
@@ -8614,10 +8619,9 @@ berryforager: {
     const item = this.dex.items.get(pickName);
     if (!item?.isBerry) return;
 
-    // Temporarily replace held item
-    const original = pokemon.getItem();
-    if (original?.id) pokemon.takeItem();
-    pokemon.setItem(item);
+    // Temporarily replace held item (bypass setItem/takeItem hooks so Choice lock isn't reset)
+    const originalItem = pokemon.item;
+    pokemon.item = item.id;
 
     const consumed = pokemon.eatItem(true);
     if (consumed) {
@@ -8625,16 +8629,13 @@ berryforager: {
 
       // If Custap was eaten, prime next action priority
       if (item.id === 'custapberry') {
-  			pokemon.addVolatile('bfp' as ID);
-  			this.add('-message', `${pokemon.name}'s Custap primed its next action!`);
-		}
-    } else {
-      // If the berry couldn't be used now, discard it to avoid overriding held item
-      if (pokemon.item) pokemon.takeItem();
+        pokemon.addVolatile('bfp' as ID);
+        this.add('-message', `${pokemon.name}'s Custap primed its next action!`);
+      }
     }
 
-    // Restore original item (if any)
-    if (original?.id) pokemon.setItem(original);
+    // Restore original item exactly (e.g. Choice items) after berry resolution
+    pokemon.item = originalItem;
   },
 
   // Fallback not needed since you said ultimateberrypriority exists, but harmless if left:
@@ -9244,6 +9245,10 @@ if (!pool.length) return;
 
   // Record the original/base ability once so you can optionally re-add it innately (commented above)
   onStart(pokemon) {
+    const cur = pokemon.getTypes(true).join('/');
+    const base = pokemon.species.types.join('/');
+    this.add('-start', pokemon, 'typechange', cur);
+
     if ((this.effectState as any).origAbility == null) {
       (this.effectState as any).origAbility = pokemon.baseAbility as ID;
     }
