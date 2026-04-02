@@ -28103,10 +28103,19 @@ serenefocus: {
 		category: "Special",
 		basePower: 50,
 		accuracy: 100,
-		pp: 10,
+		pp: 5,
 		priority: 0,
 		shortDesc: "Turns target's moves into recoil moves temporarily.",
 		flags: {protect: 1, mirror: 1, metronome: 1},
+		volatileStatus: 'agonizingbeam',
+		condition: {
+			duration: 2,
+			onModifyMove(move, pokemon) {
+				if (move.category !== 'Status' && !move.recoil && !move.id.startsWith('max')) {
+					move.recoil = [1, 4];
+				}
+			},
+		},
 		target: "normal",
 	},
 	anchorsweep: {
@@ -28115,10 +28124,16 @@ serenefocus: {
 		category: "Physical",
 		basePower: 70,
 		accuracy: 100,
-		pp: 5,
+		pp: 15,
 		priority: 0,
 		shortDesc: "If target switches, strikes before it leaves at higher power.",
 		flags: {protect: 1, mirror: 1, metronome: 1, contact: 1},
+		onAfterHit(target, source) {
+			const hazards: ID[] = ['spikes', 'toxicspikes', 'poop', 'serratedspikes', 'puddle', 'stealthrock', 'stickyweb', 'gmaxsteelsurge', 'gasoline', 'twinvines'];
+			for (const hz of hazards) {
+				if (source.side.removeSideCondition(hz)) break;
+			}
+		},
 		onEffectiveness(typeMod, target, type) {
 			return typeMod + this.dex.getEffectiveness('Steel', type);
 		},
@@ -28126,16 +28141,30 @@ serenefocus: {
 	},
 	embercurrent: {
 		name: "Ember Current",
-		type: "Water",
+		type: "Fire",
 		category: "Special",
 		basePower: 70,
 		accuracy: 100,
-		pp: 10,
+		pp: 15,
 		priority: 0,
 		shortDesc: "Boosted in Burning Field; generally faster in Rain/Steam Field.",
 		flags: {protect: 1, mirror: 1, metronome: 1},
+		onModifyPriority(priority, source, target, move) {
+			if (this.field.isWeather(['raindance', 'primordialsea']) || source.side.sideConditions['steamfield'] || target?.side.sideConditions['steamfield']) {
+				return priority + 1;
+			}
+		},
+		onBasePower(basePower, source, target) {
+			if (source.side.sideConditions['burningfield'] || target?.side.sideConditions['burningfield']) {
+				return this.chainModify(1.5);
+			}
+		},
+		onAfterHit(target) {
+			target.side.removeSideCondition('burningfield');
+			target.side.foe.removeSideCondition('burningfield');
+		},
 		onEffectiveness(typeMod, target, type) {
-			return typeMod + this.dex.getEffectiveness('Fire', type);
+			return typeMod + this.dex.getEffectiveness('Water', type);
 		},
 		target: "normal",
 	},
@@ -28149,7 +28178,23 @@ serenefocus: {
 		priority: 0,
 		shortDesc: "Sets Fallout for 5 turns (chip + stat drops on switch-in).",
 		flags: {metronome: 1},
-		target: "all",
+		sideCondition: 'falloutfield',
+		condition: {
+			duration: 5,
+			onSideStart(side) {
+				this.add('-sidestart', side, 'move: Fallout Field');
+			},
+			onSwitchIn(pokemon) {
+				if (pokemon.hasType('Gamma')) return;
+				this.damage(pokemon.baseMaxhp / 8, pokemon);
+				this.boost({spe: -1}, pokemon);
+				if (pokemon.hasType('Steel')) this.boost({spd: -1}, pokemon);
+			},
+			onSideEnd(side) {
+				this.add('-sideend', side, 'move: Fallout Field');
+			},
+		},
+		target: "foeSide",
 	},
 	fategnaw: {
 		name: "Fategnaw",
@@ -28162,6 +28207,13 @@ serenefocus: {
 		shortDesc: "Always goes last; bypasses Protect; stronger vs boosted foes.",
 		flags: {bypasssub: 1, mirror: 1, metronome: 1},
 		breaksProtect: true,
+		basePowerCallback(pokemon, target, move) {
+			let boosted = false;
+			for (const stat in target.boosts) {
+				if (target.boosts[stat as BoostID]! > 0) boosted = true;
+			}
+			return boosted ? move.basePower * 2 : move.basePower;
+		},
 		target: "normal",
 	},
 	gravebind: {
@@ -28187,6 +28239,26 @@ serenefocus: {
 		priority: 0,
 		shortDesc: "Sets a 3-turn reflective screen effect.",
 		flags: {snatch: 1, metronome: 1},
+		sideCondition: 'hallofmirrors',
+		condition: {
+			duration: 3,
+			onStart(side) {
+				this.add('-sidestart', side, 'move: Hall of Mirrors');
+				this.effectState.usedThisTurn = false;
+			},
+			onBeforeMovePriority: 101,
+			onBeforeMove() {
+				this.effectState.usedThisTurn = false;
+			},
+			onSourceModifyDamage(damage, source, target, move) {
+				if (this.effectState.usedThisTurn || move?.flags['sound']) return;
+				this.effectState.usedThisTurn = true;
+				return this.chainModify(0.667);
+			},
+			onSideEnd(side) {
+				this.add('-sideend', side, 'move: Hall of Mirrors');
+			},
+		},
 		target: "allySide",
 	},
 	hemorrhagebite: {
@@ -28200,6 +28272,10 @@ serenefocus: {
 		shortDesc: "Inflicts Bleeding; user takes recoil.",
 		flags: {bite: 1, contact: 1, protect: 1, mirror: 1, metronome: 1},
 		recoil: [1, 16],
+		basePowerCallback(pokemon, target, move) {
+			return target.volatiles['bleeding'] ? move.basePower * 2 : move.basePower;
+		},
+		secondary: {chance: 100, volatileStatus: 'bleeding'},
 		target: "normal",
 	},
 	moonpetalveil: {
@@ -28220,10 +28296,12 @@ serenefocus: {
 		category: "Special",
 		basePower: 70,
 		accuracy: 100,
-		pp: 5,
+		pp: 15,
 		priority: 0,
 		shortDesc: "Ignores Normal/Ghost immunities; may Disable target's last move.",
 		flags: {protect: 1, mirror: 1, metronome: 1},
+		ignoreImmunity: true,
+		secondaries: [{chance: 10, volatileStatus: 'disable'}],
 		onEffectiveness(typeMod, target, type) {
 			return typeMod + this.dex.getEffectiveness('Normal', type);
 		},
@@ -28239,6 +28317,9 @@ serenefocus: {
 		priority: 0,
 		shortDesc: "Ground coverage; may freeze.",
 		flags: {protect: 1, mirror: 1, metronome: 1},
+		onModifyPriority(priority) {
+			if (this.field.isWeather(['snow', 'sandstorm'])) return priority + 1;
+		},
 		secondary: {chance: 10, status: 'frz'},
 		onEffectiveness(typeMod, target, type) {
 			return typeMod + this.dex.getEffectiveness('Ground', type);
@@ -28255,6 +28336,10 @@ serenefocus: {
 		priority: 0,
 		shortDesc: "Breaks screens before damage; 10% chance to confuse.",
 		flags: {protect: 1, mirror: 1, metronome: 1},
+		onTryHit(target) {
+			const screens: ID[] = ['reflect', 'lightscreen', 'auroraveil', 'clarityveil', 'darkmoon'];
+			for (const sc of screens) target.side.removeSideCondition(sc);
+		},
 		secondary: {chance: 10, volatileStatus: 'confusion'},
 		target: "normal",
 	},
@@ -28263,15 +28348,19 @@ serenefocus: {
 		type: "Water",
 		category: "Status",
 		basePower: 0,
-		accuracy: true,
+		accuracy: 100,
 		pp: 5,
 		priority: 0,
 		shortDesc: "Sets Puddle on the opposing side.",
 		flags: {metronome: 1},
 		sideCondition: 'puddle',
 		condition: {
+			duration: 5,
 			onStart(side) {
 				this.add('-sidestart', side, 'move: Puddle');
+			},
+			onDamagingHit(damage, target, source, move) {
+				if (move.type === 'Electric') this.effectState.electrified = true;
 			},
 			onEnd(side) {
 				this.add('-sideend', side, 'move: Puddle');
@@ -28285,28 +28374,40 @@ serenefocus: {
 		category: "Special",
 		basePower: 60,
 		accuracy: 100,
-		pp: 10,
+		pp: 15,
 		priority: 0,
 		shortDesc: "Heals user for 50% of damage dealt.",
 		flags: {protect: 1, mirror: 1, metronome: 1},
 		drain: [1, 2],
+		volatileStatus: 'seedsiphon',
+		condition: {
+			duration: 2,
+			onSwitchOut(pokemon) {
+				this.damage(pokemon.baseMaxhp / 6, pokemon);
+			},
+		},
 		target: "normal",
 	},
-	skyhook: {
+		skyhook: {
 		name: "Skyhook",
 		type: "Flying",
 		category: "Physical",
 		basePower: 60,
 		accuracy: 100,
-		pp: 10,
+		pp: 15,
 		priority: 0,
 		shortDesc: "Removes target item; sets Tailwind if successful.",
-		flags: {contact: 1, protect: 1, mirror: 1, metronome: 1},
-		onEffectiveness(typeMod, target, type) {
-			return typeMod + this.dex.getEffectiveness('Steel', type);
+			flags: {contact: 1, protect: 1, mirror: 1, metronome: 1},
+			onEffectiveness(typeMod, target, type) {
+				return typeMod + this.dex.getEffectiveness('Steel', type);
+			},
+			onHit(target, source) {
+				if (target.takeItem(source)) {
+					source.side.addSideCondition('tailwind', source);
+				}
+			},
+			target: "normal",
 		},
-		target: "normal",
-	},
 	voltagebloom: {
 		name: "Voltage Bloom",
 		type: "Electric",
@@ -28319,6 +28420,10 @@ serenefocus: {
 		flags: {protect: 1, mirror: 1, metronome: 1},
 		onEffectiveness(typeMod, target, type) {
 			return typeMod + this.dex.getEffectiveness('Grass', type);
+		},
+		onAfterHit(target, source) {
+			if (this.field.isTerrain('grassyterrain')) target.trySetStatus('par', source);
+			if (this.field.isTerrain('electricterrain')) this.heal(source.baseMaxhp / 4, source);
 		},
 		target: "normal",
 	},
@@ -28349,6 +28454,4 @@ serenefocus: {
 		secondary: {chance: 30, volatileStatus: 'confusion'},
 		target: "normal",
 	},
-
-
 };
