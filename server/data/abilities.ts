@@ -8885,8 +8885,11 @@ chimneysweep: {
       'stickyweb',
       'gmaxsteelsurge',
       'poop',
+      'serratedspikes',
+      'puddle',
       'burningfield',
 	  'gasoline',
+      'twinvines',
     ];
 
     for (const side of this.sides) {
@@ -9386,7 +9389,7 @@ this.add('-start', pokemon, 'typechange', cur);
     },
     onAfterMoveSecondarySelf(source, target, move) {
       if (move.type === 'Flying') {
-        for (const hazard of ['spikes', 'toxicspikes', 'stealthrock', 'stickyweb']) {
+        for (const hazard of ['spikes', 'toxicspikes', 'stealthrock', 'stickyweb', 'poop', 'serratedspikes', 'puddle', 'gasoline', 'twinvines']) {
           if (source.side.removeSideCondition(hazard)) {
             this.add('-sideend', source.side, this.dex.conditions.get(hazard).name, '[from] ability: Tempest Surge');
           }
@@ -9430,6 +9433,188 @@ this.add('-start', pokemon, 'typechange', cur);
       }
     }
   },
+},
+allure: {
+	name: "Allure",
+	shortDesc: "On contact: 50% to infatuate or lower attacker's Accuracy by 1.",
+	rating: 3,
+	onDamagingHit(damage, target, source, move) {
+		if (!source || !move?.flags['contact'] || !this.randomChance(1, 2)) return;
+		if (!source.volatiles['attract'] && this.randomChance(1, 2)) {
+			source.addVolatile('attract', target);
+		} else {
+			this.boost({accuracy: -1}, source, target);
+		}
+	},
+},
+bartender: {
+	name: "Bartender",
+	shortDesc: "After each move, gains a random buff. After 4 turns active, becomes Truant.",
+	rating: 3.5,
+	onStart(pokemon) {
+		this.effectState.turnsActive = 0;
+	},
+	onResidual(pokemon) {
+		this.effectState.turnsActive = (this.effectState.turnsActive || 0) + 1;
+		if (this.effectState.turnsActive >= 4 && pokemon.ability !== 'truant') {
+			pokemon.setAbility('truant', pokemon, false, true);
+			this.add('-ability', pokemon, 'Truant', '[from] ability: Bartender');
+		}
+	},
+	onAfterMoveSecondarySelf(pokemon, target, move) {
+		if (!move || move.category === 'Status') return;
+		const drink = this.sample([
+			{name: 'Margarita', boost: {atk: 1, spa: 1}},
+			{name: 'Old Fashioned', boost: {def: 1, spd: 1}},
+			{name: 'Gin and Tonic', boost: {critRatio: 1}},
+		] as const);
+		this.add('-message', `${pokemon.name} drank a ${drink.name} and was powered up!`);
+		if (drink.name === 'Gin and Tonic') {
+			pokemon.addVolatile('focusenergy');
+			this.damage(pokemon.baseMaxhp / 8, pokemon, pokemon, this.dex.moves.get('struggle'));
+		} else {
+			this.boost(drink.boost as SparseBoostsTable, pokemon);
+		}
+	},
+},
+fatefulstrikes: {
+	name: "Fateful Strikes",
+	shortDesc: "Super-effective attacks have a 30% chance to inflict a random major status.",
+	rating: 3.5,
+	onAfterMoveSecondarySelf(pokemon, target, move) {
+		if (!target || !move || move.category === 'Status') return;
+		if (target.getMoveHitData(move).typeMod <= 0) return;
+		if (!this.randomChance(3, 10)) return;
+		const statuses: (ID | '')[] = ['brn', 'par', 'frz'];
+		target.trySetStatus(this.sample(statuses), pokemon, move);
+	},
+},
+firemind: {
+	name: "Firemind",
+	shortDesc: "Levitate. On switch-in/out, adjacent foes lose HP equal to half their level.",
+	rating: 3.5,
+	suppressWeather: false,
+	onImmunity(type) {
+		if (type === 'Ground') return false;
+	},
+	onStart(pokemon) {
+		for (const foe of pokemon.adjacentFoes()) {
+			const dmg = Math.max(1, Math.floor(foe.level / 2));
+			this.damage(dmg, foe, pokemon);
+		}
+	},
+	onEnd(pokemon) {
+		for (const foe of pokemon.adjacentFoes()) {
+			const dmg = Math.max(1, Math.floor(foe.level / 2));
+			this.damage(dmg, foe, pokemon);
+		}
+	},
+},
+huntersinstinct: {
+	name: "Hunter's Instinct",
+	shortDesc: "Deals 1.25x damage to targets at full HP.",
+	rating: 3,
+	onBasePower(basePower, attacker, defender, move) {
+		if (defender.hp === defender.maxhp && move.category !== 'Status') {
+			return this.chainModify([5120, 4096]);
+		}
+	},
+},
+necromancer: {
+	name: "Necromancer",
+	shortDesc: "On switch-in: +1 random stat per fainted ally; if last Pokemon, +1 all stats.",
+	rating: 3.5,
+	onStart(pokemon) {
+		const faintedAllies = pokemon.side.pokemon.filter(p => p.fainted).length;
+		const remaining = pokemon.side.pokemon.filter(p => !p.fainted).length;
+		if (remaining <= 1) {
+			this.boost({atk: 1, def: 1, spa: 1, spd: 1, spe: 1}, pokemon);
+			return;
+		}
+		const stats: BoostID[] = ['atk', 'def', 'spa', 'spd', 'spe'];
+		const boost: SparseBoostsTable = {};
+		for (let i = 0; i < faintedAllies; i++) {
+			const stat = this.sample(stats);
+			boost[stat] = (boost[stat] || 0) + 1;
+		}
+		if (Object.keys(boost).length) this.boost(boost, pokemon);
+	},
+},
+nightvision: {
+	name: "Night Vision",
+	shortDesc: "Dark-type moves used by this Pokemon cannot miss.",
+	rating: 3,
+	onModifyMove(move) {
+		if (move.type === 'Dark') move.accuracy = true;
+	},
+},
+regalaura: {
+	name: "Regal Aura",
+	shortDesc: "Opponents cannot raise their stats while this Pokemon is active.",
+	rating: 3.5,
+	onAnyTryBoost(boost, target, source, effect) {
+		if (target.side === this.effectState.target.side) return;
+		let blocked = false;
+		for (const stat in boost) {
+			if (boost[stat as BoostID]! > 0) {
+				delete boost[stat as BoostID];
+				blocked = true;
+			}
+		}
+		if (blocked) this.add('-activate', this.effectState.target, 'ability: Regal Aura');
+	},
+},
+sacredflame: {
+	name: "Sacred Flame",
+	shortDesc: "When hit by a Fire move, raises Sp. Def by 1.",
+	rating: 3,
+	onTryHit(target, source, move) {
+		if (move.type === 'Fire') {
+			this.boost({spd: 1}, target);
+		}
+	},
+},
+tacticalmind: {
+	name: "Tactical Mind",
+	shortDesc: "Prevents additional effects from foes' attacks.",
+	rating: 3.5,
+	onModifySecondaries(secondaries, target, source, move) {
+		if (target === source || move.category === 'Status') return;
+		return secondaries.filter(s => !!s.self);
+	},
+},
+terrainshift: {
+	name: "Terrain Shift",
+	shortDesc: "On switch-in, sets a random terrain.",
+	rating: 3.5,
+	onStart(pokemon) {
+		const terrain = this.sample(['grassyterrain', 'mistyterrain', 'electricterrain', 'psychicterrain', 'darkterrain'] as const);
+		this.field.setTerrain(terrain, pokemon);
+	},
+},
+underworldveil: {
+	name: "Underworld Veil",
+	shortDesc: "Opposing weather and terrain cannot be set while this Pokemon is active.",
+	rating: 3.5,
+	onAnySetWeather(target, source) {
+		if (source && source.side !== this.effectState.target.side) return false;
+	},
+	onAnyTryTerrain(target, source) {
+		if (source && source.side !== this.effectState.target.side) return false;
+	},
+},
+aliensymbiote: {
+	name: "Alien Symbiote",
+	shortDesc: "Heals on KO. On fainting, grants this Ability to the foe that KOed it.",
+	rating: 3,
+	onSourceFaint(target, source, effect) {
+		if (!source || source.fainted) return;
+		this.heal(source.baseMaxhp / 4, source);
+	},
+	onFaint(pokemon, source, effect) {
+		if (!source || source.fainted) return;
+		source.setAbility('aliensymbiote', pokemon, false, true);
+	},
 },
 
 
