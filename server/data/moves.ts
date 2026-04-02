@@ -3164,7 +3164,7 @@ export const Moves: import('../sim/dex-moves').MoveDataTable = {
 		flags: { mirror: 1, metronome: 1 },
 		onHitField(target, source) {
 			const sideConditions = [
-				'mist', 'lightscreen', 'reflect', 'spikes', 'safeguard', 'tailwind', 'toxicspikes', 'poop', 'stealthrock', 'waterpledge', 'firepledge', 'grasspledge', 'stickyweb', 'auroraveil', 'luckychant', 'gmaxsteelsurge', 'gmaxcannonade', 'gmaxvinelash', 'gmaxwildfire', 'gmaxvolcalith',
+				'mist', 'lightscreen', 'reflect', 'spikes', 'safeguard', 'tailwind', 'toxicspikes', 'poop', 'serratedspikes', 'puddle', 'stealthrock', 'waterpledge', 'firepledge', 'grasspledge', 'stickyweb', 'auroraveil', 'luckychant', 'gmaxsteelsurge', 'gmaxcannonade', 'gmaxvinelash', 'gmaxwildfire', 'gmaxvolcalith', 'gasoline', 'twinvines',
 			];
 			let success = false;
 			if (this.gameType === "freeforall") {
@@ -3595,7 +3595,7 @@ export const Moves: import('../sim/dex-moves').MoveDataTable = {
 		onHit(target, source, move) {
 			let success = false;
 			if (!target.volatiles['substitute'] || move.infiltrates) success = !!this.boost({ evasion: -1 });
-			const removeAll = ['spikes', 'toxicspikes', 'poop', 'stealthrock', 'stickyweb', 'gmaxsteelsurge'];
+			const removeAll = ['spikes', 'toxicspikes', 'poop', 'serratedspikes', 'puddle', 'stealthrock', 'stickyweb', 'gmaxsteelsurge', 'gasoline', 'twinvines'];
 			const removeTarget = ['reflect', 'lightscreen', 'auroraveil', 'safeguard', 'mist', ...removeAll];
 			for (const targetCondition of removeTarget) {
 				if (target.side.removeSideCondition(targetCondition)) {
@@ -7798,7 +7798,7 @@ export const Moves: import('../sim/dex-moves').MoveDataTable = {
 		self: {
 			onHit(source) {
 				let success = false;
-				const removeAll = ['spikes', 'toxicspikes', 'stealthrock', 'stickyweb', 'gmaxsteelsurge'];
+				const removeAll = ['spikes', 'toxicspikes', 'poop', 'serratedspikes', 'puddle', 'stealthrock', 'stickyweb', 'gmaxsteelsurge', 'gasoline', 'twinvines'];
 				const removeTarget = ['reflect', 'lightscreen', 'auroraveil', 'safeguard', 'mist', ...removeAll];
 				for (const targetCondition of removeTarget) {
 					if (source.side.foe.removeSideCondition(targetCondition)) {
@@ -12791,7 +12791,7 @@ export const Moves: import('../sim/dex-moves').MoveDataTable = {
 				if (pokemon.hp && pokemon.removeVolatile('leechseed')) {
 					this.add('-end', pokemon, 'Leech Seed', '[from] move: Mortal Spin', `[of] ${pokemon}`);
 				}
-				const sideConditions = ['spikes', 'toxicspikes', 'poop', 'stealthrock', 'stickyweb', 'gmaxsteelsurge'];
+				const sideConditions = ['spikes', 'toxicspikes', 'poop', 'serratedspikes', 'puddle', 'stealthrock', 'stickyweb', 'gmaxsteelsurge', 'gasoline', 'twinvines'];
 				for (const condition of sideConditions) {
 					if (pokemon.hp && pokemon.side.removeSideCondition(condition)) {
 						this.add('-sideend', pokemon.side, this.dex.conditions.get(condition).name, '[from] move: Mortal Spin', `[of] ${pokemon}`);
@@ -12807,7 +12807,7 @@ export const Moves: import('../sim/dex-moves').MoveDataTable = {
 				if (pokemon.hp && pokemon.removeVolatile('leechseed')) {
 					this.add('-end', pokemon, 'Leech Seed', '[from] move: Mortal Spin', `[of] ${pokemon}`);
 				}
-				const sideConditions = ['spikes', 'toxicspikes', 'stealthrock', 'stickyweb', 'gmaxsteelsurge'];
+				const sideConditions = ['spikes', 'toxicspikes', 'poop', 'serratedspikes', 'puddle', 'stealthrock', 'stickyweb', 'gmaxsteelsurge', 'gasoline', 'twinvines'];
 				for (const condition of sideConditions) {
 					if (pokemon.hp && pokemon.side.removeSideCondition(condition)) {
 						this.add('-sideend', pokemon.side, this.dex.conditions.get(condition).name, '[from] move: Mortal Spin', `[of] ${pokemon}`);
@@ -15249,7 +15249,7 @@ export const Moves: import('../sim/dex-moves').MoveDataTable = {
 				if (pokemon.hp && pokemon.removeVolatile('leechseed')) {
 					this.add('-end', pokemon, 'Leech Seed', '[from] move: Rapid Spin', `[of] ${pokemon}`);
 				}
-				const sideConditions = ['spikes', 'toxicspikes','poop', 'stealthrock', 'stickyweb', 'gmaxsteelsurge'];
+				const sideConditions = ['spikes', 'toxicspikes', 'poop', 'serratedspikes', 'puddle', 'stealthrock', 'stickyweb', 'gmaxsteelsurge', 'gasoline', 'twinvines'];
 				for (const condition of sideConditions) {
 					if (pokemon.hp && pokemon.side.removeSideCondition(condition)) {
 						this.add('-sideend', pokemon.side, this.dex.conditions.get(condition).name, '[from] move: Rapid Spin', `[of] ${pokemon}`);
@@ -15265,7 +15265,7 @@ export const Moves: import('../sim/dex-moves').MoveDataTable = {
 				if (pokemon.hp && pokemon.removeVolatile('leechseed')) {
 					this.add('-end', pokemon, 'Leech Seed', '[from] move: Rapid Spin', `[of] ${pokemon}`);
 				}
-				const sideConditions = ['spikes', 'toxicspikes', 'stealthrock', 'stickyweb', 'gmaxsteelsurge'];
+				const sideConditions = ['spikes', 'toxicspikes', 'poop', 'serratedspikes', 'puddle', 'stealthrock', 'stickyweb', 'gmaxsteelsurge', 'gasoline', 'twinvines'];
 				for (const condition of sideConditions) {
 					if (pokemon.hp && pokemon.side.removeSideCondition(condition)) {
 						this.add('-sideend', pokemon.side, this.dex.conditions.get(condition).name, '[from] move: Rapid Spin', `[of] ${pokemon}`);
@@ -20389,7 +20389,7 @@ export const Moves: import('../sim/dex-moves').MoveDataTable = {
 			for (const active of this.getAllActive()) {
 				if (active.removeVolatile('substitute')) success = true;
 			}
-			const removeAll = ['spikes', 'toxicspikes', 'poop', 'stealthrock', 'stickyweb', 'gmaxsteelsurge'];
+			const removeAll = ['spikes', 'toxicspikes', 'poop', 'serratedspikes', 'puddle', 'stealthrock', 'stickyweb', 'gmaxsteelsurge', 'gasoline', 'twinvines'];
 			const sides = [pokemon.side, ...pokemon.side.foeSidesWithConditions()];
 			for (const side of sides) {
 				for (const sideCondition of removeAll) {
@@ -24982,7 +24982,7 @@ soulrend: {
     flags: {protect: 1, contact: 1, wind: 1},
     onAfterHit(target, source) {
       const side = target.side;
-      for (const cond of ['spikes','toxicspikes','stealthrock','stickyweb','reflect','lightscreen','auroraveil']) {
+      for (const cond of ['spikes', 'toxicspikes', 'poop', 'serratedspikes', 'puddle', 'stealthrock', 'stickyweb', 'gmaxsteelsurge', 'gasoline', 'twinvines', 'reflect', 'lightscreen', 'auroraveil']) {
         if (side.removeSideCondition(cond)) {
           this.add('-sideend', side, this.dex.conditions.get(cond).name, '[from] move: Cyclone Wing');
         }
@@ -26152,8 +26152,8 @@ evaporate: {
 		basePower: 80,
 		shortDesc: 'Also super effective against water types.',
 		category: "Special",
-		name: "Overwhelm",
-		pp: 20,
+		name: "Evaporate",
+		pp: 10,
 		priority: 0,
 		flags: { protect: 1, mirror: 1, metronome: 1 },
 		onEffectiveness(typeMod, target, type) {
@@ -28097,6 +28097,258 @@ serenefocus: {
 		volatileStatus: 'serenefocus',
 	},
 },
+	agonizingbeam: {
+		name: "Agonizing Beam",
+		type: "Light",
+		category: "Special",
+		basePower: 50,
+		accuracy: 100,
+		pp: 10,
+		priority: 0,
+		shortDesc: "Turns target's moves into recoil moves temporarily.",
+		flags: {protect: 1, mirror: 1, metronome: 1},
+		target: "normal",
+	},
+	anchorsweep: {
+		name: "Anchor Sweep",
+		type: "Water",
+		category: "Physical",
+		basePower: 70,
+		accuracy: 100,
+		pp: 5,
+		priority: 0,
+		shortDesc: "If target switches, strikes before it leaves at higher power.",
+		flags: {protect: 1, mirror: 1, metronome: 1, contact: 1},
+		onEffectiveness(typeMod, target, type) {
+			return typeMod + this.dex.getEffectiveness('Steel', type);
+		},
+		target: "normal",
+	},
+	embercurrent: {
+		name: "Ember Current",
+		type: "Water",
+		category: "Special",
+		basePower: 70,
+		accuracy: 100,
+		pp: 10,
+		priority: 0,
+		shortDesc: "Boosted in Burning Field; generally faster in Rain/Steam Field.",
+		flags: {protect: 1, mirror: 1, metronome: 1},
+		onEffectiveness(typeMod, target, type) {
+			return typeMod + this.dex.getEffectiveness('Fire', type);
+		},
+		target: "normal",
+	},
+	falloutfield: {
+		name: "Fallout Field",
+		type: "Gamma",
+		category: "Status",
+		basePower: 0,
+		accuracy: true,
+		pp: 5,
+		priority: 0,
+		shortDesc: "Sets Fallout for 5 turns (chip + stat drops on switch-in).",
+		flags: {metronome: 1},
+		target: "all",
+	},
+	fategnaw: {
+		name: "Fategnaw",
+		type: "Psychic",
+		category: "Special",
+		basePower: 110,
+		accuracy: 85,
+		pp: 5,
+		priority: -6,
+		shortDesc: "Always goes last; bypasses Protect; stronger vs boosted foes.",
+		flags: {bypasssub: 1, mirror: 1, metronome: 1},
+		breaksProtect: true,
+		target: "normal",
+	},
+	gravebind: {
+		name: "Gravebind",
+		type: "Dark",
+		category: "Physical",
+		basePower: 85,
+		accuracy: 90,
+		pp: 10,
+		priority: 0,
+		shortDesc: "Lowers the target's Defense by 2 stages.",
+		flags: {protect: 1, mirror: 1, metronome: 1, contact: 1},
+		secondary: {chance: 100, boosts: {def: -2}},
+		target: "normal",
+	},
+	hallofmirrors: {
+		name: "Hall of Mirrors",
+		type: "Rock",
+		category: "Status",
+		basePower: 0,
+		accuracy: true,
+		pp: 5,
+		priority: 0,
+		shortDesc: "Sets a 3-turn reflective screen effect.",
+		flags: {snatch: 1, metronome: 1},
+		target: "allySide",
+	},
+	hemorrhagebite: {
+		name: "Hemorrhage Bite",
+		type: "Blood",
+		category: "Physical",
+		basePower: 80,
+		accuracy: 95,
+		pp: 10,
+		priority: 0,
+		shortDesc: "Inflicts Bleeding; user takes recoil.",
+		flags: {bite: 1, contact: 1, protect: 1, mirror: 1, metronome: 1},
+		recoil: [1, 16],
+		target: "normal",
+	},
+	moonpetalveil: {
+		name: "Moonpetal Veil",
+		type: "Fairy",
+		category: "Status",
+		basePower: 0,
+		accuracy: true,
+		pp: 10,
+		priority: 0,
+		shortDesc: "5 turns of passive healing and status protection.",
+		flags: {snatch: 1, metronome: 1},
+		target: "self",
+	},
+	nullpulse: {
+		name: "Null Pulse",
+		type: "Ghost",
+		category: "Special",
+		basePower: 70,
+		accuracy: 100,
+		pp: 5,
+		priority: 0,
+		shortDesc: "Ignores Normal/Ghost immunities; may Disable target's last move.",
+		flags: {protect: 1, mirror: 1, metronome: 1},
+		onEffectiveness(typeMod, target, type) {
+			return typeMod + this.dex.getEffectiveness('Normal', type);
+		},
+		target: "normal",
+	},
+	permafrostpulse: {
+		name: "Permafrost Pulse",
+		type: "Ice",
+		category: "Special",
+		basePower: 75,
+		accuracy: 100,
+		pp: 10,
+		priority: 0,
+		shortDesc: "Ground coverage; may freeze.",
+		flags: {protect: 1, mirror: 1, metronome: 1},
+		secondary: {chance: 10, status: 'frz'},
+		onEffectiveness(typeMod, target, type) {
+			return typeMod + this.dex.getEffectiveness('Ground', type);
+		},
+		target: "normal",
+	},
+	prismbreak: {
+		name: "Prism Break",
+		type: "Light",
+		category: "Special",
+		basePower: 95,
+		accuracy: 100,
+		pp: 10,
+		priority: 0,
+		shortDesc: "Breaks screens before damage; 10% chance to confuse.",
+		flags: {protect: 1, mirror: 1, metronome: 1},
+		secondary: {chance: 10, volatileStatus: 'confusion'},
+		target: "normal",
+	},
+	puddle: {
+		name: "Puddle",
+		type: "Water",
+		category: "Status",
+		basePower: 0,
+		accuracy: true,
+		pp: 5,
+		priority: 0,
+		shortDesc: "Sets Puddle on the opposing side.",
+		flags: {metronome: 1},
+		sideCondition: 'puddle',
+		condition: {
+			onStart(side) {
+				this.add('-sidestart', side, 'move: Puddle');
+			},
+			onEnd(side) {
+				this.add('-sideend', side, 'move: Puddle');
+			},
+		},
+		target: "foeSide",
+	},
+	seedsiphon: {
+		name: "Seed Siphon",
+		type: "Grass",
+		category: "Special",
+		basePower: 60,
+		accuracy: 100,
+		pp: 10,
+		priority: 0,
+		shortDesc: "Heals user for 50% of damage dealt.",
+		flags: {protect: 1, mirror: 1, metronome: 1},
+		drain: [1, 2],
+		target: "normal",
+	},
+	skyhook: {
+		name: "Skyhook",
+		type: "Flying",
+		category: "Physical",
+		basePower: 60,
+		accuracy: 100,
+		pp: 10,
+		priority: 0,
+		shortDesc: "Removes target item; sets Tailwind if successful.",
+		flags: {contact: 1, protect: 1, mirror: 1, metronome: 1},
+		onEffectiveness(typeMod, target, type) {
+			return typeMod + this.dex.getEffectiveness('Steel', type);
+		},
+		target: "normal",
+	},
+	voltagebloom: {
+		name: "Voltage Bloom",
+		type: "Electric",
+		category: "Special",
+		basePower: 90,
+		accuracy: 95,
+		pp: 10,
+		priority: 0,
+		shortDesc: "Grass coverage. Terrain-dependent bonus effects.",
+		flags: {protect: 1, mirror: 1, metronome: 1},
+		onEffectiveness(typeMod, target, type) {
+			return typeMod + this.dex.getEffectiveness('Grass', type);
+		},
+		target: "normal",
+	},
+	whirlpoolmaw: {
+		name: "Whirlpool Maw",
+		type: "Water",
+		category: "Special",
+		basePower: 80,
+		accuracy: 100,
+		pp: 10,
+		priority: 0,
+		shortDesc: "Lowers the target's Speed.",
+		flags: {protect: 1, mirror: 1, metronome: 1},
+		secondary: {chance: 100, boosts: {spe: -1}},
+		target: "normal",
+	},
+	wingofthefae: {
+		name: "Wing of the Fae",
+		type: "Fairy",
+		category: "Special",
+		basePower: 40,
+		accuracy: 100,
+		pp: 10,
+		priority: 0,
+		shortDesc: "Hits twice. 30% chance to confuse each hit.",
+		flags: {protect: 1, mirror: 1, metronome: 1},
+		multihit: 2,
+		secondary: {chance: 30, volatileStatus: 'confusion'},
+		target: "normal",
+	},
 
 
 };

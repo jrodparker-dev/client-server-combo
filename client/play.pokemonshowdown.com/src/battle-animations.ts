@@ -1391,6 +1391,47 @@ case 'gasoline': {
 				spikeArray.push(spike3);
 			}
 			break;
+		case 'serratedspikes':
+			let serratedSpikeArray = this.sideConditions[siden]['serratedspikes'];
+			if (!serratedSpikeArray) {
+				serratedSpikeArray = [];
+				this.sideConditions[siden]['serratedspikes'] = serratedSpikeArray;
+			}
+			let serratedLevels = this.battle.sides[siden].sideConditions['serratedspikes'][1];
+			if (serratedSpikeArray.length < 1 && serratedLevels >= 1) {
+				const serrated1 = new Sprite(BattleEffects.serratedspike, {
+					display: 'block',
+					x: x - 5,
+					y: y - 58,
+					z: side.z,
+					scale: 0.3,
+				}, this);
+				this.$spritesFront[spriteIndex].append(serrated1.$el!);
+				serratedSpikeArray.push(serrated1);
+			}
+			if (serratedSpikeArray.length < 2 && serratedLevels >= 2) {
+				const serrated2 = new Sprite(BattleEffects.serratedspike, {
+					display: 'block',
+					x: x + 48,
+					y: y - 60,
+					z: side.z,
+					scale: .3,
+				}, this);
+				this.$spritesFront[spriteIndex].append(serrated2.$el!);
+				serratedSpikeArray.push(serrated2);
+			}
+			if (serratedSpikeArray.length < 3 && serratedLevels >= 3) {
+				const serrated3 = new Sprite(BattleEffects.serratedspike, {
+					display: 'block',
+					x: x + 68,
+					y: y - 55,
+					z: side.z,
+					scale: .3,
+				}, this);
+				this.$spritesFront[spriteIndex].append(serrated3.$el!);
+				serratedSpikeArray.push(serrated3);
+			}
+			break;
 		case 'toxicspikes':
 			let tspikeArray = this.sideConditions[siden]['toxicspikes'];
 			if (!tspikeArray) {
@@ -3055,6 +3096,10 @@ const BattleEffects: {[k: string]: SpriteData} = {
 	},
 	caltrop: {
 		url: 'caltrop.png', // by Pokemon Showdown user SailorCosmos
+		w: 80, h: 80,
+	},
+	serratedspike: {
+		url: 'serratedspike.png',
 		w: 80, h: 80,
 	},
 	greenmetal1: {

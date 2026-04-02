@@ -8885,8 +8885,11 @@ chimneysweep: {
       'stickyweb',
       'gmaxsteelsurge',
       'poop',
+      'serratedspikes',
+      'puddle',
       'burningfield',
 	  'gasoline',
+      'twinvines',
     ];
 
     for (const side of this.sides) {
@@ -9386,7 +9389,7 @@ this.add('-start', pokemon, 'typechange', cur);
     },
     onAfterMoveSecondarySelf(source, target, move) {
       if (move.type === 'Flying') {
-        for (const hazard of ['spikes', 'toxicspikes', 'stealthrock', 'stickyweb']) {
+        for (const hazard of ['spikes', 'toxicspikes', 'stealthrock', 'stickyweb', 'poop', 'serratedspikes', 'puddle', 'gasoline', 'twinvines']) {
           if (source.side.removeSideCondition(hazard)) {
             this.add('-sideend', source.side, this.dex.conditions.get(hazard).name, '[from] ability: Tempest Surge');
           }
@@ -9430,6 +9433,71 @@ this.add('-start', pokemon, 'typechange', cur);
       }
     }
   },
+},
+allure: {
+	name: "Allure",
+	shortDesc: "No additional effect.",
+	rating: 2.5,
+},
+bartender: {
+	name: "Bartender",
+	shortDesc: "No additional effect.",
+	rating: 2.5,
+},
+fatefulstrikes: {
+	name: "Fateful Strikes",
+	shortDesc: "No additional effect.",
+	rating: 2.5,
+},
+firemind: {
+	name: "Firemind",
+	shortDesc: "No additional effect.",
+	rating: 2.5,
+},
+huntersinstinct: {
+	name: "Hunter's Instinct",
+	shortDesc: "No additional effect.",
+	rating: 2.5,
+},
+necromancer: {
+	name: "Necromancer",
+	shortDesc: "No additional effect.",
+	rating: 2.5,
+},
+nightvision: {
+	name: "Night Vision",
+	shortDesc: "No additional effect.",
+	rating: 2.5,
+},
+regalaura: {
+	name: "Regal Aura",
+	shortDesc: "No additional effect.",
+	rating: 2.5,
+},
+sacredflame: {
+	name: "Sacred Flame",
+	shortDesc: "No additional effect.",
+	rating: 2.5,
+},
+tacticalmind: {
+	name: "Tactical Mind",
+	shortDesc: "No additional effect.",
+	rating: 2.5,
+},
+terrainshift: {
+	name: "Terrain Shift",
+	shortDesc: "No additional effect.",
+	rating: 2.5,
+},
+underworldveil: {
+	name: "Underworld Veil",
+	shortDesc: "No additional effect.",
+	rating: 2.5,
+},
+aliensymbiote: {
+	name: "Alien Symbiote",
+	shortDesc: "No additional effect.",
+	rating: 2.5,
 },
 
 

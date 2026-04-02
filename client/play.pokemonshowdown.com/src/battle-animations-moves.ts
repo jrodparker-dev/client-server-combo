@@ -36173,3 +36173,25 @@ BattleMoveAnims['trailblaze'] = {anim: BattleMoveAnims['powerwhip'].anim};
 BattleMoveAnims['tripledive'] = {anim: BattleMoveAnims['dive'].anim};
 BattleMoveAnims['hydrosteam'] = {anim: BattleMoveAnims['steameruption'].anim};
 BattleMoveAnims['psyblade'] = {anim: BattleMoveAnims['psychocut'].anim};
+
+// Custom move animation links
+BattleMoveAnims['agonizingbeam'] = {anim: BattleMoveAnims['psybeam'].anim};
+BattleMoveAnims['anchorsweep'] = {anim: BattleMoveAnims['anchorshot'].anim};
+BattleMoveAnims['embercurrent'] = {anim: BattleMoveAnims['scald'].anim};
+BattleMoveAnims['evaporate'] = {anim: BattleMoveAnims['overheat'].anim};
+BattleMoveAnims['falloutfield'] = {anim: BattleMoveAnims['toxicspikes'].anim};
+BattleMoveAnims['fategnaw'] = {anim: BattleMoveAnims['futuresight'].anim};
+BattleMoveAnims['gravebind'] = {anim: BattleMoveAnims['spiritshackle'].anim};
+BattleMoveAnims['hallofmirrors'] = {anim: BattleMoveAnims['reflect'].anim};
+BattleMoveAnims['hemorrhagebite'] = {anim: BattleMoveAnims['crunch'].anim};
+BattleMoveAnims['moonpetalveil'] = {anim: BattleMoveAnims['aromatherapy'].anim};
+BattleMoveAnims['nullpulse'] = {anim: BattleMoveAnims['darkpulse'].anim};
+BattleMoveAnims['permafrostpulse'] = {anim: BattleMoveAnims['freezedry'].anim};
+BattleMoveAnims['prismbreak'] = {anim: BattleMoveAnims['dazzlinggleam'].anim};
+BattleMoveAnims['puddle'] = {anim: BattleMoveAnims['watersport'].anim};
+BattleMoveAnims['seedsiphon'] = {anim: BattleMoveAnims['gigadrain'].anim};
+BattleMoveAnims['skyhook'] = {anim: BattleMoveAnims['steelwing'].anim};
+BattleMoveAnims['voltagebloom'] = {anim: BattleMoveAnims['discharge'].anim};
+BattleMoveAnims['whirlpoolmaw'] = {anim: BattleMoveAnims['whirlpool'].anim};
+BattleMoveAnims['wingofthefae'] = {anim: BattleMoveAnims['fairywind'].anim};
+BattleMoveAnims['serratedspikes'] = {anim: BattleMoveAnims['spikes'].anim};
