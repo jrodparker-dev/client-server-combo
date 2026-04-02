@@ -719,9 +719,9 @@ function getFoeTypeIdsSafe(battle) {
     }
   }
 
-  // map tokens to lowercase ids; dedupe; cap to 8
+  // map tokens to lowercase ids; dedupe; cap to 2
   var out = [], seen = Object.create(null);
-  for (var j = 0; j < pieces.length && out.length < 8; j++) {
+  for (var j = 0; j < pieces.length && out.length < 2; j++) {
     var id = String(pieces[j]).toLowerCase();
     if (!seen[id]) { seen[id] = true; out.push(id); }
   }
@@ -747,9 +747,6 @@ function getFoeTypeIdsSafe(battle) {
 					// --- Start: compact custom-chart effectiveness (TitleCase vs lowercase) ---
 var effHtml = '';
 try {
-  if (move.category === 'Status') {
-    effHtml = '';
-  } else {
   // 0) Require chart
   var CHART = window._EFF_CHART;
   if (!CHART) {
@@ -830,7 +827,6 @@ try {
         }
       }
     }
-  }
   }
 } catch (e) {
   effHtml = '<small class="eff-tag eff-debug">ERR</small> ';

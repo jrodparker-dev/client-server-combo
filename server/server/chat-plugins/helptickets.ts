@@ -10,8 +10,9 @@ const SETTINGS_FILE = 'config/chat-plugins/ticket-settings.json';
 const TICKET_CACHE_TIME = 24 * 60 * 60 * 1000; // 24 hours
 const TICKET_BAN_DURATION = 48 * 60 * 60 * 1000; // 48 hours
 export const BATTLES_REGEX = /\bbattle-(?:[a-z0-9]+)-(?:[0-9]+)(?:-[a-z0-9]{31}pw)?/g;
+const REPLAY_ROUTE = Config.routes?.replays || 'replay.pokemonshowdown.com';
 export const REPLAY_REGEX = new RegExp(
-	`${Utils.escapeRegex(Config.routes.replays)}/(?:[a-z0-9]-)?(?:[a-z0-9]+)-(?:[0-9]+)(?:-[a-z0-9]{31}pw)?`, "g"
+	`${Utils.escapeRegex(REPLAY_ROUTE)}/(?:[a-z0-9]-)?(?:[a-z0-9]+)-(?:[0-9]+)(?:-[a-z0-9]{31}pw)?`, "g"
 );
 const REPORT_NAMECOLORS: { [k: string]: string } = {
 	p1: 'DodgerBlue',

@@ -883,7 +883,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 		eggGroups: ["Field"],
 	},
 	sandiron: {
-		num: -1,
+		num: 1500,
 		name: "Sandslash",
 		types: ["Ground", "Steel"],
 		baseStats: { hp: 80, atk: 120, def: 110, spa: 45, spd: 80, spe: 95 },
@@ -6066,7 +6066,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 		eggGroups: ["Field", "Human-Like"],
 	},
 	mintwirl: {
-		num: -2,
+		num: -327,
 		name: "Mintwirl",
 		types: ["Normal", "Psychic"],
 		baseStats: { hp:100, atk: 85, def: 85, spa: 75, spd: 90, spe: 88},
@@ -18596,7 +18596,7 @@ castformmega: {
 		eggGroups: ["Undiscovered"],
 	},
 	syclar: {
-		num: -3,
+		num: -1,
 		name: "Syclar",
 		types: ["Ice", "Bug"],
 		baseStats: { hp: 40, atk: 76, def: 45, spa: 74, spd: 39, spe: 91 },
@@ -18609,7 +18609,7 @@ castformmega: {
 		gen: 4,
 	},
 	syclant: {
-		num: -4,
+		num: -2,
 		name: "Syclant",
 		types: ["Ice", "Bug"],
 		baseStats: { hp: 70, atk: 116, def: 70, spa: 114, spd: 64, spe: 121 },
@@ -18623,7 +18623,7 @@ castformmega: {
 		gen: 4,
 	},
 	revenankh: {
-		num: -5,
+		num: -3,
 		name: "Revenankh",
 		types: ["Ghost", "Fighting"],
 		baseStats: { hp: 90, atk: 105, def: 90, spa: 65, spd: 110, spe: 65 },
@@ -18635,7 +18635,7 @@ castformmega: {
 		gen: 4,
 	},
 	embirch: {
-		num: -6,
+		num: -4,
 		name: "Embirch",
 		types: ["Fire", "Grass"],
 		baseStats: { hp: 60, atk: 40, def: 55, spa: 65, spd: 40, spe: 60 },
@@ -18648,7 +18648,7 @@ castformmega: {
 		gen: 4,
 	},
 	flarelm: {
-		num: -7,
+		num: -5,
 		name: "Flarelm",
 		types: ["Fire", "Grass"],
 		baseStats: { hp: 90, atk: 50, def: 95, spa: 75, spd: 70, spe: 40 },
@@ -18663,7 +18663,7 @@ castformmega: {
 		gen: 4,
 	},
 	pyroak: {
-		num: -8,
+		num: -6,
 		name: "Pyroak",
 		types: ["Fire", "Grass"],
 		baseStats: { hp: 120, atk: 70, def: 105, spa: 70, spd: 65, spe: 60 },
@@ -18677,7 +18677,7 @@ castformmega: {
 		gen: 4,
 	},
 	breezi: {
-		num: -9,
+		num: -7,
 		name: "Breezi",
 		types: ["Poison", "Flying"],
 		baseStats: { hp: 50, atk: 46, def: 69, spa: 60, spd: 50, spe: 75 },
@@ -18690,7 +18690,7 @@ castformmega: {
 		gen: 4,
 	},
 	fidgit: {
-		num: -10,
+		num: -8,
 		name: "Fidgit",
 		types: ["Poison", "Ground"],
 		baseStats: { hp: 95, atk: 76, def: 109, spa: 90, spd: 80, spe: 105 },
@@ -18704,7 +18704,7 @@ castformmega: {
 		gen: 4,
 	},
 	rebble: {
-		num: -11,
+		num: -9,
 		name: "Rebble",
 		types: ["Rock"],
 		gender: "N",
@@ -18718,7 +18718,7 @@ castformmega: {
 		gen: 4,
 	},
 	tactite: {
-		num: -12,
+		num: -10,
 		name: "Tactite",
 		types: ["Rock"],
 		gender: "N",
@@ -18734,7 +18734,7 @@ castformmega: {
 		gen: 4,
 	},
 	stratagem: {
-		num: -13,
+		num: -11,
 		name: "Stratagem",
 		types: ["Rock"],
 		gender: "N",
@@ -18749,7 +18749,7 @@ castformmega: {
 		gen: 4,
 	},
 	privatyke: {
-		num: -14,
+		num: -12,
 		name: "Privatyke",
 		types: ["Water", "Fighting"],
 		baseStats: { hp: 65, atk: 75, def: 65, spa: 40, spd: 60, spe: 45 },
@@ -18762,7 +18762,7 @@ castformmega: {
 		gen: 4,
 	},
 	arghonaut: {
-		num: -15,
+		num: -13,
 		name: "Arghonaut",
 		types: ["Water", "Fighting"],
 		baseStats: { hp: 105, atk: 110, def: 95, spa: 70, spd: 100, spe: 75 },
@@ -18776,7 +18776,7 @@ castformmega: {
 		gen: 4,
 	},
 	kitsunoh: {
-		num: -16,
+		num: -14,
 		name: "Kitsunoh",
 		types: ["Ghost", "Steel"],
 		baseStats: { hp: 80, atk: 103, def: 85, spa: 55, spd: 80, spe: 120 },
@@ -18791,7 +18791,7 @@ castformmega: {
 		gen: 4,
 	},
 	cyclohm: {
-		num: -17,
+		num: -15,
 		name: "Cyclohm",
 		types: ["Electric", "Dragon"],
 		baseStats: { hp: 108, atk: 60, def: 118, spa: 112, spd: 70, spe: 80 },
@@ -18805,7 +18805,7 @@ castformmega: {
 		gen: 4,
 	},
 	colossoil: {
-		num: -18,
+		num: -16,
 		name: "Colossoil",
 		types: ["Ground", "Dark"],
 		baseStats: { hp: 133, atk: 122, def: 72, spa: 71, spd: 72, spe: 95 },
@@ -18819,7 +18819,7 @@ castformmega: {
 		gen: 4,
 	},
 	krilowatt: {
-		num: -19,
+		num: -17,
 		name: "Krilowatt",
 		types: ["Electric", "Water"],
 		baseStats: { hp: 151, atk: 84, def: 73, spa: 83, spd: 74, spe: 105 },
@@ -18833,7 +18833,7 @@ castformmega: {
 		gen: 4,
 	},
 	voodoll: {
-		num: -20,
+		num: -18,
 		name: "Voodoll",
 		types: ["Normal", "Dark"],
 		baseStats: { hp: 55, atk: 40, def: 55, spa: 75, spd: 50, spe: 70 },
@@ -18846,7 +18846,7 @@ castformmega: {
 		gen: 4,
 	},
 	voodoom: {
-		num: -21,
+		num: -19,
 		name: "Voodoom",
 		types: ["Fighting", "Dark"],
 		baseStats: { hp: 90, atk: 85, def: 80, spa: 130, spd: 80, spe: 110 },
@@ -18860,7 +18860,7 @@ castformmega: {
 		gen: 4,
 	},
 	scratchet: {
-		num: -22,
+		num: -20,
 		name: "Scratchet",
 		types: ["Normal", "Fighting"],
 		baseStats: { hp: 55, atk: 85, def: 80, spa: 20, spd: 70, spe: 40 },
@@ -18873,7 +18873,7 @@ castformmega: {
 		gen: 5,
 	},
 	tomohawk: {
-		num: -23,
+		num: -21,
 		name: "Tomohawk",
 		types: ["Flying", "Fighting"],
 		baseStats: { hp: 105, atk: 60, def: 90, spa: 115, spd: 80, spe: 85 },
@@ -18887,7 +18887,7 @@ castformmega: {
 		gen: 5,
 	},
 	necturine: {
-		num: -24,
+		num: -22,
 		name: "Necturine",
 		types: ["Grass", "Ghost"],
 		gender: "F",
@@ -18901,7 +18901,7 @@ castformmega: {
 		gen: 5,
 	},
 	necturna: {
-		num: -25,
+		num: -23,
 		name: "Necturna",
 		types: ["Grass", "Ghost"],
 		gender: "F",
@@ -18916,7 +18916,7 @@ castformmega: {
 		gen: 5,
 	},
 	mollux: {
-		num: -26,
+		num: -24,
 		name: "Mollux",
 		types: ["Fire", "Poison"],
 		baseStats: { hp: 95, atk: 45, def: 83, spa: 131, spd: 105, spe: 76 },
@@ -18928,7 +18928,7 @@ castformmega: {
 		gen: 5,
 	},
 	cupra: {
-		num: -27,
+		num: -25,
 		name: "Cupra",
 		types: ["Bug", "Psychic"],
 		baseStats: { hp: 50, atk: 60, def: 49, spa: 67, spd: 30, spe: 44 },
@@ -18941,7 +18941,7 @@ castformmega: {
 		gen: 5,
 	},
 	argalis: {
-		num: -28,
+		num: -26,
 		name: "Argalis",
 		types: ["Bug", "Psychic"],
 		baseStats: { hp: 60, atk: 90, def: 89, spa: 87, spd: 40, spe: 54 },
@@ -18956,7 +18956,7 @@ castformmega: {
 		gen: 5,
 	},
 	aurumoth: {
-		num: -29,
+		num: -27,
 		name: "Aurumoth",
 		types: ["Bug", "Psychic"],
 		baseStats: { hp: 110, atk: 120, def: 99, spa: 117, spd: 60, spe: 94 },
@@ -18970,7 +18970,7 @@ castformmega: {
 		gen: 5,
 	},
 	brattler: {
-		num: -30,
+		num: -28,
 		name: "Brattler",
 		types: ["Dark", "Grass"],
 		baseStats: { hp: 80, atk: 70, def: 40, spa: 20, spd: 90, spe: 30 },
@@ -18983,7 +18983,7 @@ castformmega: {
 		gen: 5,
 	},
 	malaconda: {
-		num: -31,
+		num: -29,
 		name: "Malaconda",
 		types: ["Dark", "Grass"],
 		baseStats: { hp: 115, atk: 100, def: 60, spa: 40, spd: 130, spe: 55 },
@@ -18997,7 +18997,7 @@ castformmega: {
 		gen: 5,
 	},
 	cawdet: {
-		num: -32,
+		num: -30,
 		name: "Cawdet",
 		types: ["Steel", "Flying"],
 		baseStats: { hp: 35, atk: 72, def: 85, spa: 40, spd: 55, spe: 88 },
@@ -19010,7 +19010,7 @@ castformmega: {
 		gen: 5,
 	},
 	cawmodore: {
-		num: -33,
+		num: -31,
 		name: "Cawmodore",
 		types: ["Steel", "Flying"],
 		baseStats: { hp: 50, atk: 92, def: 130, spa: 65, spd: 75, spe: 118 },
@@ -19024,7 +19024,7 @@ castformmega: {
 		gen: 5,
 	},
 	volkritter: {
-		num: -34,
+		num: -32,
 		name: "Volkritter",
 		types: ["Water", "Fire"],
 		baseStats: { hp: 60, atk: 30, def: 50, spa: 80, spd: 60, spe: 70 },
@@ -19037,7 +19037,7 @@ castformmega: {
 		gen: 6,
 	},
 	volkraken: {
-		num: -35,
+		num: -33,
 		name: "Volkraken",
 		types: ["Water", "Fire"],
 		baseStats: { hp: 100, atk: 45, def: 80, spa: 135, spd: 100, spe: 95 },
@@ -19051,7 +19051,7 @@ castformmega: {
 		gen: 6,
 	},
 	snugglow: {
-		num: -36,
+		num: -34,
 		name: "Snugglow",
 		types: ["Electric", "Poison"],
 		baseStats: { hp: 40, atk: 37, def: 79, spa: 91, spd: 68, spe: 70 },
@@ -19064,7 +19064,7 @@ castformmega: {
 		gen: 6,
 	},
 	plasmanta: {
-		num: -37,
+		num: -35,
 		name: "Plasmanta",
 		types: ["Electric", "Poison"],
 		baseStats: { hp: 60, atk: 57, def: 119, spa: 131, spd: 98, spe: 100 },
@@ -19078,7 +19078,7 @@ castformmega: {
 		gen: 6,
 	},
 	floatoy: {
-		num: -38,
+		num: -36,
 		name: "Floatoy",
 		types: ["Water"],
 		baseStats: { hp: 48, atk: 70, def: 40, spa: 70, spd: 30, spe: 77 },
@@ -19091,7 +19091,7 @@ castformmega: {
 		gen: 6,
 	},
 	caimanoe: {
-		num: -39,
+		num: -37,
 		name: "Caimanoe",
 		types: ["Water", "Steel"],
 		baseStats: { hp: 73, atk: 85, def: 65, spa: 80, spd: 40, spe: 87 },
@@ -19106,7 +19106,7 @@ castformmega: {
 		gen: 6,
 	},
 	naviathan: {
-		num: -40,
+		num: -38,
 		name: "Naviathan",
 		types: ["Water", "Steel"],
 		baseStats: { hp: 103, atk: 110, def: 90, spa: 95, spd: 65, spe: 97 },
@@ -19120,7 +19120,7 @@ castformmega: {
 		gen: 6,
 	},
 	crucibelle: {
-		num: -41,
+		num: -39,
 		name: "Crucibelle",
 		types: ["Rock", "Poison"],
 		genderRatio: { M: 0.25, F: 0.75 },
@@ -19135,7 +19135,7 @@ castformmega: {
 		gen: 6,
 	},
 	crucibellemega: {
-		num: -42,
+		num: -39,
 		name: "Crucibelle-Mega",
 		baseSpecies: "Crucibelle",
 		forme: "Mega",
@@ -19151,7 +19151,7 @@ castformmega: {
 		gen: 6,
 	},
 	pluffle: {
-		num: -43,
+		num: -40,
 		name: "Pluffle",
 		types: ["Fairy"],
 		baseStats: { hp: 74, atk: 38, def: 51, spa: 65, spd: 78, spe: 49 },
@@ -19164,7 +19164,7 @@ castformmega: {
 		gen: 6,
 	},
 	kerfluffle: {
-		num: -44,
+		num: -41,
 		name: "Kerfluffle",
 		types: ["Fairy", "Fighting"],
 		baseStats: { hp: 84, atk: 78, def: 86, spa: 115, spd: 88, spe: 119 },
@@ -19179,7 +19179,7 @@ castformmega: {
 		gen: 6,
 	},
 	pajantom: {
-		num: -45,
+		num: -42,
 		name: "Pajantom",
 		types: ["Dragon", "Ghost"],
 		baseStats: { hp: 84, atk: 133, def: 71, spa: 51, spd: 111, spe: 101 },
@@ -19191,7 +19191,7 @@ castformmega: {
 		gen: 7,
 	},
 	mumbao: {
-		num: -46,
+		num: -43,
 		name: "Mumbao",
 		types: ["Grass", "Fairy"],
 		baseStats: { hp: 55, atk: 30, def: 64, spa: 87, spd: 73, spe: 66 },
@@ -19204,7 +19204,7 @@ castformmega: {
 		gen: 7,
 	},
 	jumbao: {
-		num: -47,
+		num: -44,
 		name: "Jumbao",
 		types: ["Grass", "Fairy"],
 		baseStats: { hp: 92, atk: 63, def: 97, spa: 124, spd: 104, spe: 96 },
@@ -19219,7 +19219,7 @@ castformmega: {
 		gen: 7,
 	},
 	fawnifer: {
-		num: -48,
+		num: -45,
 		name: "Fawnifer",
 		types: ["Grass"],
 		genderRatio: { M: 0.875, F: 0.125 },
@@ -19233,7 +19233,7 @@ castformmega: {
 		gen: 7,
 	},
 	electrelk: {
-		num: -49,
+		num: -46,
 		name: "Electrelk",
 		types: ["Grass", "Electric"],
 		genderRatio: { M: 0.875, F: 0.125 },
@@ -19249,7 +19249,7 @@ castformmega: {
 		gen: 7,
 	},
 	caribolt: {
-		num: -50,
+		num: -47,
 		name: "Caribolt",
 		types: ["Grass", "Electric"],
 		genderRatio: { M: 0.875, F: 0.125 },
@@ -19264,7 +19264,7 @@ castformmega: {
 		gen: 7,
 	},
 	smogecko: {
-		num: -51,
+		num: -48,
 		name: "Smogecko",
 		types: ["Fire"],
 		genderRatio: { M: 0.875, F: 0.125 },
@@ -19278,7 +19278,7 @@ castformmega: {
 		gen: 7,
 	},
 	smoguana: {
-		num: -52,
+		num: -49,
 		name: "Smoguana",
 		types: ["Fire", "Ground"],
 		genderRatio: { M: 0.875, F: 0.125 },
@@ -19294,7 +19294,7 @@ castformmega: {
 		gen: 7,
 	},
 	smokomodo: {
-		num: -53,
+		num: -50,
 		name: "Smokomodo",
 		types: ["Fire", "Ground"],
 		genderRatio: { M: 0.875, F: 0.125 },
@@ -19309,7 +19309,7 @@ castformmega: {
 		gen: 7,
 	},
 	swirlpool: {
-		num: -54,
+		num: -51,
 		name: "Swirlpool",
 		types: ["Water"],
 		genderRatio: { M: 0.875, F: 0.125 },
@@ -19323,7 +19323,7 @@ castformmega: {
 		gen: 7,
 	},
 	coribalis: {
-		num: -55,
+		num: -52,
 		name: "Coribalis",
 		types: ["Water", "Bug"],
 		genderRatio: { M: 0.875, F: 0.125 },
@@ -19339,7 +19339,7 @@ castformmega: {
 		gen: 7,
 	},
 	snaelstrom: {
-		num: -56,
+		num: -53,
 		name: "Snaelstrom",
 		types: ["Water", "Bug"],
 		genderRatio: { M: 0.875, F: 0.125 },
@@ -19354,7 +19354,7 @@ castformmega: {
 		gen: 7,
 	},
 	justyke: {
-		num: -57,
+		num: -54,
 		name: "Justyke",
 		types: ["Steel", "Ground"],
 		gender: "N",
@@ -19368,7 +19368,7 @@ castformmega: {
 		gen: 7,
 	},
 	equilibra: {
-		num: -58,
+		num: -55,
 		name: "Equilibra",
 		types: ["Steel", "Ground"],
 		gender: "N",
@@ -19383,7 +19383,7 @@ castformmega: {
 		gen: 7,
 	},
 	solotl: {
-		num: -59,
+		num: -56,
 		name: "Solotl",
 		types: ["Fire", "Dragon"],
 		baseStats: { hp: 68, atk: 48, def: 34, spa: 72, spd: 24, spe: 84 },
@@ -19396,7 +19396,7 @@ castformmega: {
 		gen: 8,
 	},
 	astrolotl: {
-		num: -60,
+		num: -57,
 		name: "Astrolotl",
 		types: ["Fire", "Dragon"],
 		baseStats: { hp: 108, atk: 108, def: 74, spa: 92, spd: 64, spe: 114 },
@@ -19410,7 +19410,7 @@ castformmega: {
 		gen: 8,
 	},
 	miasmite: {
-		num: -61,
+		num: -58,
 		name: "Miasmite",
 		types: ["Bug", "Dragon"],
 		baseStats: { hp: 40, atk: 85, def: 60, spa: 52, spd: 52, spe: 44 },
@@ -19423,7 +19423,7 @@ castformmega: {
 		gen: 8,
 	},
 	miasmaw: {
-		num: -62,
+		num: -59,
 		name: "Miasmaw",
 		types: ["Bug", "Dragon"],
 		baseStats: { hp: 85, atk: 135, def: 60, spa: 88, spd: 105, spe: 99 },
@@ -19437,7 +19437,7 @@ castformmega: {
 		gen: 8,
 	},
 	chromera: {
-		num: -63,
+		num: -60,
 		name: "Chromera",
 		types: ["Dark", "Normal"],
 		gender: "N",
@@ -19451,7 +19451,7 @@ castformmega: {
 		gen: 8,
 	},
 	nohface: {
-		num: -64,
+		num: -61,
 		name: "Nohface",
 		types: ["Ghost"],
 		baseStats: { hp: 50, atk: 73, def: 50, spa: 30, spd: 50, spe: 80 },
@@ -19464,7 +19464,7 @@ castformmega: {
 		gen: 4,
 	},
 	monohm: {
-		num: -65,
+		num: -62,
 		name: "Monohm",
 		types: ["Electric"],
 		baseStats: { hp: 53, atk: 40, def: 58, spa: 67, spd: 55, spe: 55 },
@@ -19477,7 +19477,7 @@ castformmega: {
 		gen: 4,
 	},
 	duohm: {
-		num: -66,
+		num: -63,
 		name: "Duohm",
 		types: ["Electric", "Dragon"],
 		baseStats: { hp: 88, atk: 40, def: 103, spa: 77, spd: 60, spe: 60 },
@@ -19492,7 +19492,7 @@ castformmega: {
 		gen: 4,
 	},
 	dorsoil: {
-		num: -67,
+		num: -64,
 		name: "Dorsoil",
 		types: ["Ground"],
 		baseStats: { hp: 103, atk: 72, def: 52, spa: 61, spd: 52, spe: 65 },
@@ -19505,7 +19505,7 @@ castformmega: {
 		gen: 4,
 	},
 	protowatt: {
-		num: -68,
+		num: -65,
 		name: "Protowatt",
 		types: ["Electric", "Water"],
 		baseStats: { hp: 51, atk: 44, def: 33, spa: 43, spd: 34, spe: 65 },
@@ -19518,7 +19518,7 @@ castformmega: {
 		gen: 4,
 	},
 	venomicon: {
-		num: -69,
+		num: -66,
 		name: "Venomicon",
 		baseForme: "Prologue",
 		types: ["Poison", "Flying"],
@@ -19534,7 +19534,7 @@ castformmega: {
 		gen: 8,
 	},
 	venomiconepilogue: {
-		num: -70,
+		num: -66,
 		name: "Venomicon-Epilogue",
 		baseSpecies: "Venomicon",
 		forme: "Epilogue",
@@ -19551,7 +19551,7 @@ castformmega: {
 		gen: 8,
 	},
 	saharascal: {
-		num: -71,
+		num: -67,
 		name: "Saharascal",
 		types: ["Ground"],
 		baseStats: { hp: 50, atk: 80, def: 65, spa: 45, spd: 90, spe: 70 },
@@ -19564,7 +19564,7 @@ castformmega: {
 		gen: 8,
 	},
 	saharaja: {
-		num: -72,
+		num: -68,
 		name: "Saharaja",
 		types: ["Ground"],
 		baseStats: { hp: 70, atk: 112, def: 105, spa: 65, spd: 123, spe: 78 },
@@ -19579,7 +19579,7 @@ castformmega: {
 		gen: 8,
 	},
 	ababo: {
-		num: -73,
+		num: -69,
 		name: "Ababo",
 		types: ["Fairy"],
 		genderRatio: { M: 0.75, F: 0.25 },
@@ -19594,7 +19594,7 @@ castformmega: {
 		gen: 9,
 	},
 	scattervein: {
-		num: -74,
+		num: -70,
 		name: "Scattervein",
 		types: ["Fairy"],
 		genderRatio: { M: 0.75, F: 0.25 },
@@ -19611,7 +19611,7 @@ castformmega: {
 		gen: 9,
 	},
 	hemogoblin: {
-		num: -75,
+		num: -71,
 		name: "Hemogoblin",
 		types: ["Fairy", "Fire"],
 		genderRatio: { M: 0.75, F: 0.25 },
@@ -19627,7 +19627,7 @@ castformmega: {
 		gen: 9,
 	},
 	cresceidon: {
-		num: -76,
+		num: -72,
 		name: "Cresceidon",
 		types: ["Water", "Fairy"],
 		baseStats: { hp: 80, atk: 32, def: 111, spa: 88, spd: 99, spe: 124 },
@@ -19639,7 +19639,7 @@ castformmega: {
 		gen: 9,
 	},
 	chuggon: {
-		num: -77,
+		num: -73,
 		name: "Chuggon",
 		types: ["Dragon", "Poison"],
 		baseStats: { hp: 30, atk: 23, def: 77, spa: 55, spd: 65, spe: 30 },
@@ -19652,7 +19652,7 @@ castformmega: {
 		gen: 9,
 	},
 	draggalong: {
-		num: -78,
+		num: -74,
 		name: "Draggalong",
 		types: ["Dragon", "Poison"],
 		baseStats: { hp: 40, atk: 33, def: 92, spa: 95, spd: 80, spe: 85 },
@@ -19667,7 +19667,7 @@ castformmega: {
 		gen: 9,
 	},
 	chuggalong: {
-		num: -79,
+		num: -75,
 		name: "Chuggalong",
 		types: ["Dragon", "Poison"],
 		baseStats: { hp: 45, atk: 43, def: 117, spa: 120, spd: 110, spe: 108 },
@@ -19681,7 +19681,7 @@ castformmega: {
 		gen: 9,
 	},
 	shox: {
-		num: -80,
+		num: -77,
 		name: "Shox",
 		types: ["Electric", "Normal"],
 		baseStats: { hp: 136, atk: 55, def: 87, spa: 108, spd: 108, spe: 56 },
@@ -19693,7 +19693,7 @@ castformmega: {
 		gen: 9,
 	},
 	ramnarok: {
-		num: -81,
+		num: -78,
 		name: "Ramnarok",
 		baseForme: "Dormant",
 		types: ["Fire", "Steel"],
@@ -19710,7 +19710,7 @@ castformmega: {
 		gen: 9,
 	},
 	ramnarokradiant: {
-		num: -82,
+		num: -78,
 		name: "Ramnarok-Radiant",
 		baseSpecies: "Ramnarok",
 		forme: "Radiant",
@@ -19728,7 +19728,7 @@ castformmega: {
 	},
 	// NOTE: PokeStar "formes" are not actually formes and thus do not have a formeOrder
 	pokestarsmeargle: {
-		num: -83,
+		num: -5000,
 		name: "Pokestar Smeargle",
 		types: ["Normal"],
 		baseStats: { hp: 55, atk: 20, def: 35, spa: 20, spd: 45, spe: 75 },
@@ -19740,7 +19740,7 @@ castformmega: {
 		gen: 5,
 	},
 	pokestarufo: {
-		num: -84,
+		num: -5001,
 		name: "Pokestar UFO",
 		types: ["Flying", "Electric"],
 		gender: "N",
@@ -19755,7 +19755,7 @@ castformmega: {
 		gen: 5,
 	},
 	pokestarufo2: {
-		num: -85,
+		num: -5001,
 		name: "Pokestar UFO-2",
 		baseSpecies: "Pokestar UFO",
 		forme: "2",
@@ -19770,7 +19770,7 @@ castformmega: {
 		gen: 5,
 	},
 	pokestarbrycenman: {
-		num: -86,
+		num: -5002,
 		name: "Pokestar Brycen-Man",
 		types: ["Dark", "Psychic"],
 		gender: "M",
@@ -19784,7 +19784,7 @@ castformmega: {
 		gen: 5,
 	},
 	pokestarmt: {
-		num: -87,
+		num: -5003,
 		name: "Pokestar MT",
 		types: ["Steel"],
 		gender: "N",
@@ -19798,7 +19798,7 @@ castformmega: {
 		gen: 5,
 	},
 	pokestarmt2: {
-		num: -88,
+		num: -5004,
 		name: "Pokestar MT2",
 		types: ["Steel", "Electric"],
 		gender: "N",
@@ -19812,7 +19812,7 @@ castformmega: {
 		gen: 5,
 	},
 	pokestartransport: {
-		num: -89,
+		num: -5005,
 		name: "Pokestar Transport",
 		types: ["Steel"],
 		gender: "N",
@@ -19826,7 +19826,7 @@ castformmega: {
 		gen: 5,
 	},
 	pokestargiant: {
-		num: -90,
+		num: -5006,
 		name: "Pokestar Giant",
 		types: ["Normal"],
 		gender: "F",
@@ -19840,7 +19840,7 @@ castformmega: {
 		gen: 5,
 	},
 	pokestarhumanoid: {
-		num: -91,
+		num: -5007,
 		name: "Pokestar Humanoid",
 		types: ["Normal"],
 		baseStats: { hp: 100, atk: 100, def: 100, spa: 100, spd: 100, spe: 100 },
@@ -19853,7 +19853,7 @@ castformmega: {
 		gen: 5,
 	},
 	pokestarmonster: {
-		num: -92,
+		num: -5008,
 		name: "Pokestar Monster",
 		types: ["Dark"],
 		baseStats: { hp: 100, atk: 100, def: 100, spa: 100, spd: 100, spe: 100 },
@@ -19866,7 +19866,7 @@ castformmega: {
 		gen: 5,
 	},
 	pokestarf00: {
-		num: -93,
+		num: -5009,
 		name: "Pokestar F-00",
 		types: ["Steel", "Normal"],
 		baseStats: { hp: 100, atk: 100, def: 100, spa: 100, spd: 100, spe: 100 },
@@ -19879,7 +19879,7 @@ castformmega: {
 		gen: 5,
 	},
 	pokestarf002: {
-		num: -94,
+		num: -5010,
 		name: "Pokestar F-002",
 		types: ["Steel", "Normal"],
 		baseStats: { hp: 100, atk: 100, def: 100, spa: 100, spd: 100, spe: 100 },
@@ -19892,7 +19892,7 @@ castformmega: {
 		gen: 5,
 	},
 	pokestarspirit: {
-		num: -95,
+		num: -5011,
 		name: "Pokestar Spirit",
 		types: ["Dark", "Ghost"],
 		baseStats: { hp: 100, atk: 100, def: 100, spa: 100, spd: 100, spe: 100 },
@@ -19905,7 +19905,7 @@ castformmega: {
 		gen: 5,
 	},
 	pokestarblackdoor: {
-		num: -96,
+		num: -5012,
 		name: "Pokestar Black Door",
 		types: ["Grass"],
 		gender: "F",
@@ -19919,7 +19919,7 @@ castformmega: {
 		gen: 5,
 	},
 	pokestarwhitedoor: {
-		num: -97,
+		num: -5013,
 		name: "Pokestar White Door",
 		types: ["Fire"],
 		gender: "M",
@@ -19933,7 +19933,7 @@ castformmega: {
 		gen: 5,
 	},
 	pokestarblackbelt: {
-		num: -98,
+		num: -5014,
 		name: "Pokestar Black Belt",
 		types: ["Fighting"],
 		gender: "M",
@@ -19947,7 +19947,7 @@ castformmega: {
 		gen: 5,
 	},
 	pokestarufopropu2: {
-		num: -99,
+		num: -5001,
 		name: "Pokestar UFO-PropU2",
 		baseSpecies: "Pokestar UFO",
 		forme: "PropU2",
@@ -20086,7 +20086,7 @@ oinkolognemega: {
   // TEAM A – Order of the Elementals
   // =========================
   pyrelith: {
-    num: -100,
+    num: -1001,
     name: "Pyrelith",
     types: ["Fire", "Rock"],
     baseStats: {hp: 95, atk: 120, def: 90, spa: 75, spd: 85, spe: 75},
@@ -20096,7 +20096,7 @@ oinkolognemega: {
     eggGroups: ["Mineral"],
   },
   glaciarch: {
-    num: -101,
+    num: -1002,
     name: "Glaciarch",
     types: ["Ice", "Fairy"],
     baseStats: {hp: 75, atk: 70, def: 80, spa: 130, spd: 105, spe: 90},
@@ -20106,7 +20106,7 @@ oinkolognemega: {
     eggGroups: ["Field"],
   },
   terrabite: {
-    num: -102,
+    num: -1003,
     name: "Terrabite",
     types: ["Ground", "Steel"],
     baseStats: {hp: 100, atk: 130, def: 120, spa: 60, spd: 100, spe: 60},
@@ -20116,7 +20116,7 @@ oinkolognemega: {
     eggGroups: ["Field", "Mineral"],
   },
   zephyren: {
-    num: -103,
+    num: -1004,
     name: "Zephyren",
     types: ["Flying", "Dragon"],
     baseStats: {hp: 80, atk: 115, def: 80, spa: 100, spd: 85, spe: 110},
@@ -20126,7 +20126,7 @@ oinkolognemega: {
     eggGroups: ["Dragon"],
   },
   aqualume: {
-    num: -104,
+    num: -1005,
     name: "Aqualume",
     types: ["Water", "Psychic"],
     baseStats: {hp: 80, atk: 70, def: 80, spa: 115, spd: 100, spe: 105},
@@ -20136,7 +20136,7 @@ oinkolognemega: {
     eggGroups: ["Water 2"],
   },
   floracern: {
-    num: -105,
+    num: -1006,
     name: "Floracern",
     types: ["Grass", "Fighting"],
     baseStats: {hp: 100, atk: 120, def: 90, spa: 65, spd: 80, spe: 95},
@@ -20150,7 +20150,7 @@ oinkolognemega: {
   // TEAM B – Vanguard of Shadows
   // =========================
   umbraquill: {
-    num: -106,
+    num: -1007,
     name: "Umbraquill",
     types: ["Dark", "Flying"],
     baseStats: {hp: 85, atk: 120, def: 80, spa: 100, spd: 80, spe: 95},
@@ -20160,7 +20160,7 @@ oinkolognemega: {
     eggGroups: ["Flying"],
   },
   venomire: {
-    num: -107,
+    num: -1008,
     name: "Venomire",
     types: ["Poison", "Dragon"],
     baseStats: {hp: 90, atk: 110, def: 90, spa: 110, spd: 80, spe: 90},
@@ -20170,7 +20170,7 @@ oinkolognemega: {
     eggGroups: ["Dragon"],
   },
   oblivara: {
-    num: -108,
+    num: -1009,
     name: "Oblivara",
     types: ["Ghost", "Grass"],
     baseStats: {hp: 95, atk: 95, def: 85, spa: 95, spd: 95, spe: 95},
@@ -20180,7 +20180,7 @@ oinkolognemega: {
     eggGroups: ["Amorphous", "Grass"],
   },
   ferraclaw: {
-    num: -109,
+    num: -1010,
     name: "Ferraclaw",
     types: ["Steel", "Dark"],
     baseStats: {hp: 100, atk: 125, def: 110, spa: 70, spd: 100, spe: 75},
@@ -20190,7 +20190,7 @@ oinkolognemega: {
     eggGroups: ["Field", "Mineral"],
   },
   embergeist: {
-    num: -110,
+    num: -1011,
     name: "Embergeist",
     types: ["Fire", "Ghost"],
     baseStats: {hp: 80, atk: 115, def: 75, spa: 115, spd: 80, spe: 95},
@@ -20200,7 +20200,7 @@ oinkolognemega: {
     eggGroups: ["Amorphous"],
   },
   thornox: {
-    num: -111,
+    num: -1012,
     name: "Thornox",
     types: ["Bug", "Fighting"],
     baseStats: {hp: 95, atk: 120, def: 100, spa: 60, spd: 95, spe: 90},
@@ -20212,7 +20212,7 @@ oinkolognemega: {
 
   //EXTREME BOSS POKEMON ONLY 1 ON TEAM AND NO OTHER POKEMON||
   fearmongrodon: {
-  num: -112,
+  num: -9999,
   name: "Fearmongrodon",
   types: ["Steel", "Ghost", "Fairy", "Flying", "Ground", "Water", "Poison", "Dark"],
   baseStats: {hp: 500, atk: 200, def: 100, spa: 200, spd: 100, spe: 200},
@@ -20225,7 +20225,7 @@ oinkolognemega: {
 // End of boss pokemon
 
   klumph: {
-		num: -113,
+		num: -1001,
 		name: "Klumph",
 		types: ["Flying", "Light"],
 		baseStats: {hp: 100, atk: 20, def: 20, spa: 20, spd: 20, spe: 20},
@@ -20234,7 +20234,7 @@ oinkolognemega: {
 		eggGroups: ["Undiscovered"],
 	},
 	klumphstolen: {
-  num: -114, // or same num as base Klumph, depending on how you're organizing
+  num: -1001, // or same num as base Klumph, depending on how you're organizing
   name: "Klumph-Stolen",
   baseSpecies: "Klumph",
   forme: "Stolen",
@@ -20252,7 +20252,7 @@ oinkolognemega: {
 },
 
 	grawshawg: {
-		num: -115,
+		num: -1002,
 		name: "Grawshawg",
 		types: ["Blood", "Dark"],
 		baseStats: {hp: 150, atk: 150, def: 50, spa: 50, spd: 50, spe: 150},
@@ -20261,7 +20261,7 @@ oinkolognemega: {
 		eggGroups: ["Undiscovered"],
 	},
 	nucleode: {
-		num: -116,
+		num: -1003,
 		name: "Nucleode",
 		types: ["Rock", "Gamma"],
 		baseStats: {hp: 71, atk: 91, def: 92, spa: 111, spd: 91, spe: 99},
@@ -20270,7 +20270,7 @@ oinkolognemega: {
 		eggGroups: ["Undiscovered"],
 	},
 	cloudstrike: {
-		num: -117,
+		num: -1004,
 		name: "Cloudstrike",
 		types: ["Flying", "Electric", "Dragon"],
 		baseStats: {hp: 105, atk: 115, def: 75, spa: 75, spd: 100, spe: 100},
@@ -20279,7 +20279,7 @@ oinkolognemega: {
 		eggGroups: ["Undiscovered"],
 	},
 	frostallion: {
-		num: -118,
+		num: -1005,
 		name: "Frostallion",
 		types: ["Ice", "Flying"],
 		baseStats: {hp: 90, atk: 65, def: 70, spa: 130, spd: 95, spe: 110},
@@ -20288,7 +20288,7 @@ oinkolognemega: {
 		eggGroups: ["Undiscovered"],
 	},
 	arachniss: {
-		num: -119,
+		num: -1006,
 		name: "Arachniss",
 		types: ["Bug", "Gamma"],
 		baseStats: {hp: 75, atk: 125, def: 60, spa: 70, spd: 125, spe: 125},
@@ -20297,7 +20297,7 @@ oinkolognemega: {
 		eggGroups: ["Undiscovered"],
 	},
 	hexameleon: {
-		num: -120,
+		num: -1007,
 		name: "Hexameleon",
 		types: ["Normal", "Ghost"],
 		baseStats: {hp: 100, atk: 95, def: 90, spa: 100, spd: 85, spe: 80},
@@ -20306,7 +20306,7 @@ oinkolognemega: {
 		eggGroups: ["Undiscovered"],
 	},
 	glimming: {
-		num: -121,
+		num: -1008,
 		name: "Glimming",
 		types: ["Dragon", "Fairy"],
 		baseStats: {hp: 80, atk: 90, def: 90, spa: 90, spd: 90, spe: 90},
@@ -20315,7 +20315,7 @@ oinkolognemega: {
 		eggGroups: ["Undiscovered"],
 	},
 	mutador: {
-		num: -122,
+		num: -1009,
 		name: "Mutador",
 		types: ["Normal"],
 		baseStats: {hp: 95, atk: 95, def: 95, spa: 95, spd: 95, spe: 95},
@@ -20324,7 +20324,7 @@ oinkolognemega: {
 		eggGroups: ["Undiscovered"],
 	},
 	venom: {
-		num: -123,
+		num: -1010,
 		name: "Venom",
 		types: ["Dark"],
 		baseStats: {hp: 150, atk: 150, def: 80, spa: 30, spd: 70, spe: 75},
@@ -20333,7 +20333,7 @@ oinkolognemega: {
 		eggGroups: ["Undiscovered"],
 	},
 	maha: {
-		num: -124,
+		num: -1011,
 		name: "Maha",
 		types: ["Dark", "Flying"],
 		baseStats: {hp: 70, atk: 120, def: 90, spa: 50, spd: 70, spe: 90},
@@ -20342,7 +20342,7 @@ oinkolognemega: {
 		eggGroups: ["Undiscovered"],
 	},
 	spiderman: {
-		num: -125,
+		num: -1012,
 		name: "Spiderman",
 		types: ["Bug", "Fighting"],
 		baseStats: {hp: 60, atk: 100, def: 70, spa: 100, spd: 70, spe: 120},
@@ -20351,7 +20351,7 @@ oinkolognemega: {
 		eggGroups: ["Undiscovered"],
 	},
 	spidergwen: {
-		num: -126,
+		num: -1013,
 		name: "Spider Gwen",
 		types: ["Dark", "Fairy"],
 		baseStats: {hp: 75, atk: 50, def: 60, spa: 130, spd: 100, spe: 105},
@@ -20360,7 +20360,7 @@ oinkolognemega: {
 		eggGroups: ["Undiscovered"],
 	},
 	docock: {
-		num: -127,
+		num: -1014,
 		name: "Doc Ock",
 		types: ["Psychic", "Steel"],
 		baseStats: {hp: 108, atk: 108, def: 108, spa: 10, spd: 108, spe: 108},
@@ -20369,7 +20369,7 @@ oinkolognemega: {
 		eggGroups: ["Undiscovered"],
 	},
 	nivmizzet: {
-		num: -128,
+		num: -1015,
 		name: "Niv-Mizzet",
 		types: ["Water", "Fire"],
 		baseStats: {hp: 110, atk: 60, def: 100, spa: 130, spd: 100, spe: 100},
@@ -20378,7 +20378,7 @@ oinkolognemega: {
 		eggGroups: ["Undiscovered"],
 	},
 	liliana: {
-		num: -129,
+		num: -1016,
 		name: "Liliana",
 		types: ["Dark", "Ghost"],
 		baseStats: {hp: 95, atk: 95, def: 95, spa: 95, spd: 95, spe: 95},
@@ -20387,7 +20387,7 @@ oinkolognemega: {
 		eggGroups: ["Undiscovered"],
 	},
 	moxxi: {
-		num: -130,
+		num: -1017,
 		name: "Moxxi",
 		types: ["Fairy", "Psychic"],
 		baseStats: {hp: 96, atk: 96, def: 69, spa: 96, spd: 69, spe: 99},
@@ -20398,7 +20398,7 @@ oinkolognemega: {
 
 	// Second batch
 	mjolnislash: {
-		num: -131,
+		num: -1018,
 		name: "Mjolnislash",
 		types: ["Ghost", "Electric"],
 		baseStats: {hp: 70, atk: 120, def: 120, spa: 40, spd: 70, spe: 80},
@@ -20407,7 +20407,7 @@ oinkolognemega: {
 		eggGroups: ["Undiscovered"],
 	},
 	majesting: {
-		num: -132,
+		num: -1019,
 		name: "Majesting",
 		types: ["Fire", "Psychic"],
 		baseStats: {hp: 90, atk: 65, def: 75, spa: 100, spd: 100, spe: 90},
@@ -20416,7 +20416,7 @@ oinkolognemega: {
 		eggGroups: ["Undiscovered"],
 	},
 	obscuring: {
-		num: -133,
+		num: -1020,
 		name: "Obscuring",
 		types: ["Water", "Dark"],
 		baseStats: {hp: 80, atk: 55, def: 70, spa: 130, spd: 100, spe: 110},
@@ -20425,7 +20425,7 @@ oinkolognemega: {
 		eggGroups: ["Undiscovered"],
 	},
 	trolossus: {
-		num: -134,
+		num: -1021,
 		name: "Trolossus",
 		types: ["Grass", "Ground"],
 		baseStats: {hp: 100, atk: 65, def: 90, spa: 120, spd: 110, spe: 80},
@@ -20434,7 +20434,7 @@ oinkolognemega: {
 		eggGroups: ["Undiscovered"],
 	},
 	valkyrien: {
-		num: -135,
+		num: -1022,
 		name: "Valkyrien",
 		types: ["Fairy", "Light"],
 		baseStats: {hp: 90, atk: 115, def: 110, spa: 60, spd: 90, spe: 115},
@@ -20443,7 +20443,7 @@ oinkolognemega: {
 		eggGroups: ["Undiscovered"],
 	},
 	dragrism: {
-		num: -136,
+		num: -1023,
 		name: "Dragrism",
 		types: ["Dragon", "Normal"],
 		baseStats: {hp: 85, atk: 115, def: 100, spa: 90, spd: 110, spe: 100},
@@ -20452,7 +20452,7 @@ oinkolognemega: {
 		eggGroups: ["Undiscovered"],
 	},
 	jormora: {
-		num: -137,
+		num: -1024,
 		name: "Jormora",
 		types: ["Poison", "Rock"],
 		baseStats: {hp: 100, atk: 100, def: 110, spa: 60, spd: 110, spe: 65},
@@ -20461,7 +20461,7 @@ oinkolognemega: {
 		eggGroups: ["Undiscovered"],
 	},
 	jarnoxe: {
-		num: -138,
+		num: -1025,
 		name: "Jarnoxe",
 		types: ["Ice", "Fighting"],
 		baseStats: {hp: 95, atk: 135, def: 115, spa: 50, spd: 95, spe: 75},
@@ -20470,7 +20470,7 @@ oinkolognemega: {
 		eggGroups: ["Undiscovered"],
 	},
 	gjallarhorn: {
-		num: -139,
+		num: -1026,
 		name: "Gjallarhorn",
 		types: ["Flying", "Steel"],
 		baseStats: {hp: 85, atk: 70, def: 95, spa: 115, spd: 100, spe: 115},
@@ -20479,7 +20479,7 @@ oinkolognemega: {
 		eggGroups: ["Undiscovered"],
 	},
 	valdrion: {
-		num: -140,
+		num: -1027,
 		name: "Valdrion",
 		types: ["Steel", "Light"],
 		baseStats: {hp: 95, atk: 120, def: 110, spa: 85, spd: 100, spe: 90},
@@ -20488,7 +20488,7 @@ oinkolognemega: {
 		eggGroups: ["Undiscovered"],
 	},
 	ignityr: {
-		num: -141,
+		num: -1028,
 		name: "Ignityr",
 		types: ["Fire", "Ground"],
 		baseStats: {hp: 80, atk: 115, def: 100, spa: 60, spd: 90, spe: 85},
@@ -20497,7 +20497,7 @@ oinkolognemega: {
 		eggGroups: ["Undiscovered"],
 	},
 	skarnash: {
-		num: -142,
+		num: -1029,
 		name: "Skarnash",
 		types: ["Bug", "Normal"],
 		baseStats: {hp: 80, atk: 100, def: 70, spa: 60, spd: 70, spe: 120},
@@ -20506,7 +20506,7 @@ oinkolognemega: {
 		eggGroups: ["Undiscovered"],
 	},
 	freylune: {
-		num: -143,
+		num: -1030,
 		name: "Freylune",
 		types: ["Grass", "Fairy"],
 		baseStats: {hp: 95, atk: 70, def: 85, spa: 115, spd: 100, spe: 89},
@@ -20515,7 +20515,7 @@ oinkolognemega: {
 		eggGroups: ["Undiscovered"],
 	},
 	hafgrout: {
-		num: -144,
+		num: -1031,
 		name: "Hafgrout",
 		types: ["Water", "Ground"],
 		baseStats: {hp: 110, atk: 70, def: 115, spa: 110, spd: 110, spe: 45},
@@ -20524,7 +20524,7 @@ oinkolognemega: {
 		eggGroups: ["Undiscovered"],
 	},
 	draughollow: {
-		num: -145,
+		num: -1032,
 		name: "Draughollow",
 		types: ["Ghost", "Dark"],
 		baseStats: {hp: 80, atk: 120, def: 90, spa: 65, spd: 85, spe: 80},
@@ -20533,7 +20533,7 @@ oinkolognemega: {
 		eggGroups: ["Undiscovered"],
 	},
 	mindhoggr: {
-		num: -146,
+		num: -1033,
 		name: "MindHoggr",
 		types: ["Psychic", "Dragon"],
 		baseStats: {hp: 90, atk: 75, def: 100, spa: 125, spd: 105, spe: 85},
@@ -20542,7 +20542,7 @@ oinkolognemega: {
 		eggGroups: ["Undiscovered"],
 	},
 	narcissa: {
-  num: -147, // custom ID; keep negative or any unused number in your mod
+  num: -1034, // custom ID; keep negative or any unused number in your mod
   name: "Narcissa",
   types: ["Fairy", "Ice"],
   abilities: {0: "Cold Heart"}, // make sure abilities.ts defines coldheart
@@ -20553,7 +20553,7 @@ oinkolognemega: {
   eggGroups: ["Fairy"],  // flavor; adjust if you care about breeding in your mod
 },
   mondra: {
-    num: -148,
+    num: -5001,
     name: "Mondra",
     baseSpecies: "Mondra",
     forme: "Mondra",
@@ -20567,7 +20567,7 @@ oinkolognemega: {
   },
 
   duodra: {
-    num: -149,
+    num: -5002,
     name: "Duodra",
     baseSpecies: "Mondra",
     forme: "Duodra",
@@ -20583,7 +20583,7 @@ oinkolognemega: {
   },
 
   polydra: {
-    num: -150,
+    num: -5003,
     name: "Polydra",
     baseSpecies: "Mondra",
     forme: "Polydra",

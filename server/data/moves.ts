@@ -26916,7 +26916,7 @@ enchantingspin: {
         shortDesc: "Inflicts paralysis and confusion (100% if it hits).",
         type: "Fairy",
         category: "Status",
-        accuracy: 80,
+        accuracy: 75,
         basePower: 0,
         pp: 5,
         priority: 0,

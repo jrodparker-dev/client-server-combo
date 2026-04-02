@@ -7781,97 +7781,88 @@ export const Items: import('../sim/dex-items').ItemDataTable = {
 	},
 	
   typedice: {
-    name: "Type Dice",
-    shortDesc: "On use of a damaging move: holder becomes a random type. If the move matches that type, its power is doubled.",
-    fling: {
-			basePower: 60,
-		},
-
-    // We want to set the type BEFORE damage calcs, and only for the holder's own moves.
-    onBeforeMove(source, target, move) {
-      if (!move || move.category === 'Status') return;
-
-      // Build a list of eligible types (exclude weird/engine types if present).
-      const allTypes = this.dex.types.names().filter(t =>
-        t !== 'Stellar' && t !== '???'
-      );
-
-      // --- SINGLE TYPE VERSION (inactive) ---
-      // const newType = this.sample(allTypes);
-      // if (source.setType(newType)) {
-        // Visual message for the type change
-        // this.add('-start', source, 'typechange', newType, '[from] item: Type Dice');
-      // }
-
-      // Remember if the move matches the freshly-set type so we can boost power later.
-      // (Store this only for the duration of this move.)
-      // source.itemState.typeDiceMatched = (move.type === newType);
-
-      // --- DUAL TYPE VERSION (active) ---
-      
-       const t1 = this.sample(allTypes);
-       let t2Pool = allTypes.filter(t => t !== t1);
-      // // If you want to allow duplicates (e.g., both same type), remove the filter above.
-       const t2 = this.sample(t2Pool);
-       const newTypes = [t1, t2];
-       if (source.setType(newTypes)) {
-         this.add('-start', source, 'typechange', newTypes.join('/'), '[from] item: Type Dice');
-       }
-       source.itemState.typeDiceMatched = (move.type === t1 || move.type === t2);
-    },
-
-    // Apply the x2 power if we flagged a match in onBeforeMove.
-    onBasePowerPriority: 19,
-    onBasePower(basePower, user, target, move) {
-		// If the Pokémon is Terastallized, do NOT apply the Type Dice doubling.
-      if (user?.terastallized) {
-        return;
-      }
-      // Only boost for the move that triggered the change
-      if (user?.itemState?.typeDiceMatched) {
-        return this.chainModify(2);
-      }
-    },
-
-	// This is how loaded dice does it. Added typedice into the sim battle-actions where loaded dice is to hopefully emulate loaded dice exactly
-	onModifyMove(move) {
-			if (move.multiaccuracy) {
-				delete move.multiaccuracy;
-			}
-		},
-
-
-
-	// Manually set multihit moves with minimums and maximums
-	//onModifyMove(move) {
-//  if (Array.isArray(move.multihit)) {
-  //  const [min, max] = move.multihit;
-   // if (min === 2 && max === 5) move.multihit = [4, 5]
-	//if (min === 5 && max === 10) move.multihit = [7, 10]
-//	if (min === 2 && max === 10) move.multihit = [4, 10]
- // }
-//},
-
-    // Clean up the per-move flag after the action resolves.
-    onAfterMove(source, target, move) {
-      if (!move) return;
-      if (source?.itemState?.typeDiceMatched) {
-        delete source.itemState.typeDiceMatched;
-      }
-    },
-
-    // Also clear the flag if something weird happens (like move failing/being interrupted).
-    onMoveAborted(pokemon, target, move) {
-      if (pokemon?.itemState?.typeDiceMatched) {
-        delete pokemon.itemState.typeDiceMatched;
-      }
-    },
-
-    // Standard item fields
-    gen: 9,
-    // Make sure it actually exists in battle
-    spritenum: 0, // optional; set your own if you have custom sprites
+  name: "Type Dice",
+  shortDesc: "On use of a damaging move: holder becomes a random type or two random types. If the move matches one of them, its power is doubled.",
+  fling: {
+    basePower: 60,
   },
+
+  // We want to set the type BEFORE damage calcs, and only for the holder's own moves.
+  onBeforeMove(source, target, move) {
+    if (!move || move.category === 'Status') return;
+
+    // Build a list of eligible types
+    const allTypes = this.dex.types.names().filter(t =>
+      t !== 'Stellar' && t !== '???'
+    );
+
+    // 50/50 chance: single type or dual type
+    if (this.randomChance(1, 2)) {
+      // SINGLE TYPE
+      const newType = this.sample(allTypes);
+      if (source.setType(newType)) {
+        this.add('-start', source, 'typechange', newType, '[from] item: Type Dice');
+      }
+      source.itemState.typeDiceMatched = (move.type === newType);
+    } else {
+      // DUAL TYPE
+      const t1 = this.sample(allTypes);
+      const t2Pool = allTypes.filter(t => t !== t1);
+      const t2 = this.sample(t2Pool);
+      const newTypes = [t1, t2];
+
+      if (source.setType(newTypes)) {
+		source.m.typeDiceTypes = newTypes.slice();
+        this.add('-start', source, 'typechange', newTypes.join('/'), '[from] item: Type Dice');
+      }
+      source.itemState.typeDiceMatched = (move.type === t1 || move.type === t2);
+    }
+  },
+onSwitchIn(pokemon) {
+    const saved = pokemon?.m?.typeDiceTypes as string[] | undefined;
+    if (!saved?.length || pokemon.terastallized) return;
+    if (pokemon.setType(saved)) {
+      this.add('-start', pokemon, 'typechange', saved.join('/'), '[from] item: Type Dice');
+    }
+  },
+  // Apply the x2 power if we flagged a match in onBeforeMove.
+  onBasePowerPriority: 19,
+  onBasePower(basePower, user, target, move) {
+    // If the Pokémon is Terastallized, do NOT apply the Type Dice doubling.
+    if (user?.terastallized) {
+      return;
+    }
+    // Only boost for the move that triggered the change
+    if (user?.itemState?.typeDiceMatched) {
+      return this.chainModify(2);
+    }
+  },
+
+  // This is how loaded dice does it. Added typedice into the sim battle-actions where loaded dice is to hopefully emulate loaded dice exactly
+  onModifyMove(move) {
+    if (move.multiaccuracy) {
+      delete move.multiaccuracy;
+    }
+  },
+
+  // Clean up the per-move flag after the action resolves.
+  onAfterMove(source, target, move) {
+    if (!move) return;
+    if (source?.itemState?.typeDiceMatched !== undefined) {
+      delete source.itemState.typeDiceMatched;
+    }
+  },
+
+  // Also clear the flag if something weird happens (like move failing/being interrupted).
+  onMoveAborted(pokemon, target, move) {
+    if (pokemon?.itemState?.typeDiceMatched !== undefined) {
+      delete pokemon.itemState.typeDiceMatched;
+    }
+  },
+
+  gen: 9,
+  spritenum: 0,
+},
   normalbrush: {
     name: "Normal Brush",
     shortDesc: "Once: First move used becomes Normal-type, then consumed (pre-damage).",
@@ -8374,54 +8365,46 @@ elegantband: {
   // Run after Serene Grace so it overwrites its effect
   onModifyMovePriority: -1,
   onModifyMove(move) {
-    // Helper: normalize to move.secondaries (PS supports both `secondary` and `secondaries`)
     const pushSecondary = (sec: any) => {
       if (!move.secondaries) move.secondaries = [];
       move.secondaries.push(sec);
     };
 
-    // 1) Target secondaries (effects on the opponent)
-    if (move.secondaries?.length) {
-      this.debug('setting target secondary chances to 30%');
-      for (const secondary of move.secondaries) {
-        // If it already has a chance, clamp it; if not, give it one
-        if (secondary.chance === undefined || secondary.chance > 30) secondary.chance = 30;
-      }
-    }
-
-    // Some moves use singular `secondary` instead of `secondaries`
+    // 1) Normalize singular -> secondaries
     const singular = (move as any).secondary;
     if (singular) {
-      this.debug('normalizing singular secondary and clamping to 30%');
-      if (singular.chance === undefined || singular.chance > 30) singular.chance = 30;
       pushSecondary(singular);
       (move as any).secondary = null;
     }
 
-    // 2) Self effects (like Close Combat / V-create stat drops)
-    // NOTE: `move.self` does NOT support `chance` in typings or engine logic.
-    // To make it probabilistic, convert it into a normal secondary with `self: ...`.
+    // 2) Force ALL target secondaries to 30%
+    if (move.secondaries?.length) {
+      this.debug('forcing all secondary chances to 30%');
+      for (const secondary of move.secondaries) {
+        secondary.chance = 30;
+      }
+    }
+
+    // 3) Convert deterministic self effects into 30% secondary
     if (move.self) {
       const self: any = move.self;
 
-      // Only bother if it's actually doing something to the user
       if (self.boosts || self.volatileStatus || self.sideCondition || self.weather || self.terrain || self.status) {
         this.debug('converting self-effect to 30% secondary');
+
         pushSecondary({
           chance: 30,
           self,
         });
 
-        // Remove deterministic self so it doesn't always happen
         delete (move as any).self;
       }
     }
 
-    // 3) Some moves use selfBoost separately (mainly boosts on hit)
-    // `selfBoost` also doesn't have a typed `chance`, and isn't rolled by engine.
-    // Convert to a secondary the same way.
+    // 4) Convert selfBoost into 30% secondary
     if ((move as any).selfBoost) {
       const selfBoost: any = (move as any).selfBoost;
+
       this.debug('converting selfBoost to 30% secondary');
 
       pushSecondary({
@@ -8435,41 +8418,30 @@ elegantband: {
 },
 
 
-
-
 adrenalineshot: {
   name: "Adrenaline Shot",
-  shortDesc: "At 1/4 HP or less: +3 all stats. Faints at end of the next turn.",
+  shortDesc: "At 1/4 HP or less: +3 all stats. Faints after the next attacking move on a later turn.",
   onUpdate(pokemon) {
-    if (pokemon?.itemState?.adrenalineUsed || pokemon?.itemState?.adrenalineArmed) return;
+    if (pokemon?.m?.adrenalineUsed || pokemon?.m?.adrenalinePendingFaint) return;
     if (pokemon.hp > pokemon.maxhp / 4) return;
 
     this.add('-activate', pokemon, 'item: Adrenaline Shot');
-    this.boost({atk: 3, def: 3, spa: 3, spd: 3, spe: 3, accuracy: -1}, pokemon);
+     this.boost({atk: 3, def: 3, spa: 3, spd: 3, spe: 3}, pokemon);
 
-    pokemon.itemState.adrenalineArmed = true;
-    pokemon.itemState.adrenalineDueTurn = this.turn + 2;
+    pokemon.m.adrenalinePendingFaint = true;
+    pokemon.m.adrenalineTriggerTurn = this.turn;
   },
-  onResidualOrder: 999,
-  onResidual(pokemon) {
-    const due = pokemon?.itemState?.adrenalineDueTurn;
-    if (!due) return;
+  onAfterMove(pokemon, target, move) {
+    if (!pokemon?.m?.adrenalinePendingFaint) return;
+    if (pokemon.fainted || move.category === 'Status') return;
+    if (this.turn <= (pokemon.m.adrenalineTriggerTurn || 0)) return;
 
-    // Faint only after one full turn has passed since activation
-    if (this.turn >= due) {
-      // Optional visible message like your example
-      this.add('-message', pokemon.name + "'s adrenaline wore off!");
-      // Consume then faint
-      pokemon.useItem();
-      if (!pokemon.fainted) pokemon.faint();
+    this.add('-message', pokemon.name + " crashed after the adrenaline surge!");
+    if (!pokemon.fainted) pokemon.faint();
 
-      delete pokemon.itemState.adrenalineDueTurn;
-      delete pokemon.itemState.adrenalineArmed;
-      pokemon.itemState.adrenalineUsed = true;
-    }
-	
+    pokemon.m.adrenalinePendingFaint = false;
+    pokemon.m.adrenalineUsed = true;
   },
-  // Safety: if it leaves the field, keep the timer; it will resolve on a later turn when active.
   gen: 9,
 },
 
@@ -8505,42 +8477,61 @@ armoredshell: {
 },
 typedrugs: {
   name: "Type Drugs",
-  shortDesc: "Each turn: adds another random type to the holder, stacking infinitely.",
+  shortDesc: "Each turn: adds another random type to the holder, up to 4 total types.",
   fling: {
-	basePower: 50
+    basePower: 50,
   },
+
   onTryMove(pokemon, target, move) {
     if (move.id !== 'fling') return;
 
     const allTypes = this.dex.types.names().filter(t => t !== '???' && t !== 'Stellar');
     let cur = pokemon.getTypes();
+
+    // Stop if already at 4 types
+    if (cur.length >= 4) return;
+
     let candidates = allTypes.filter(t => !cur.includes(t));
 
-    // Add up to 3 random extra types
-    for (let i = 0; i < 3 && candidates.length; i++) {
+    // Add up to enough random extra types to reach 4 total
+    for (let i = 0; i < 3 && candidates.length && cur.length < 4; i++) {
       const addType = this.sample(candidates);
       cur = cur.concat(addType);
       candidates = candidates.filter(t => t !== addType);
     }
 
     if (pokemon.setType(cur)) {
-      this.add('-start', pokemon, 'typechange', cur.join('/'), '[from] item: Type Orb');
-    }},
+		pokemon.m.typeDrugsTypes = cur.slice();
+      this.add('-start', pokemon, 'typechange', cur.join('/'), '[from] item: Type Drugs');
+    }
+  },
+onSwitchIn(pokemon) {
+    const saved = pokemon?.m?.typeDrugsTypes as string[] | undefined;
+    if (!saved?.length || pokemon.terastallized) return;
+    if (pokemon.setType(saved)) {
+      this.add('-start', pokemon, 'typechange', saved.join('/'), '[from] item: Type Drugs');
+    }
+  },
   onResidual(pokemon) {
-    // Build a list of types not already present
-    const allTypes = this.dex.types.names().filter(t => t !== '???' && t !== 'Stellar');
     const current = pokemon.getTypes();
+
+    // Stop if already at 4 types
+    if (current.length >= 4) return;
+
+    const allTypes = this.dex.types.names().filter(t => t !== '???' && t !== 'Stellar');
     const candidates = allTypes.filter(t => !current.includes(t));
-    
-    if (!candidates.length) return; // already has all types
-    
+
+    if (!candidates.length) return;
+
     const addType = this.sample(candidates);
-    // `addType` gets merged into the pokemon's types list
     const newTypes = current.concat(addType);
+
     if (pokemon.setType(newTypes)) {
+		pokemon.m.typeDrugsTypes = newTypes.slice();
       this.add('-start', pokemon, 'typechange', newTypes.join('/'), '[from] item: Type Drugs');
     }
   },
+
   gen: 9,
 },
 typebulb: {
@@ -8751,7 +8742,7 @@ onSourceModifyDamage(damage, source, target, move) {
 
 isseisglove: {
   name: "Issei's Glove",
-  shortDesc: "On a damaging move: 5% deals 1000 raw dmg, else 15% 3× dmg, else 30% 2× dmg. Consumed on trigger.",
+  shortDesc: "On a damaging move: 4% OHKO, else 6% 3× dmg, else 10% 2× dmg, else 30% 1.75× dmg, else 50% 1.5× dmg. Consumed on trigger.",
 
   // Decide the outcome once per move use, but DON'T consume yet.
   onModifyMove(move, pokemon) {
@@ -8761,41 +8752,51 @@ isseisglove: {
 
     const r = this.random(100);
 
-if (r < 5) {             
-    mem.isseiOutcome = 'raw';   // 5%
-}
-else if (r < 20) {       
-    mem.isseiOutcome = 'x3';    // 15%
-}
-else if (r < 50) {       
-    mem.isseiOutcome = 'x2';    // 30%
-}
-else {                   
-    mem.isseiOutcome = null;    // 50%
-}
+    if (r < 4) {
+      mem.isseiOutcome = 'ohko';   // 4%
+    } else if (r < 10) {
+      mem.isseiOutcome = 'x3';     // 6%
+    } else if (r < 20) {
+      mem.isseiOutcome = 'x2';     // 10%
+    } else if (r < 50) {
+      mem.isseiOutcome = 'x175';   // 30%
+    } else {
+      mem.isseiOutcome = 'x150';   // 50%
+    }
   },
 
-  // Apply 2× / 3× (now we consume + announce the first time we apply)
+  // Apply 1.5× / 1.75× / 2× / 3×
   onBasePower(basePower, source, target, move) {
     const mem = (source as any).m;
     const outcome = mem?.isseiOutcome;
-    if (outcome !== 'x2' && outcome !== 'x3') return;
+    if (!['x150', 'x175', 'x2', 'x3'].includes(outcome)) return;
 
     // consume+announce once (covers multihit)
     if (!mem.isseiConsumed) {
       if (source.useItem()) {
-        if (outcome === 'x3') this.add('-message', 'BOOOOOOST!!!!');
-        else this.add('-message', 'BOOST!');
+        if (outcome === 'x3') {
+          this.add('-message', 'BOOOOOOST!!!!');
+        } else if (outcome === 'x2') {
+          this.add('-message', 'BOOST!!');
+        } else if (outcome === 'x175') {
+          this.add('-message', 'BOOST!');
+        } else {
+          this.add('-message', 'boost!');
+        }
       }
       mem.isseiConsumed = true;
     }
-    return this.chainModify(outcome === 'x3' ? 3 : 2);
+
+    if (outcome === 'x3') return this.chainModify(3);
+    if (outcome === 'x2') return this.chainModify(2);
+    if (outcome === 'x175') return this.chainModify([7, 4]); // 1.75x
+    return this.chainModify([3, 2]); // 1.5x
   },
 
-  // Apply raw 1000 damage (replaces the normal calc)
+  // Apply OHKO effect
   onModifyDamage(damage, source, target, move) {
     const mem = (source as any).m;
-    if (mem?.isseiOutcome !== 'raw') return;
+    if (mem?.isseiOutcome !== 'ohko') return;
 
     if (!mem.isseiConsumed) {
       if (source.useItem()) {
@@ -8803,7 +8804,8 @@ else {
       }
       mem.isseiConsumed = true;
     }
-    return 1000; // flat damage, ignores typing/resists/etc.
+
+    return target.maxhp; // effectively OHKO damage
   },
 
   // Cleanup after the action (hit, miss, or aborted)
