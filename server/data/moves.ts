@@ -28467,12 +28467,70 @@ serenefocus: {
 		flags: {metronome: 1},
 		sideCondition: 'puddle',
 		condition: {
-			duration: 5,
+			duration: 0,
 			onStart(side) {
+				this.effectState.electrifiedTurns = 0;
+				this.effectState.fireSpent = false;
 				this.add('-sidestart', side, 'move: Puddle');
 			},
 			onDamagingHit(damage, target, source, move) {
-				if (move.type === 'Electric') this.effectState.electrified = true;
+				if (move.type === 'Electric') {
+					this.effectState.electrifiedTurns = 3;
+					this.add('-message', `${target.side.name}'s puddle became electrified!`);
+				}
+			},
+			onSwap(target) {
+				if (this.effectState.electrifiedTurns > 0) {
+					target.trySetStatus('par', target.side.foe.active[0], this.dex.conditions.get('puddle'));
+					return;
+				}
+				if (target.hasType('Ground')) {
+					target.side.removeSideCondition('puddle');
+					this.add('-message', `${target.side.name}'s puddle was absorbed by the ground!`);
+				}
+			},
+			onSwitchIn(target) {
+				if (this.effectState.electrifiedTurns > 0) {
+					target.trySetStatus('par', target.side.foe.active[0], this.dex.conditions.get('puddle'));
+					return;
+				}
+				if (target.hasType('Ground')) {
+					target.side.removeSideCondition('puddle');
+					this.add('-message', `${target.side.name}'s puddle was absorbed by the ground!`);
+				}
+			},
+			onAnyBasePower(basePower, attacker, defender, move) {
+				if (!move || move.category === 'Status') return;
+				const affectedSide = this.effectState.target as any;
+				if (move.type === 'Water' && (attacker.side === affectedSide || defender.side === affectedSide)) {
+					return this.chainModify([5, 4]); // 1.25x
+				}
+				if (
+					move.type === 'Fire' &&
+					!this.effectState.fireSpent &&
+					this.effectState.electrifiedTurns <= 0 &&
+					(attacker.side === affectedSide || defender.side === affectedSide)
+				) {
+					this.effectState.fireSpent = true;
+					affectedSide.removeSideCondition('puddle');
+					return this.chainModify(0.5);
+				}
+			},
+			onAnyDamagingHit(damage, target, source, move) {
+				if (this.effectState.electrifiedTurns > 0) return;
+				if (move?.type === 'Flying' && target.side === this.effectState.target) {
+					target.side.removeSideCondition('puddle');
+					this.add('-message', `${target.side.name}'s puddle was blown away!`);
+				}
+			},
+			onResidualOrder: 26,
+			onResidual(side) {
+				if (this.effectState.electrifiedTurns > 0) {
+					this.effectState.electrifiedTurns--;
+					if (this.effectState.electrifiedTurns === 0) {
+						this.add('-message', `${side.name}'s puddle returned to normal.`);
+					}
+				}
 			},
 			onEnd(side) {
 				this.add('-sideend', side, 'move: Puddle');

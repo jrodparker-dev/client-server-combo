@@ -20499,7 +20499,7 @@ oinkolognemega: {
 		name: "Skarnash",
 		types: ["Bug", "Normal"],
 		baseStats: {hp: 80, atk: 100, def: 70, spa: 60, spd: 70, spe: 120},
-		abilities: {0: "Echo Messenger"},
+		abilities: {0: "Echo Danger"},
 		weightkg: 50,
 		eggGroups: ["Undiscovered"],
 	},

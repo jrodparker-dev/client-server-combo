@@ -10738,7 +10738,7 @@ this.add('-start', pokemon, 'typechange', cur);
 
 valorsgrip: {
   name: "Valor's Grip",
-  shortDesc: "Once/battle: survive a fatal hit at 1 HP. Next turn: Fire/Ground moves 1.3×.",
+  shortDesc: "Once/battle: survive a fatal hit at 1 HP. Next turn: Fire/Ground moves 1.25×.",
   onStart(pokemon) {
 const cur = pokemon.getTypes(true).join('/'); // runtime types 
 const base = pokemon.species.types.join('/'); // species types 
@@ -10771,7 +10771,7 @@ this.add('-start', pokemon, 'typechange', cur);
       this.effectState.boostTurn === this.turn &&
       move && (move.type === 'Fire' || move.type === 'Ground')
     ) {
-      return this.chainModify([13, 10]); // 1.3x
+      return this.chainModify([5, 4]); // 1.25x
     }
   },
 },
@@ -10808,7 +10808,7 @@ echomessenger: {
     this.add('-start', pokemon, 'typechange', cur);
 
     // Announce so the opponent knows the first move will have priority
-    this.add('-ability', pokemon, 'Echo Messenger');
+    this.add('-ability', pokemon, 'Echo Danger');
     this.add('-message', `${pokemon.name} is poised to act with priority!`);
 
     // Per-Pokémon persistent scratch
@@ -10873,7 +10873,7 @@ echodanger: {
     const base = pokemon.species.types.join('/'); // species types
     this.add('-start', pokemon, 'typechange', cur);
 
-    this.add('-ability', pokemon, 'Echo Messenger');
+    this.add('-ability', pokemon, 'Echo Danger');
     this.add('-message', `${pokemon.name} is poised to act with priority!`);
 
     // Reset per-entry state so the "echo" button can appear on this entry
@@ -12657,6 +12657,7 @@ typethief: {
   onDamage(damage, target, source, effect) {
     // Phase 1 -> Phase 2 transition
     if (damage < target.hp) return;
+    if (target.species.baseSpecies !== 'Mondra') return;
 
     // @ts-ignore
     const m = ((target as any).m ??= {});
@@ -12768,6 +12769,7 @@ typethief: {
   onDamage(damage, target, source, effect) {
     // Phase 2 -> Phase 3 transition
     if (damage < target.hp) return;
+    if (target.species.baseSpecies !== 'Mondra') return;
 
     // @ts-ignore
     const m = ((target as any).m ??= {});
