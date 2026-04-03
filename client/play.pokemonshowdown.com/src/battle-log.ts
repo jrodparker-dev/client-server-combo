@@ -1181,13 +1181,14 @@ export class BattleLog {
 		buf += '<div class="wrapper replay-wrapper" style="max-width:1180px;margin:0 auto">\n';
 		buf += '<input type="hidden" name="replayid" value="' + replayid + '" />\n';
 		buf += '<div class="battle"></div><div class="battle-log"></div><div class="replay-controls"></div><div class="replay-controls-2"></div>\n';
-		buf += `<h1 style="font-weight:normal;text-align:center"><strong>${BattleLog.escapeHTML(battle.tier)}</strong><br /><a href="http://${Config.routes.users}/${toID(battle.p1.name)}" class="subtle" target="_blank">${BattleLog.escapeHTML(battle.p1.name)}</a> vs. <a href="http://${Config.routes.users}/${toID(battle.p2.name)}" class="subtle" target="_blank">${BattleLog.escapeHTML(battle.p2.name)}</a></h1>\n`;
+		buf += `<h1 style="font-weight:normal;text-align:center"><strong>${BattleLog.escapeHTML(battle.tier)}</strong><br /><a href="https://${Config.routes.users}/${toID(battle.p1.name)}" class="subtle" target="_blank">${BattleLog.escapeHTML(battle.p1.name)}</a> vs. <a href="https://${Config.routes.users}/${toID(battle.p2.name)}" class="subtle" target="_blank">${BattleLog.escapeHTML(battle.p2.name)}</a></h1>\n`;
 		buf += '<script type="text/plain" class="battle-log-data">' + battle.stepQueue.join('\n').replace(/\//g, '\\/') + '</script>\n'; // lgtm [js/incomplete-sanitization]
 		buf += '</div>\n';
 		buf += '<div class="battle-log battle-log-inline"><div class="inner">' + battle.scene.log.elem.innerHTML + '</div></div>\n';
 		buf += '</div>\n';
 		buf += '<script>\n';
-		buf += `let daily = Math.floor(Date.now()/1000/60/60/24);document.write('<script src="http://191.101.232.116//js/replay-embed.js?version'+daily+'"></'+'script>');\n`;
+		buf += `window.__PSReplayConfig={clientBase:'https://${Config.routes.client}',resourcePrefix:'https://raw.githubusercontent.com/jrodparker-dev/pokemon-sprites/main/'};\n`;
+		buf += `let daily = Math.floor(Date.now()/1000/60/60/24);let s=document.createElement('script');s.src='https://${Config.routes.client}/js/replay-embed.js?version='+daily;s.onerror=function(){let f=document.createElement('script');f.src='https://play.pokemonshowdown.com/js/replay-embed.js?version='+daily;document.head.appendChild(f);};document.head.appendChild(s);\n`;
 		buf += '</script>\n';
 		return buf;
 	}
