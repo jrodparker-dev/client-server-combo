@@ -35,7 +35,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 	},
 
 	//Comment out these custom ones before building the client or it throws errors
-	
+	/*
 	{
 		name: "[Custom] Random Battle",
 		desc: 'Random Teams of Pokemon with Jordans sets',
@@ -57,7 +57,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		team: 'randomCamo',
 		ruleset: ['Obtainable', 'Species Clause', 'Team Preview', 'Camomons Mod', 'HP Percentage Mod', 'Cancel Mod', 'Sleep Clause Mod', 'Illusion Level Mod']
 	},
-
+*/
 	 // End comment
 	{
 		name: "[Gen 9] Unrated Random Battle",

@@ -9449,11 +9449,18 @@ allure: {
 },
 bartender: {
 	name: "Bartender",
-	shortDesc: "After each move, gains a random buff. After 4 turns active, becomes Truant.",
+	shortDesc: "After each move, gains a random drink effect. After 4 turns active, becomes Truant.",
 	rating: 3.5,
+
 	onStart(pokemon) {
 		this.effectState.turnsActive = 0;
+
+		// Pending next-move drink effects
+		this.effectState.ginTonicTurn = 0;
+		this.effectState.moscowMuleTurn = 0;
+		this.effectState.whiskeyTurn = 0;
 	},
+
 	onResidual(pokemon) {
 		this.effectState.turnsActive = (this.effectState.turnsActive || 0) + 1;
 		if (this.effectState.turnsActive >= 4 && pokemon.ability !== 'truant') {
@@ -9461,34 +9468,123 @@ bartender: {
 			this.add('-ability', pokemon, 'Truant', '[from] ability: Bartender');
 		}
 	},
-	onAfterMoveSecondarySelf(pokemon, target, move) {
+
+	// Apply "next move" drink effects
+	onModifyMove(move, pokemon) {
 		if (!move || move.category === 'Status') return;
+		if (!pokemon.hp) return;
+
+		// Gin and Tonic: next damaging move gets +1 crit ratio
+		if ((this.effectState.ginTonicTurn || 0) < this.turn) {
+			move.critRatio = (move.critRatio || 0) + 1;
+		}
+
+		// Moscow Mule: next damaging move gets +20 accuracy
+		if ((this.effectState.moscowMuleTurn || 0) < this.turn) {
+			if (typeof move.accuracy === 'number') {
+				move.accuracy += 20;
+			}
+		}
+
+		// Whiskey: next damaging move forces target to switch after damage
+		if ((this.effectState.whiskeyTurn || 0) < this.turn) {
+			move.forceSwitch = true;
+		}
+	},
+
+	// Moscow Mule: next damaging move gets +20 BP
+	onBasePower(basePower, attacker, defender, move) {
+		if (!move || move.category === 'Status') return;
+		if ((this.effectState.moscowMuleTurn || 0) < this.turn) {
+			return basePower + 20;
+		}
+	},
+
+	onAfterMoveSecondarySelf(pokemon, target, move) {
+		if (!move) return;
+
+		// Consume pending next-move effects after the next damaging move is actually used
+		if (move.category !== 'Status') {
+			if ((this.effectState.ginTonicTurn || 0) < this.turn) {
+				this.damage(pokemon.baseMaxhp / 8, pokemon);
+				this.effectState.ginTonicTurn = 0;
+			}
+			if ((this.effectState.moscowMuleTurn || 0) < this.turn) {
+				this.effectState.moscowMuleTurn = 0;
+			}
+			if ((this.effectState.whiskeyTurn || 0) < this.turn) {
+				this.effectState.whiskeyTurn = 0;
+			}
+		}
+
 		const drink = this.sample([
-			{name: 'Margarita', boost: {atk: 1, spa: 1}},
-			{name: 'Old Fashioned', boost: {def: 1, spd: 1}},
-			{name: 'Gin and Tonic', boost: {critRatio: 1}},
+			'Margarita',
+			'Old Fashioned',
+			'Vodka',
+			'Rum and Coke',
+			'Mojito',
+			'Gin and Tonic',
+			'Moscow Mule',
+			'Whiskey',
+			'Wine',
 		] as const);
-		this.add('-message', `${pokemon.name} drank a ${drink.name} and was powered up!`);
-		if (drink.name === 'Gin and Tonic') {
-			pokemon.addVolatile('focusenergy');
-			this.damage(pokemon.baseMaxhp / 8, pokemon, pokemon, this.dex.moves.get('struggle'));
-		} else {
-			this.boost(drink.boost as SparseBoostsTable, pokemon);
+
+		this.add('-message', `${pokemon.name} drank a ${drink}!`);
+
+		switch (drink) {
+		case 'Margarita':
+			// +1 Atk +1 SpAtk
+			this.boost({atk: 1, spa: 1}, pokemon);
+			break;
+
+		case 'Old Fashioned':
+			// +1 Def +1 SpDef
+			this.boost({def: 1, spd: 1}, pokemon);
+			break;
+
+		case 'Vodka':
+			// -1 Spe + Confusion
+			this.boost({spe: -1}, pokemon);
+			pokemon.addVolatile('confusion');
+			break;
+
+		case 'Rum and Coke':
+			// +2 Spe -1 Acc
+			this.boost({spe: 2, accuracy: -1}, pokemon);
+			break;
+
+		case 'Mojito':
+			// Restore 25% max HP
+			this.heal(pokemon.baseMaxhp / 4, pokemon);
+			break;
+
+		case 'Gin and Tonic':
+			// Next damaging move: +1 crit ratio, then user takes 1/8 recoil after that move
+			this.effectState.ginTonicTurn = this.turn;
+			this.add('-message', `${pokemon.name}'s next attack will have an increased crit ratio!`);
+			break;
+
+		case 'Moscow Mule':
+			// Next damaging move: +20 accuracy and +20 BP
+			this.effectState.moscowMuleTurn = this.turn;
+			this.add('-message', `${pokemon.name}'s next attack got stronger and more accurate!`);
+			break;
+
+		case 'Whiskey':
+			// Next damaging move forces the opponent to switch
+			this.effectState.whiskeyTurn = this.turn;
+			this.add('-message', `${pokemon.name}'s next attack will force a switch!`);
+			break;
+
+		case 'Wine':
+			// User becomes infatuated
+			// If your fork blocks self-Attract, replace this with a custom volatile.
+			pokemon.addVolatile('attract', pokemon);
+			break;
 		}
 	},
 },
-fatefulstrikes: {
-	name: "Fateful Strikes",
-	shortDesc: "Super-effective attacks have a 30% chance to inflict a random major status.",
-	rating: 3.5,
-	onAfterMoveSecondarySelf(pokemon, target, move) {
-		if (!target || !move || move.category === 'Status') return;
-		if (target.getMoveHitData(move).typeMod <= 0) return;
-		if (!this.randomChance(3, 10)) return;
-		const statuses: (ID | '')[] = ['brn', 'par', 'frz'];
-		target.trySetStatus(this.sample(statuses), pokemon, move);
-	},
-},
+
 firemind: {
 	name: "Firemind",
 	shortDesc: "Levitate. On switch-in/out, adjacent foes lose HP equal to half their level.",
@@ -9542,10 +9638,19 @@ necromancer: {
 },
 nightvision: {
 	name: "Night Vision",
-	shortDesc: "Dark-type moves used by this Pokemon cannot miss.",
+	shortDesc: "Dark-type moves used by this Pokemon cannot miss. On switch-in, foes become weak to Dark.",
 	rating: 3,
+
 	onModifyMove(move) {
 		if (move.type === 'Dark') move.accuracy = true;
+	},
+
+	onStart(pokemon) {
+		for (const target of this.getAllActive()) {
+			if (target === pokemon || target.fainted) continue;
+			target.addVolatile('nightvisionweak');
+			this.add('-message', `${target.name} is exposed to darkness!`);
+		}
 	},
 },
 regalaura: {
@@ -9599,8 +9704,22 @@ underworldveil: {
 	onAnySetWeather(target, source) {
 		if (source && source.side !== this.effectState.target.side) return false;
 	},
-	onAnyTryTerrain(target, source) {
-		if (source && source.side !== this.effectState.target.side) return false;
+
+	onStart(pokemon) {
+		// Clear opposing terrain immediately if one is up
+		if (this.field.terrain && this.field.terrainState?.source?.side !== pokemon.side) {
+			this.add('-activate', pokemon, 'ability: Underworld Veil');
+			this.field.clearTerrain();
+		}
+	},
+
+	onResidualOrder: 27,
+	onResidual(pokemon) {
+		// Keep suppressing opposing terrain while this mon stays active
+		if (this.field.terrain && this.field.terrainState?.source?.side !== pokemon.side) {
+			this.add('-activate', pokemon, 'ability: Underworld Veil');
+			this.field.clearTerrain();
+		}
 	},
 },
 aliensymbiote: {
@@ -9947,7 +10066,7 @@ if (ok) {
 */
 bloodhound: {
   name: "Bloodhound",
-  shortDesc:
+  shortDesc: 
     "When hit by a move, forces the attacker to switch (like Red Card). Once per battle: if at full HP, survives a KO hit at 1 HP. Marks the attacker; if it switches in while this is active, it takes level/3 damage.",
   rating: 4,
 
@@ -10657,7 +10776,7 @@ this.add('-start', pokemon, 'typechange', cur);
   },
 },
 
-/*
+
 echomessenger: {
   name: "Echo Messenger",
   shortDesc: "The first move this Pokémon uses always goes first (+5 priority).",
@@ -10675,7 +10794,7 @@ this.add('-start', pokemon, 'typechange', cur);
     if (move && !this.effectState.used) this.effectState.used = true;
   },
 },
-*/
+
 /*
 echomessenger: {
   name: "Echo Messenger",
@@ -10742,9 +10861,9 @@ echomessenger: {
 },
 */
 
-echomessenger: {
+echodanger: {
 	//Hopefully this one works with the button
-  name: "Echo Messenger",
+  name: "Echo Danger",
   shortDesc:
     "First move used in battle: +3 priority (automatic). After that, first move after each switch-in can be toggled: +1 priority and 0.5× power.",
   rating: 5,

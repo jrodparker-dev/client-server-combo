@@ -24884,7 +24884,7 @@ soulrend: {
   flags: {protect: 1, mirror: 1},
   onModifyMove(move) {
     // Support both 'snow' (Gen 9) and 'hail' just in case
-    const snowy = this.field.isWeather('snow') || this.field.isWeather('hail');
+    const snowy = this.field.isWeather('snowscape') || this.field.isWeather('hail');
     if (snowy) {
       move.accuracy = true;
       // raise any freeze secondary on this move to 30%
@@ -27434,7 +27434,7 @@ bloodoath: {
             }
             for (const weather of [
                 'raindance', 'primordialsea', 'sunnyday', 'desolateland',
-                'sandstorm', 'hail', 'snow',
+                'sandstorm', 'hail', 'snowscape',
             ] as ID[]) {
                 if (this.field.isWeather(weather)) {
                     this.field.clearWeather();
@@ -28119,26 +28119,103 @@ serenefocus: {
 		target: "normal",
 	},
 	anchorsweep: {
-		name: "Anchor Sweep",
-		type: "Water",
-		category: "Physical",
-		basePower: 70,
-		accuracy: 100,
-		pp: 15,
-		priority: 0,
-		shortDesc: "If target switches, strikes before it leaves at higher power.",
-		flags: {protect: 1, mirror: 1, metronome: 1, contact: 1},
-		onAfterHit(target, source) {
-			const hazards: ID[] = ['spikes', 'toxicspikes', 'poop', 'serratedspikes', 'puddle', 'stealthrock', 'stickyweb', 'gmaxsteelsurge', 'gasoline', 'twinvines'];
-			for (const hz of hazards) {
-				if (source.side.removeSideCondition(hz)) break;
+	name: "Anchor Sweep",
+	type: "Water",
+	category: "Physical",
+	basePower: 70,
+	accuracy: 100,
+	pp: 15,
+	priority: 0,
+	shortDesc: "If target switches, strikes before it leaves at 2x power. Clears a hazard on the user's side.",
+	flags: {protect: 1, mirror: 1, metronome: 1, contact: 1},
+
+	basePowerCallback(pokemon, target, move) {
+		if (target.beingCalledBack || target.switchFlag) {
+			this.debug('Anchor Sweep damage boost');
+			return move.basePower * 2;
+		}
+		return move.basePower;
+	},
+
+	beforeTurnCallback(pokemon) {
+		for (const side of this.sides) {
+			if (side.hasAlly(pokemon)) continue;
+			side.addSideCondition('anchorsweep', pokemon);
+			const data = side.getSideConditionData('anchorsweep');
+			if (!data.sources) data.sources = [];
+			data.sources.push(pokemon);
+		}
+	},
+
+	onModifyMove(move, source, target) {
+		if (target?.beingCalledBack || target?.switchFlag) move.accuracy = true;
+	},
+
+	onTryHit(target, pokemon) {
+		target.side.removeSideCondition('anchorsweep');
+	},
+
+	onAfterHit(target, source) {
+		const hazards = [
+			'spikes',
+			'toxicspikes',
+			'poop',
+			'serratedspikes',
+			'puddle',
+			'stealthrock',
+			'stickyweb',
+			'gmaxsteelsurge',
+			'gasoline',
+			'twinvines',
+		] as const;
+
+		for (const hz of hazards) {
+			if (source.side.removeSideCondition(hz as ID)) break;
+		}
+	},
+
+	onEffectiveness(typeMod, target, type) {
+		return typeMod + this.dex.getEffectiveness('Steel', type);
+	},
+
+	condition: {
+		duration: 1,
+		onBeforeSwitchOut(pokemon) {
+			this.debug('Anchor Sweep start');
+			let alreadyAdded = false;
+			pokemon.removeVolatile('destinybond');
+
+			for (const source of this.effectState.sources) {
+				if (!source.isAdjacent(pokemon) || !this.queue.cancelMove(source) || !source.hp) continue;
+
+				if (!alreadyAdded) {
+					this.add('-activate', pokemon, 'move: Anchor Sweep');
+					alreadyAdded = true;
+				}
+
+				if (source.canMegaEvo || source.canUltraBurst || source.canTerastallize) {
+					for (const [actionIndex, action] of this.queue.entries()) {
+						if (action.pokemon === source) {
+							if (action.choice === 'megaEvo') {
+								this.actions.runMegaEvo(source);
+							} else if (action.choice === 'terastallize') {
+								this.actions.terastallize(source);
+							} else {
+								continue;
+							}
+							this.queue.list.splice(actionIndex, 1);
+							break;
+						}
+					}
+				}
+
+				this.actions.runMove('anchorsweep', source, source.getLocOf(pokemon));
 			}
 		},
-		onEffectiveness(typeMod, target, type) {
-			return typeMod + this.dex.getEffectiveness('Steel', type);
-		},
-		target: "normal",
 	},
+
+	target: "normal",
+},
 	embercurrent: {
 		name: "Ember Current",
 		type: "Fire",
@@ -28269,7 +28346,7 @@ serenefocus: {
 		accuracy: 95,
 		pp: 10,
 		priority: 0,
-		shortDesc: "Inflicts Bleeding; user takes recoil.",
+		shortDesc: "Inflicts Bleeding; user takes recoil. 2x power against bleeding targets",
 		flags: {bite: 1, contact: 1, protect: 1, mirror: 1, metronome: 1},
 		recoil: [1, 16],
 		basePowerCallback(pokemon, target, move) {
@@ -28279,17 +28356,52 @@ serenefocus: {
 		target: "normal",
 	},
 	moonpetalveil: {
-		name: "Moonpetal Veil",
-		type: "Fairy",
-		category: "Status",
-		basePower: 0,
-		accuracy: true,
-		pp: 10,
-		priority: 0,
-		shortDesc: "5 turns of passive healing and status protection.",
-		flags: {snatch: 1, metronome: 1},
-		target: "self",
+	name: "Moonpetal Veil",
+	type: "Fairy",
+	category: "Status",
+	basePower: 0,
+	accuracy: true,
+	pp: 10,
+	priority: 0,
+	shortDesc: "5 turns of passive healing and status protection.",
+	flags: {snatch: 1, metronome: 1},
+	target: "self",
+
+	onHit(pokemon) {
+		pokemon.side.addSideCondition('moonpetalveil');
 	},
+
+	condition: {
+		duration: 5,
+
+		onStart(side) {
+			this.add('-sidestart', side, 'Moonpetal Veil');
+		},
+
+		onResidualOrder: 5,
+		onResidualSubOrder: 3,
+		onResidual(side) {
+			for (const pokemon of this.getAllActive()) {
+	if (!pokemon || pokemon.fainted) continue;
+	if (pokemon.side !== (side as any)) continue;
+
+	this.heal(pokemon.baseMaxhp / 16, pokemon);
+}
+		},
+
+		onSetStatus(status, target, source, effect) {
+			// Block status conditions (like Safeguard)
+			if (target.side === this.effectState.target) {
+				this.add('-activate', target, 'move: Moonpetal Veil');
+				return false;
+			}
+		},
+
+		onEnd(side) {
+			this.add('-sideend', side, 'Moonpetal Veil');
+		},
+	},
+},
 	nullpulse: {
 		name: "Null Pulse",
 		type: "Ghost",
@@ -28315,10 +28427,10 @@ serenefocus: {
 		accuracy: 100,
 		pp: 10,
 		priority: 0,
-		shortDesc: "Ground coverage; may freeze.",
+		shortDesc: "Ground coverage; may freeze. Priority in snow or sandstorm",
 		flags: {protect: 1, mirror: 1, metronome: 1},
 		onModifyPriority(priority) {
-			if (this.field.isWeather(['snow', 'sandstorm'])) return priority + 1;
+			if (this.field.isWeather(['snowscape', 'sandstorm'])) return priority + 1;
 		},
 		secondary: {chance: 10, status: 'frz'},
 		onEffectiveness(typeMod, target, type) {
@@ -28337,7 +28449,7 @@ serenefocus: {
 		shortDesc: "Breaks screens before damage; 10% chance to confuse.",
 		flags: {protect: 1, mirror: 1, metronome: 1},
 		onTryHit(target) {
-			const screens: ID[] = ['reflect', 'lightscreen', 'auroraveil', 'clarityveil', 'darkmoon'];
+			const screens = ['reflect', 'lightscreen', 'auroraveil', 'clarityveil', 'darkmoon'];
 			for (const sc of screens) target.side.removeSideCondition(sc);
 		},
 		secondary: {chance: 10, volatileStatus: 'confusion'},
@@ -28376,7 +28488,7 @@ serenefocus: {
 		accuracy: 100,
 		pp: 15,
 		priority: 0,
-		shortDesc: "Heals user for 50% of damage dealt.",
+		shortDesc: "Heals user for 50% of damage dealt. Deals extra damage if target switches next turn",
 		flags: {protect: 1, mirror: 1, metronome: 1},
 		drain: [1, 2],
 		volatileStatus: 'seedsiphon',
@@ -28438,20 +28550,6 @@ serenefocus: {
 		shortDesc: "Lowers the target's Speed.",
 		flags: {protect: 1, mirror: 1, metronome: 1},
 		secondary: {chance: 100, boosts: {spe: -1}},
-		target: "normal",
-	},
-	wingofthefae: {
-		name: "Wing of the Fae",
-		type: "Fairy",
-		category: "Special",
-		basePower: 40,
-		accuracy: 100,
-		pp: 10,
-		priority: 0,
-		shortDesc: "Hits twice. 30% chance to confuse each hit.",
-		flags: {protect: 1, mirror: 1, metronome: 1},
-		multihit: 2,
-		secondary: {chance: 30, volatileStatus: 'confusion'},
 		target: "normal",
 	},
 };

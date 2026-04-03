@@ -1962,6 +1962,18 @@ echomessengerhalfpower: {
 		return this.chainModify(0.5);
 	}
 },
+nightvisionweak: {
+		name: 'Night Vision Weakness',
 
+		onEffectiveness(typeMod, target, type, move) {
+			if (!move || move.type !== 'Dark') return;
+
+			// Make Dark always at least super effective (+1 stage)
+			if (typeMod <= 0) return 1;
+
+			// If already super effective, amplify it further
+			return typeMod + 1;
+		},
+	},
 
 };

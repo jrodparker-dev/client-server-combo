@@ -20253,7 +20253,7 @@ oinkolognemega: {
 		num: -1002,
 		name: "Grawshawg",
 		types: ["Blood", "Dark"],
-		baseStats: {hp: 150, atk: 150, def: 50, spa: 50, spd: 50, spe: 150},
+		baseStats: {hp: 150, atk: 150, def: 75, spa: 75, spd: 75, spe: 50},
 		abilities: {0: "Bloodhound"},
 		weightkg: 50,
 		eggGroups: ["Undiscovered"],
