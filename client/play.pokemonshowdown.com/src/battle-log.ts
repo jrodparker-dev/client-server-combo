@@ -1186,10 +1186,7 @@ export class BattleLog {
 		buf += '</div>\n';
 		buf += '<div class="battle-log battle-log-inline"><div class="inner">' + battle.scene.log.elem.innerHTML + '</div></div>\n';
 		buf += '</div>\n';
-		buf += '<script>\n';
-		buf += `window.__PSReplayConfig={clientBase:'https://${Config.routes.client}',resourcePrefix:'https://raw.githubusercontent.com/jrodparker-dev/pokemon-sprites/main/'};\n`;
-		buf += `let daily = Math.floor(Date.now()/1000/60/60/24);let s=document.createElement('script');s.src='https://${Config.routes.client}/js/replay-embed.js?version='+daily;s.onerror=function(){let f=document.createElement('script');f.src='https://play.pokemonshowdown.com/js/replay-embed.js?version='+daily;document.head.appendChild(f);};document.head.appendChild(s);\n`;
-		buf += '</script>\n';
+		buf += '<script src="https://play.pokemonshowdown.com/js/replay-embed.js"></script>\n';
 		return buf;
 	}
 

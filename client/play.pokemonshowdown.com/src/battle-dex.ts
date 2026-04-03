@@ -179,14 +179,9 @@ const Dex = new class implements ModdedDex {
 
 	pokeballs: string[] | null = null;
 
-	private readonly replayConfig = window.__PSReplayConfig || {};
-	private readonly defaultAssetPrefix = (() => {
-		const protocol = (window.document?.location?.protocol !== 'http:') ? 'https:' : '';
-		return `${protocol}//${'play.pokemonshowdown.com'}/`;
-	})();
 	readonly modResourcePrefix = 'https://raw.githubusercontent.com/scoopapa/dh2/master/data/mods/';
-	resourcePrefix = ('' + (this.replayConfig.resourcePrefix || this.replayConfig.clientBase || this.defaultAssetPrefix)).replace(/\/?$/, '/');
-	fxPrefix = ('' + (this.replayConfig.fxPrefix || `${this.resourcePrefix}fx/`)).replace(/\/?$/, '/');
+	resourcePrefix = 'https://raw.githubusercontent.com/jrodparker-dev/pokemon-sprites/main/';
+	fxPrefix = 'https://raw.githubusercontent.com/jrodparker-dev/pokemon-sprites/main/fx/';
 
 	loadedSpriteData = {xy: 1, bw: 0};
 	moddedDexes: {[mod: string]: ModdedDex} = {};
