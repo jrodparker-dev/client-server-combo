@@ -38,7 +38,7 @@ export interface ChosenAction {
 	mega?: boolean | null; // true if megaing or ultra bursting
 	megax?: boolean | null; // true if megaing x
 	megay?: boolean | null; // true if megaing y
-	echo?: boolean | null; // using Echo Messenger Priority
+	echo?: boolean | null; // using Echo Danger priority
 	zmove?: string; // if zmoving, the name of the zmove
 	maxMove?: string; // if dynamaxed, the name of the max move
 	terastallize?: string; // if terastallizing, tera type
@@ -614,11 +614,11 @@ export class Side {
 		}
 		const move = this.battle.dex.moves.get(moveid);
 
-		// Echo Messenger toggle
+		// Echo Danger toggle
 const echo = (event === 'echo');
 const canEcho = (this.activeRequest as MoveRequest)?.active[pokemon.position]?.canEcho;
 if (echo && !canEcho) {
-  return this.emitChoiceError(`Can't move: ${pokemon.name} can't use Echo Messenger right now.`);
+  return this.emitChoiceError(`Can't move: ${pokemon.name} can't use Echo Danger right now.`);
 }
 
 

@@ -1214,6 +1214,26 @@ export class BattleScene implements BattleSceneStub {
 				time: instant ? 0 : 300,
 			});
 			break;
+		case 'puddle':
+			const puddle = new Sprite(BattleEffects.puddle, {
+				display: 'block',
+				x,
+				y,
+				z: side.behind(-27),
+				xscale: 1,
+				yscale: 0,
+				opacity: 0.4,
+			}, this);
+			this.$spritesFront[spriteIndex].append(puddle.$el!);
+			this.sideConditions[siden][id] = [puddle];
+			puddle.anim({
+				opacity: 0.7,
+				time: instant ? 0 : 400,
+			}).anim({
+				opacity: 0.3,
+				time: instant ? 0 : 300,
+			});
+			break;
 		case 'steamfield': {
   const ref = this.sideConditions[siden][id];
   if (ref && ref[0]) ref[0].destroy();
@@ -1401,35 +1421,13 @@ case 'gasoline': {
 			if (serratedSpikeArray.length < 1 && serratedLevels >= 1) {
 				const serrated1 = new Sprite(BattleEffects.serratedspike, {
 					display: 'block',
-					x: x - 5,
-					y: y - 58,
+					x: x + side.leftof(-72),
+					y: y - 64,
 					z: side.z,
 					scale: 0.3,
 				}, this);
 				this.$spritesFront[spriteIndex].append(serrated1.$el!);
 				serratedSpikeArray.push(serrated1);
-			}
-			if (serratedSpikeArray.length < 2 && serratedLevels >= 2) {
-				const serrated2 = new Sprite(BattleEffects.serratedspike, {
-					display: 'block',
-					x: x + 48,
-					y: y - 60,
-					z: side.z,
-					scale: .3,
-				}, this);
-				this.$spritesFront[spriteIndex].append(serrated2.$el!);
-				serratedSpikeArray.push(serrated2);
-			}
-			if (serratedSpikeArray.length < 3 && serratedLevels >= 3) {
-				const serrated3 = new Sprite(BattleEffects.serratedspike, {
-					display: 'block',
-					x: x + 68,
-					y: y - 55,
-					z: side.z,
-					scale: .3,
-				}, this);
-				this.$spritesFront[spriteIndex].append(serrated3.$el!);
-				serratedSpikeArray.push(serrated3);
 			}
 			break;
 		case 'toxicspikes':
@@ -2012,6 +2010,7 @@ export class PokemonSprite extends Sprite {
 		lightscreen: ['Light Screen', 'good'],
 		reflect: ['Reflect', 'good'],
 		steamfield: ['Steam Field', 'bad'],
+		puddle: ['Puddle', 'bad'],
 	};
 	forme = '';
 	cryurl: string | undefined = undefined;
@@ -3268,6 +3267,10 @@ const BattleEffects: {[k: string]: SpriteData} = {
 	},
 	steamfield: {
 		url: 'steamfield.png',
+		w: 100, h: 100,
+	},
+	puddle: {
+		url: 'puddle.png',
 		w: 100, h: 100,
 	},
 	gasoline: {

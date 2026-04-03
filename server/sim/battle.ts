@@ -2689,12 +2689,12 @@ if (effect && effect.effectType === 'Move') {
 			priority = this.singleEvent('ModifyPriority', move, null, action.pokemon, null, null, priority);
 			priority = this.runEvent('ModifyPriority', action.pokemon, null, move, priority);
 						// -----------------------------
-			// Echo Messenger (server action flag + stateful priority)
+			// Echo Danger (server action flag + stateful priority)
 			// First move of the entire battle: +3 priority (always)
 			// On later switch-ins: first move can optionally be "echo" (+1 priority + half power)
 			// -----------------------------
 			const p = action.pokemon;
-			if (p?.hasAbility?.('echomessenger')) {
+			if (p?.hasAbility?.('echodanger')) {
 				// @ts-ignore - persistent scratch space
 				const m = ((p as any).m ??= {});
 				const battleFirstUsed = !!m.echoMessengerBattleFirstMoveUsed;
@@ -2805,7 +2805,7 @@ if (effect && effect.effectType === 'Move') {
 			if (!action.pokemon.isActive) return false;
 			if (action.pokemon.fainted) return false;
 
-			// Echo Messenger half-power applies only when the action was "echo" and eligible
+			// Echo Danger half-power applies only when the action was "echo" and eligible
 			if ((action as any).echoMessengerHalfPower) {
 				action.pokemon.addVolatile('echomessengerhalfpower');
 			}
@@ -2820,8 +2820,8 @@ if (effect && effect.effectType === 'Move') {
 				action.pokemon.removeVolatile('echomessengerhalfpower');
 			}
 
-			// Consume Echo Messenger state after the Pokémon successfully attempts its first move while active
-			if (action.pokemon.hasAbility?.('echomessenger')) {
+			// Consume Echo Danger state after the Pokémon successfully attempts its first move while active
+			if (action.pokemon.hasAbility?.('echodanger')) {
 				// @ts-ignore - persistent scratch space
 				const m = ((action.pokemon as any).m ??= {});
 				if (!m.echoMessengerBattleFirstMoveUsed) m.echoMessengerBattleFirstMoveUsed = true;

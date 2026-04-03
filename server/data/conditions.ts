@@ -1957,7 +1957,7 @@ serenefocus: {
 	},
 },
 echomessengerhalfpower: {
-	name: "Echo Messenger (Half Power)",
+	name: "Echo Danger (Half Power)",
 	onBasePower(basePower) {
 		return this.chainModify(0.5);
 	}
