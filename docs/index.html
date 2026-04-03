@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Static Replay Viewer</title>
+  <link rel="stylesheet" href="https://play.pokemonshowdown.com/style/font-awesome.css" />
+  <link rel="stylesheet" href="https://play.pokemonshowdown.com/style/battle.css" />
+  <link rel="stylesheet" href="https://play.pokemonshowdown.com/style/replay.css" />
+  <link rel="stylesheet" href="https://play.pokemonshowdown.com/style/utilichart.css" />
+  <style>
+    body { font-family: Arial, sans-serif; margin: 0; padding: 16px; background: #f6f7fb; }
+    .layout { max-width: 1200px; margin: 0 auto; }
+    .panel { background: white; border-radius: 8px; padding: 12px; margin-bottom: 12px; }
+    .controls { display: grid; grid-template-columns: 1fr auto; gap: 8px; align-items: center; }
+    .textbox { width: 100%; }
+    .wrapper.replay-wrapper { max-width: 1180px; margin: 0 auto; background: white; border-radius: 8px; padding: 8px; }
+    textarea { width: 100%; min-height: 180px; font-family: monospace; }
+    .status { color: #444; margin-top: 6px; }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <div class="panel">
+      <h1>Static Replay Viewer (GitHub Pages-safe)</h1>
+      <p>Load a replay from a local <code>.log</code>/<code>.json</code>, a URL, or paste raw battle log text.</p>
+      <div class="controls">
+        <input id="sourceUrl" class="textbox" placeholder="Replay URL (example: ./replays/example.json or https://.../battle.log)" />
+        <button id="loadUrl" class="button"><i class="fa fa-cloud-download"></i> Load URL</button>
+      </div>
+      <div class="controls" style="margin-top:8px;">
+        <input id="spriteBaseUrl" class="textbox" placeholder="Sprite base URL (example: https://raw.githubusercontent.com/jrodparker-dev/pokemon-sprites/main/)" />
+        <button id="applySprites" class="button"><i class="fa fa-paint-brush"></i> Apply Sprites</button>
+      </div>
+      <p>
+        <input id="fileInput" type="file" accept=".json,.log,.txt" />
+      </p>
+      <p>
+        <textarea id="logInput" placeholder="Paste raw replay log here (lines beginning with |turn| etc.)"></textarea>
+      </p>
+      <p>
+        <button id="loadText" class="button"><i class="fa fa-play"></i> Render Pasted Log</button>
+      </p>
+      <div class="status" id="status"></div>
+    </div>
+
+    <div class="wrapper replay-wrapper">
+      <div class="battle" style="position: relative"></div>
+      <div class="battle-log"></div>
+      <div class="replay-controls"></div>
+      <div class="replay-controls-2"></div>
+    </div>
+  </div>
+
+  <script src="https://play.pokemonshowdown.com/js/lib/ps-polyfill.js"></script>
+  <script src="https://play.pokemonshowdown.com/config/config.js"></script>
+  <script src="https://play.pokemonshowdown.com/js/lib/jquery-2.2.4.min.js"></script>
+  <script src="https://play.pokemonshowdown.com/js/lib/lodash.core.js"></script>
+  <script src="https://play.pokemonshowdown.com/js/lib/html-sanitizer-minified.js"></script>
+  <script src="https://play.pokemonshowdown.com/js/battle-sound.js"></script>
+  <script src="https://play.pokemonshowdown.com/js/battledata.js"></script>
+  <script src="https://play.pokemonshowdown.com/data/pokedex-mini.js"></script>
+  <script src="https://play.pokemonshowdown.com/data/pokedex-mini-bw.js"></script>
+  <script src="https://play.pokemonshowdown.com/data/graphics.js"></script>
+  <script src="https://play.pokemonshowdown.com/data/pokedex.js"></script>
+  <script src="https://play.pokemonshowdown.com/data/moves.js"></script>
+  <script src="https://play.pokemonshowdown.com/data/abilities.js"></script>
+  <script src="https://play.pokemonshowdown.com/data/items.js"></script>
+  <script src="https://play.pokemonshowdown.com/data/teambuilder-tables.js"></script>
+  <script src="https://play.pokemonshowdown.com/data/mod-sprites.js"></script>
+  <script src="https://play.pokemonshowdown.com/data/mod-config.js"></script>
+  <script src="https://play.pokemonshowdown.com/js/battle-tooltips.js"></script>
+  <script src="https://play.pokemonshowdown.com/js/battle.js"></script>
+  <script src="./replay-viewer.js"></script>
+</body>
+</html>
