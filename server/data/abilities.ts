@@ -10376,9 +10376,6 @@ this.add('-start', pokemon, 'typechange', cur);
     source.addVolatile('trapped', target, this.effect);
     // Optional legacy helper in your fork:
     // source.tryTrap(true);
-
-    source.addVolatile('sting');
-    this.add('-message', `${source.name} is ensnared in deadly threads!`);
   },
 },
 

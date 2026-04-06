@@ -1,0 +1,264 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Static Replay Viewer</title>
+  <link rel="stylesheet" href="https://play.pokemonshowdown.com/style/font-awesome.css" />
+  <link rel="stylesheet" href="https://play.pokemonshowdown.com/style/battle.css" />
+  <link rel="stylesheet" href="https://play.pokemonshowdown.com/style/replay.css" />
+  <link rel="stylesheet" href="https://play.pokemonshowdown.com/style/utilichart.css" />
+  <style>
+    body { font-family: Verdana, Arial, sans-serif; margin: 0; padding: 16px; background: #f3f4f6; color: #111827; }
+    .layout { width: min(1300px, 100%); margin: 0 auto; }
+    .panel { background: #fff; border-radius: 8px; padding: 12px; margin-top: 12px; border: 1px solid #d1d5db; }
+    .controls { display: grid; grid-template-columns: 1fr auto; gap: 8px; align-items: center; }
+    .textbox { width: 100%; }
+    .wrapper {
+      position: relative;
+      width: 955px;
+      max-width: 100%;
+      margin: 0 auto;
+      padding-top: 460px;
+      font-family: Verdana, sans-serif;
+      font-size: 10pt;
+    }
+    .wrapper .mobile-side-log-toggle {
+      display: none;
+      width: auto;
+      border: 1px solid #9ca3af;
+      background: #f9fafb;
+      color: #111827;
+      font-size: 10pt;
+      margin-bottom: 6px;
+      padding: 6px 10px;
+      text-align: left;
+      cursor: pointer;
+    }
+    .wrapper .body.replay-body { min-height: 0; }
+    .wrapper .battle {
+      position: absolute;
+      text-align: left;
+      top: 9px;
+      left: -1px;
+      border: 1px solid #AAAAAA;
+      background: #CFD5DA;
+      color: black;
+      width: 640px;
+      height: 360px;
+      overflow: hidden;
+      margin: 0 !important;
+      flex: 0 0 640px;
+    }
+    .wrapper .innerbattle,
+    .wrapper .weather {
+      width: 640px;
+      height: 360px;
+    }
+    .wrapper .battle-log {
+      position: absolute;
+      text-align: left;
+      border: 1px solid #AAAAAA;
+      background: #EEF2F5;
+      color: black;
+      top: 9px;
+      left: 640px;
+      right: -1px;
+      height: 360px;
+      overflow: auto;
+      overflow-y: scroll;
+      display: block !important;
+      word-wrap: break-word;
+    }
+    .wrapper .replay-controls {
+      position: absolute;
+      top: 373px;
+      left: 5px;
+      right: 0;
+      text-align: left;
+      width: 640px;
+      margin: 0;
+    }
+    .wrapper .replay-controls-2 {
+      position: absolute;
+      top: 415px;
+      left: 5px;
+      right: 0;
+      text-align: left;
+      width: 640px;
+      margin: 0;
+    }
+    .wrapper .battle-log-full {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 12px;
+      border: 1px solid #AAAAAA;
+      background: #EEF2F5;
+      overflow-wrap: anywhere;
+      overflow: auto;
+      max-height: 60vh;
+    }
+    .wrapper .battle-log-full pre {
+      margin: 0;
+      white-space: pre-wrap;
+    }
+    .wrapper .battle-log-full.hidden {
+      display: none;
+    }
+    @media (max-width: 980px) {
+      body { padding: 8px; }
+      .controls { grid-template-columns: 1fr; }
+      .wrapper {
+        width: 100%;
+        padding-top: 0;
+        margin: 0;
+      }
+      .wrapper .mobile-side-log-toggle {
+        display: block;
+      }
+      .wrapper .body.replay-body {
+        display: block;
+        position: relative;
+        min-height: 360px;
+      }
+      .wrapper .battle {
+        position: relative;
+        top: auto;
+        left: auto;
+        width: 100%;
+        max-width: 640px;
+      }
+      .wrapper .innerbattle,
+      .wrapper .weather {
+        width: 100%;
+        max-width: 640px;
+      }
+      .wrapper .battle-log {
+        position: absolute;
+        top: 1px;
+        right: 0;
+        left: auto;
+        width: min(335px, 90vw);
+        height: 358px;
+        transform: translateX(101%);
+        transition: transform 0.2s ease-in-out;
+        z-index: 5;
+        box-shadow: -8px 0 20px rgba(0, 0, 0, 0.16);
+      }
+      .wrapper.side-log-open .battle-log {
+        transform: translateX(0);
+      }
+      .wrapper .replay-controls,
+      .wrapper .replay-controls-2 {
+        position: static;
+        width: 100%;
+        padding: 4px 0 0;
+        box-sizing: border-box;
+      }
+      .wrapper .battle-log-full {
+        max-height: 50vh;
+        margin-top: 8px;
+      }
+    }
+    textarea { width: 100%; min-height: 180px; font-family: monospace; }
+    .status { color: #444; margin-top: 6px; }
+
+    .import-panel-hidden { display: none; }
+    .settings-toggle.hidden { display: none; }
+
+    .import-modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.45);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      padding: 16px;
+    }
+    .import-modal.hidden { display: none; }
+    .import-modal-card {
+      width: min(900px, 100%);
+      max-height: calc(100vh - 32px);
+      overflow: auto;
+      background: #fff;
+      border-radius: 8px;
+      padding: 12px;
+      position: relative;
+    }
+    .import-modal-close {
+      position: sticky;
+      float: right;
+      top: 0;
+      right: 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <div class="wrapper">
+      <button id="mobileSideLogToggle" class="mobile-side-log-toggle" aria-expanded="false">Show side battle log</button>
+      <div class="body replay-body">
+        <div class="battle" style="position: relative"></div>
+        <div class="battle-log"></div>
+      </div>
+      <div class="replay-controls"></div>
+      <div class="replay-controls-2"></div>
+      <div class="battle-log-full hidden" id="battleLogFull"></div>
+    </div>
+
+    <div class="panel" id="importPanel">
+      <div id="importControlsContent">
+        <h1>Static Replay Viewer (GitHub Pages-safe)</h1>
+        <p>Load a replay from a local <code>.log</code>/<code>.json</code>, a URL, or paste raw battle log text.</p>
+        <div class="controls">
+          <input id="sourceUrl" class="textbox" placeholder="Replay URL (example: ./replays/example.json or https://.../battle.log)" />
+          <button id="loadUrl" class="button"><i class="fa fa-cloud-download"></i> Load URL</button>
+        </div>
+        <div class="controls" style="margin-top:8px;">
+          <input id="spriteBaseUrl" class="textbox" placeholder="Sprite base URL (example: https://raw.githubusercontent.com/jrodparker-dev/pokemon-sprites/main/)" />
+          <button id="applySprites" class="button"><i class="fa fa-paint-brush"></i> Apply Sprites</button>
+        </div>
+        <p>
+          <input id="fileInput" type="file" accept=".html,.htm,.json,.log,.txt" />
+        </p>
+        <p>
+          <textarea id="logInput" placeholder="Paste raw replay log here (lines beginning with |turn| etc.)"></textarea>
+        </p>
+        <p>
+          <button id="loadText" class="button"><i class="fa fa-play"></i> Render Pasted Log</button>
+        </p>
+      </div>
+      <div class="status" id="status"></div>
+    </div>
+  </div>
+
+  <div id="importModal" class="import-modal hidden" role="dialog" aria-modal="true" aria-label="Replay import settings">
+    <div class="import-modal-card">
+      <button id="closeImportModal" class="button import-modal-close"><i class="fa fa-times"></i> Close</button>
+      <div id="importModalMount"></div>
+    </div>
+  </div>
+
+  <script src="https://play.pokemonshowdown.com/js/lib/ps-polyfill.js"></script>
+  <script src="https://play.pokemonshowdown.com/config/config.js"></script>
+  <script src="https://play.pokemonshowdown.com/js/lib/jquery-2.2.4.min.js"></script>
+  <script src="https://play.pokemonshowdown.com/js/lib/lodash.core.js"></script>
+  <script src="https://play.pokemonshowdown.com/js/lib/html-sanitizer-minified.js"></script>
+  <script src="https://play.pokemonshowdown.com/js/battle-sound.js"></script>
+  <script src="https://play.pokemonshowdown.com/js/battledata.js"></script>
+  <script src="https://play.pokemonshowdown.com/data/pokedex-mini.js"></script>
+  <script src="https://play.pokemonshowdown.com/data/pokedex-mini-bw.js"></script>
+  <script src="https://play.pokemonshowdown.com/data/graphics.js"></script>
+  <script src="https://play.pokemonshowdown.com/data/pokedex.js"></script>
+  <script src="https://play.pokemonshowdown.com/data/moves.js"></script>
+  <script src="https://play.pokemonshowdown.com/data/abilities.js"></script>
+  <script src="https://play.pokemonshowdown.com/data/items.js"></script>
+  <script src="https://play.pokemonshowdown.com/data/teambuilder-tables.js"></script>
+  <script src="https://play.pokemonshowdown.com/data/mod-sprites.js"></script>
+  <script src="https://play.pokemonshowdown.com/data/mod-config.js"></script>
+  <script src="https://play.pokemonshowdown.com/js/battle-tooltips.js"></script>
+  <script src="https://play.pokemonshowdown.com/js/battle.js"></script>
+  <script src="./replay-viewer.js"></script>
+</body>
+</html>

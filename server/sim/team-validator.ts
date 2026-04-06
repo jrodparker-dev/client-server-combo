@@ -684,12 +684,6 @@ export class TeamValidator {
 				set.hpType = type.name;
 			}
 		}
-		if ((this.gen === 9 && !ruleTable.has('terastalclause')) || ruleTable.has('bonustypemod')) {
-			set.teraType = set.teraType;
-		}
-		console.log(`[Tera Debug] ${name} final teraType: ${set.teraType}`);
-
-
 		let problem = this.checkSpecies(set, species, tierSpecies, setHas);
 		if (problem) problems.push(problem);
 
