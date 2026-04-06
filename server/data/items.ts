@@ -8999,42 +8999,29 @@ steelfangs: {
 	},
 
 	prismpearl: {
-  name: "Prism Pearl",
-  shortDesc: "First damaging move each stay becomes 2-hit at 0.65× per hit. Resets on switch.",
-  gen: 9,
+		name: "Prism Pearl",
+		shortDesc: "Damaging moves hit 2-4 times (0.4x/0.3x/0.2x per hit) and gain high crit ratio.",
+		gen: 9,
+		onModifyMove(move, pokemon) {
+			if (!move || move.category === 'Status') return;
 
-  onStart(pokemon) {
-    this.effectState.armed = true;       // re-armed on entry
-    this.effectState.boosting = false;   // per-move flag
-  },
-  onAfterSwitchInSelf(pokemon) {
-    this.effectState.armed = true;       // re-arm after every switch-in
-    this.effectState.boosting = false;
-  },
+			const hits = this.random(2, 5); // 2, 3, or 4
+			const perHit: Record<number, number> = {
+				2: 0.4,
+				3: 0.3,
+				4: 0.2,
+			};
 
-  onModifyMove(move, pokemon) {
-    if (!move || move.category === 'Status') return;
-    if (this.effectState.armed && !move.multihit) {
-      move.multihit = 2;
-      this.effectState.boosting = true;  // mark that THIS move should be 0.65× per hit
-      this.add('-activate', pokemon, 'item: Prism Pearl');
-    }
-  },
+			move.multihit = hits;
+			(move as any).prismPearlPerHit = perHit[hits];
+			move.critRatio = (move.critRatio || 0) + 1;
 
-  onBasePower(basePower, user, target, move) {
-    // While boosting flag is set, each hit is 0.65×
-    if (this.effectState.boosting) {
-      return this.chainModify(0.65);
-    }
-  },
-
-  onAfterMove(pokemon, target, move) {
-    if (!move || move.category === 'Status') return;
-    // consume after first damaging move of the stay
-    if (this.effectState.armed) this.effectState.armed = false;
-    // and stop boosting so the next turns aren’t affected
-    if (this.effectState.boosting) this.effectState.boosting = false;
-  },
+			this.add('-activate', pokemon, 'item: Prism Pearl');
+		},
+		onBasePower(basePower, user, target, move) {
+			const perHit = (move as any)?.prismPearlPerHit;
+			if (perHit) return this.chainModify(perHit);
+		},
 },
 
 
