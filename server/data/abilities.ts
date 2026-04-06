@@ -8117,107 +8117,73 @@ pinata: {
 
 berrymaster: {
   name: "Berry Master",
-  shortDesc: "Ripen + Gluttony + Cud Chew + Cheek Pouch.",
-
-  // --- Gluttony flag (used by item/berry checks in PS) ---
+  shortDesc: "Gluttony + one random berry bonus (Ripen OR Cud Chew OR Cheek Pouch) each berry eaten.",
   onStart(pokemon) {
-    const cur = pokemon.getTypes(true).join('/');
-	const base = pokemon.species.types.join('/');
-    this.add('-start', pokemon, 'typechange', cur);
     pokemon.abilityState.gluttony = true;
   },
-  onDamage(item, pokemon) {
-    // preserve your gluttony flag refresh
+  onUpdate(pokemon) {
     pokemon.abilityState.gluttony = true;
   },
-
-  // --- Cheek Pouch heal + Cud Chew bookkeeping + Ripen weaken tracking ---
-  onEatItem(item, pokemon) {
-  if (!item.isBerry) return;
-
-  // Cheek Pouch: heal 1/3 max HP
-  this.heal(pokemon.baseMaxhp / 3);
-
-  // Ripen: remember if it was a resist berry
-  const weakenBerries = [
-    'Babiri Berry','Charti Berry','Chilan Berry','Chople Berry','Coba Berry','Colbur Berry',
-    'Haban Berry','Kasib Berry','Kebia Berry','Occa Berry','Passho Berry','Payapa Berry',
-    'Rindo Berry','Roseli Berry','Shuca Berry','Tanga Berry','Wacan Berry','Yache Berry',
-  ];
-  pokemon.abilityState.berryWeaken = weakenBerries.includes(item.name);
-
-  // Cud Chew: if this eat is a REPLAY, don't schedule another; otherwise arm 2-turn timer
-  const m = (pokemon as any).m ?? ((pokemon as any).m = {});
-  if (!m.bmCudReplay) {
-    m.bmCud = { berry: item, dur: 2 };
-  }
-},
-
-  // --- Ripen: double heals from berries; announce like your version ---
-  onTryHeal(damage, target, _source, effect) {
-    if (!effect) return;
-    if (effect.name === 'Berry Juice' || effect.name === 'Leftovers') {
-      this.add('-activate', target, 'ability: Ripen');
-    }
-    if ((effect as Item).isBerry) return this.chainModify(2);
-  },
-
-  // --- Ripen: double stat boosts from berries ---
-  onChangeBoost(boost, _target, _source, effect) {
-    if (effect && (effect as Item).isBerry) {
-      let b: BoostID;
-      for (b in boost) boost[b]! *= 2;
-    }
-  },
-
-  // --- Ripen: if a resist berry weakened this hit, halve again (→ 1/4 total) ---
-  onSourceModifyDamagePriority: -1,
-  onSourceModifyDamage(damage, source, target, move) {
-    if (target.abilityState.berryWeaken) {
-      target.abilityState.berryWeaken = false;
-      return this.chainModify(0.5);
-    }
-  },
-
-  // --- Ripen's announce when a berry is about to be eaten (kept from your code) ---
   onTryEatItemPriority: -1,
   onTryEatItem(item, pokemon) {
-    this.add('-activate', pokemon, 'ability: Ripen');
+    if (!item.isBerry) return;
+    const m = ((pokemon as any).m ??= {});
+    if (!m.bmNextMode) {
+      m.bmNextMode = this.sample(['ripen', 'cudchew', 'cheekpouch'] as const);
+    }
   },
+  onTryHeal(damage, target, source, effect) {
+    const m = (target as any).m;
+    if ((effect as Item)?.isBerry && m?.bmNextMode === 'ripen') {
+      this.add('-activate', target, 'ability: Berry Master', '[mode] Ripen');
+      return this.chainModify(2);
+    }
+  },
+  onChangeBoost(boost, target, source, effect) {
+    const m = (target as any).m;
+    if ((effect as Item)?.isBerry && m?.bmNextMode === 'ripen') {
+      let stat: BoostID;
+      for (stat in boost) boost[stat]! *= 2;
+    }
+  },
+  onEatItem(item, pokemon) {
+    if (!item.isBerry) return;
+    const m = ((pokemon as any).m ??= {});
+    const mode = m.bmNextMode || this.sample(['ripen', 'cudchew', 'cheekpouch'] as const);
+    delete m.bmNextMode;
 
-  // --- Cud Chew: re-eat the same berry when the 2-turn volatile ends ---
-  // (implemented with simple per-mon state to avoid separate Condition object)
+    if (mode === 'cheekpouch') {
+      this.add('-activate', pokemon, 'ability: Berry Master', '[mode] Cheek Pouch');
+      this.heal(pokemon.baseMaxhp / 3, pokemon, pokemon);
+      return;
+    }
+    if (mode === 'cudchew' && !m.bmCudReplay) {
+      this.add('-activate', pokemon, 'ability: Berry Master', '[mode] Cud Chew');
+      m.bmCud = {berry: item, dur: 2};
+    }
+  },
   onResidualOrder: 28,
-onResidualSubOrder: 2,
-onResidual(pokemon) {
-  const m = (pokemon as any).m;
-  const state = m?.bmCud;
-  if (!state) return;
+  onResidualSubOrder: 2,
+  onResidual(pokemon) {
+    const m = (pokemon as any).m;
+    const state = m?.bmCud;
+    if (!state) return;
+    state.dur--;
+    if (state.dur > 0) return;
+    delete m.bmCud;
+    if (!pokemon.hp) return;
 
-  state.dur--;
-  if (state.dur > 0) return;
-
-  // consume the pending replay
-  delete m.bmCud;
-  if (!pokemon.hp) return;
-
-  const item: Item | undefined = state.berry;
-  if (!item) return;
-
-  // Mark this eat as a replay so onEatItem won't re-arm another Cud Chew
-  m.bmCudReplay = true;
-
-  this.add('-activate', pokemon, 'ability: Cud Chew');
-  this.add('-enditem', pokemon, item.name, '[eat]');
-
-  if (this.singleEvent('Eat', item, null, pokemon, null, null)) {
-    this.runEvent('EatItem', pokemon, null, null, item);
-  }
-  if (item.onEat) pokemon.ateBerry = true;
-
-  // Clear the replay flag so future (new) berries can schedule again
-  delete m.bmCudReplay;
-},
+    const item: Item | undefined = state.berry;
+    if (!item) return;
+    m.bmCudReplay = true;
+    this.add('-activate', pokemon, 'ability: Berry Master', '[mode] Cud Chew');
+    this.add('-enditem', pokemon, item.name, '[eat]');
+    if (this.singleEvent('Eat', item, null, pokemon, null, null)) {
+      this.runEvent('EatItem', pokemon, null, null, item);
+    }
+    if (item.onEat) pokemon.ateBerry = true;
+    delete m.bmCudReplay;
+  },
 },
 
 wonderwheel: {
@@ -9699,25 +9665,24 @@ terrainshift: {
 },
 underworldveil: {
 	name: "Underworld Veil",
-	shortDesc: "Opposing weather and terrain cannot be set while this Pokemon is active.",
+	shortDesc: "Opposing weather and terrain effects are suppressed while this Pokemon is active.",
 	rating: 3.5,
-	onAnySetWeather(target, source) {
-		if (source && source.side !== this.effectState.target.side) return false;
+	onSwitchIn(pokemon) {
+		this.add('-ability', pokemon, 'Underworld Veil');
+		((this.effect as any).onStart as (p: Pokemon) => void).call(this, pokemon);
 	},
-
 	onStart(pokemon) {
-		// Clear opposing terrain immediately if one is up
-		if (this.field.terrain && this.field.terrainState?.source?.side !== pokemon.side) {
-			this.add('-activate', pokemon, 'ability: Underworld Veil');
-			this.field.clearTerrain();
-		}
+		pokemon.abilityState.ending = false;
+		this.eachEvent('WeatherChange', this.effect);
 	},
-
-	onResidualOrder: 27,
-	onResidual(pokemon) {
-		// Keep suppressing opposing terrain while this mon stays active
-		if (this.field.terrain && this.field.terrainState?.source?.side !== pokemon.side) {
-			this.add('-activate', pokemon, 'ability: Underworld Veil');
+	onEnd(pokemon) {
+		pokemon.abilityState.ending = true;
+		this.eachEvent('WeatherChange', this.effect);
+	},
+	suppressWeather: true,
+	onAnyTerrain(pokemon) {
+		if (this.field.terrain && this.field.terrainState?.source?.side !== this.effectState.target.side) {
+			this.add('-activate', this.effectState.target, 'ability: Underworld Veil');
 			this.field.clearTerrain();
 		}
 	},
