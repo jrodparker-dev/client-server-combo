@@ -1835,18 +1835,38 @@ interface InitScenePos {
 }
 
 function setGen5PngFallback($img: JQuery, spriteURL: string) {
-	let fallbackURL = '';
-	if (spriteURL.includes('/sprites/gen5ani-back/')) {
-		fallbackURL = spriteURL.replace('/sprites/gen5ani-back/', '/sprites/gen5-back/').replace(/\.gif($|\?)/, '.png$1');
+	$img.each(function () {
+		const img = this as HTMLImageElement;
+		delete img.dataset.gen5AniFallbackTried;
+		delete img.dataset.gen5PngFallbackTried;
+	});
+	let gen5AniFallbackURL = '';
+	let gen5PngFallbackURL = '';
+	if (spriteURL.includes('/sprites/ani-back/')) {
+		gen5AniFallbackURL = spriteURL.replace('/sprites/ani-back/', '/sprites/gen5ani-back/');
+		gen5PngFallbackURL = spriteURL.replace('/sprites/ani-back/', '/sprites/gen5-back/').replace(/\.gif($|\?)/, '.png$1');
+	} else if (spriteURL.includes('/sprites/ani/')) {
+		gen5AniFallbackURL = spriteURL.replace('/sprites/ani/', '/sprites/gen5ani/');
+		gen5PngFallbackURL = spriteURL.replace('/sprites/ani/', '/sprites/gen5/').replace(/\.gif($|\?)/, '.png$1');
+	} else if (spriteURL.includes('/sprites/gen5ani-back/')) {
+		gen5PngFallbackURL = spriteURL.replace('/sprites/gen5ani-back/', '/sprites/gen5-back/').replace(/\.gif($|\?)/, '.png$1');
 	} else if (spriteURL.includes('/sprites/gen5ani/')) {
-		fallbackURL = spriteURL.replace('/sprites/gen5ani/', '/sprites/gen5/').replace(/\.gif($|\?)/, '.png$1');
+		gen5PngFallbackURL = spriteURL.replace('/sprites/gen5ani/', '/sprites/gen5/').replace(/\.gif($|\?)/, '.png$1');
 	}
-	if (!fallbackURL) return;
+	if (!gen5AniFallbackURL && !gen5PngFallbackURL) return;
 	$img.off('error.gen5pngfallback').on('error.gen5pngfallback', function () {
 		const img = this as HTMLImageElement;
-		if (img.dataset.gen5PngFallback) return;
-		img.dataset.gen5PngFallback = '1';
-		img.src = fallbackURL;
+		if (!img.dataset.gen5AniFallbackTried && gen5AniFallbackURL) {
+			img.dataset.gen5AniFallbackTried = '1';
+			img.src = gen5AniFallbackURL;
+			return;
+		}
+		if (!img.dataset.gen5PngFallbackTried && gen5PngFallbackURL) {
+			img.dataset.gen5PngFallbackTried = '1';
+			img.src = gen5PngFallbackURL;
+			return;
+		}
+		img.onerror = null;
 	});
 }
 
