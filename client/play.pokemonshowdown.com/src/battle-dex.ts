@@ -683,7 +683,6 @@ const Dex = new class implements ModdedDex {
 			spriteData.w = animationData[facing].w;
 			spriteData.h = animationData[facing].h;
 			spriteData.url += dir + '/' + name + '.gif';
-			console.log(animationData[facing]);
 		} else {
 			// There is no entry or enough data in pokedex-mini.js
 			// Handle these in case-by-case basis; either using BW sprites or matching the played gen.
