@@ -1225,14 +1225,13 @@ export class BattleScene implements BattleSceneStub {
 		case 'puddle':
 			const puddle = new Sprite(BattleEffects.puddle, {
 				display: 'block',
-				x,
-				y,
-				z: side.behind(-27),
-				xscale: 1,
-				yscale: 0,
+				x: x + side.leftof(5),
+				y: y - 8,
+				z: side.behind(-10),
+				scale: 0.7,
 				opacity: 0.4,
 			}, this);
-			this.$spritesFront[spriteIndex].append(puddle.$el!);
+			this.$sprites[spriteIndex].append(puddle.$el!);
 			this.sideConditions[siden][id] = [puddle];
 			puddle.anim({
 				opacity: 0.7,
@@ -1429,13 +1428,35 @@ case 'gasoline': {
 			if (serratedSpikeArray.length < 1 && serratedLevels >= 1) {
 				const serrated1 = new Sprite(BattleEffects.serratedspike, {
 					display: 'block',
-					x: x + side.leftof(-72),
-					y: y - 64,
+					x: x - 65,
+					y: y - 52,
 					z: side.z,
 					scale: 0.3,
 				}, this);
 				this.$spritesFront[spriteIndex].append(serrated1.$el!);
 				serratedSpikeArray.push(serrated1);
+			}
+			if (serratedSpikeArray.length < 2 && serratedLevels >= 2) {
+				const serrated2 = new Sprite(BattleEffects.serratedspike, {
+					display: 'block',
+					x: x + 65,
+					y: y - 56,
+					z: side.z,
+					scale: 0.3,
+				}, this);
+				this.$spritesFront[spriteIndex].append(serrated2.$el!);
+				serratedSpikeArray.push(serrated2);
+			}
+			if (serratedSpikeArray.length < 3 && serratedLevels >= 3) {
+				const serrated3 = new Sprite(BattleEffects.serratedspike, {
+					display: 'block',
+					x: x + 15,
+					y: y - 60,
+					z: side.z,
+					scale: 0.3,
+				}, this);
+				this.$spritesFront[spriteIndex].append(serrated3.$el!);
+				serratedSpikeArray.push(serrated3);
 			}
 			break;
 		case 'toxicspikes':
@@ -1448,8 +1469,8 @@ case 'gasoline': {
 			if (tspikeArray.length < 1 && tspikeLevels >= 1) {
 				const tspike1 = new Sprite(BattleEffects.poisoncaltrop, {
 					display: 'block',
-					x: x + 5,
-					y: y - 40,
+					x: x - 55,
+					y: y - 26,
 					z: side.z,
 					scale: 0.3,
 				}, this);
@@ -1459,8 +1480,8 @@ case 'gasoline': {
 			if (tspikeArray.length < 2 && tspikeLevels >= 2) {
 				const tspike2 = new Sprite(BattleEffects.poisoncaltrop, {
 					display: 'block',
-					x: x - 15,
-					y: y - 35,
+					x: x + 5,
+					y: y - 20,
 					z: side.z,
 					scale: .3,
 				}, this);
