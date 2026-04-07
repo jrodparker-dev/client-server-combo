@@ -831,13 +831,16 @@ export class BattleScene implements BattleSceneStub {
 				textBuf += pokemon.speciesForme;
 				let url = spriteData.url;
 				const fallbackSpriteId = (url.split('/').pop() || 'substitute.png').replace(/\.(gif|png)$/, '');
+				const gen5PngFallback = spriteData.isFrontSprite
+					? `${Dex.resourcePrefix}sprites/gen5/${fallbackSpriteId}.png`
+					: `${Dex.resourcePrefix}sprites/gen5-back/${fallbackSpriteId}.png`;
 				const gen5AniFallback = spriteData.isFrontSprite
 					? `${Dex.resourcePrefix}sprites/gen5ani/${fallbackSpriteId}.gif`
 					: `${Dex.resourcePrefix}sprites/gen5ani-back/${fallbackSpriteId}.gif`;
 				const placeholderSprite = spriteData.isFrontSprite // Pet Mods placeholder sprites
 					? `${Dex.resourcePrefix}sprites/gen5/substitute.png`
 					: `${Dex.resourcePrefix}sprites/gen5-back/substitute.png`;
-				const fallbackHandler = `if(!this.dataset.gen5aniFallback){this.dataset.gen5aniFallback='1';this.src='${gen5AniFallback}';}else{this.onerror=null;this.src='${placeholderSprite}';}`;
+				const fallbackHandler = `if(!this.dataset.gen5PngFallback){this.dataset.gen5PngFallback='1';this.src='${gen5PngFallback}';}else if(!this.dataset.gen5AniFallback){this.dataset.gen5AniFallback='1';this.src='${gen5AniFallback}';}else{this.onerror=null;this.src='${placeholderSprite}';}`;
 				// if (this.paused) url.replace('/xyani', '/xy').replace('.gif', '.png');
 				buf += '<img src="' + url + '" width="' + spriteData.w + '" height="' + spriteData.h + '" style="position:absolute;top:' + Math.floor(y - spriteData.h / 2) + 'px;left:' + Math.floor(x - spriteData.w / 2) + 'px" onerror="' + BattleLog.escapeHTML(fallbackHandler) + '"/>';
 				buf2 += '<div style="position:absolute;top:' + (y + 45) + 'px;left:' + (x - 40) + 'px;width:80px;font-size:10px;text-align:center;color:#FFF;">';
@@ -1840,30 +1843,34 @@ function setGen5PngFallback($img: JQuery, spriteURL: string) {
 		delete img.dataset.gen5AniFallbackTried;
 		delete img.dataset.gen5PngFallbackTried;
 	});
-	let gen5AniFallbackURL = '';
 	let gen5PngFallbackURL = '';
+	let gen5AniFallbackURL = '';
 	if (spriteURL.includes('/sprites/ani-back/')) {
-		gen5AniFallbackURL = spriteURL.replace('/sprites/ani-back/', '/sprites/gen5ani-back/');
 		gen5PngFallbackURL = spriteURL.replace('/sprites/ani-back/', '/sprites/gen5-back/').replace(/\.gif($|\?)/, '.png$1');
+		gen5AniFallbackURL = spriteURL.replace('/sprites/ani-back/', '/sprites/gen5ani-back/');
 	} else if (spriteURL.includes('/sprites/ani/')) {
-		gen5AniFallbackURL = spriteURL.replace('/sprites/ani/', '/sprites/gen5ani/');
 		gen5PngFallbackURL = spriteURL.replace('/sprites/ani/', '/sprites/gen5/').replace(/\.gif($|\?)/, '.png$1');
+		gen5AniFallbackURL = spriteURL.replace('/sprites/ani/', '/sprites/gen5ani/');
+	} else if (spriteURL.includes('/sprites/gen5-back/')) {
+		gen5AniFallbackURL = spriteURL.replace('/sprites/gen5-back/', '/sprites/gen5ani-back/').replace(/\.png($|\?)/, '.gif$1');
+	} else if (spriteURL.includes('/sprites/gen5/')) {
+		gen5AniFallbackURL = spriteURL.replace('/sprites/gen5/', '/sprites/gen5ani/').replace(/\.png($|\?)/, '.gif$1');
 	} else if (spriteURL.includes('/sprites/gen5ani-back/')) {
 		gen5PngFallbackURL = spriteURL.replace('/sprites/gen5ani-back/', '/sprites/gen5-back/').replace(/\.gif($|\?)/, '.png$1');
 	} else if (spriteURL.includes('/sprites/gen5ani/')) {
 		gen5PngFallbackURL = spriteURL.replace('/sprites/gen5ani/', '/sprites/gen5/').replace(/\.gif($|\?)/, '.png$1');
 	}
-	if (!gen5AniFallbackURL && !gen5PngFallbackURL) return;
+	if (!gen5PngFallbackURL && !gen5AniFallbackURL) return;
 	$img.off('error.gen5pngfallback').on('error.gen5pngfallback', function () {
 		const img = this as HTMLImageElement;
-		if (!img.dataset.gen5AniFallbackTried && gen5AniFallbackURL) {
-			img.dataset.gen5AniFallbackTried = '1';
-			img.src = gen5AniFallbackURL;
-			return;
-		}
 		if (!img.dataset.gen5PngFallbackTried && gen5PngFallbackURL) {
 			img.dataset.gen5PngFallbackTried = '1';
 			img.src = gen5PngFallbackURL;
+			return;
+		}
+		if (!img.dataset.gen5AniFallbackTried && gen5AniFallbackURL) {
+			img.dataset.gen5AniFallbackTried = '1';
+			img.src = gen5AniFallbackURL;
 			return;
 		}
 		img.onerror = null;
