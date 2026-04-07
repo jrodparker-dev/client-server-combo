@@ -701,18 +701,16 @@ const Dex = new class implements ModdedDex {
 				}
 			}
 
-			const shouldTryGen5AniFallback = (
+			const shouldUseGen5PngFallback = (
 				!hasCustomSprite &&
 				allowAnim &&
 				spriteData.gen >= 5 &&
 				(baseDir === '' || baseDir === 'gen5')
 			);
-			if (shouldTryGen5AniFallback) {
-				dir = 'gen5ani' + dir.slice('gen5'.length);
-				spriteData.url += dir + '/' + name + '.gif';
-			} else {
-				spriteData.url += dir + '/' + name + '.png';
+			if (shouldUseGen5PngFallback) {
+				dir = 'gen5' + dir.slice('gen5'.length);
 			}
+			spriteData.url += dir + '/' + name + '.png';
 		}
 
 		if (!options.noScale) {
