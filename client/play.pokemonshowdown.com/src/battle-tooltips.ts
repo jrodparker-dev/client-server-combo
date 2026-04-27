@@ -1044,6 +1044,9 @@ class BattleTooltips {
 	): ReadonlyArray<TypeName> {
 		const terastallizedType = serverPokemon?.terastallized || pokemon.terastallized;
 		if (terastallizedType) return [terastallizedType as TypeName];
+		if (clientPokemon?.volatiles.formechange) {
+			return this.getPokemonTypes(clientPokemon);
+		}
 		if (clientPokemon?.volatiles.typechange || clientPokemon?.volatiles.typeadd) {
 			return this.getPokemonTypes(clientPokemon);
 		}
@@ -1057,6 +1060,9 @@ class BattleTooltips {
 		serverPokemon: ServerPokemon | null | undefined,
 		pokemon: Pokemon | ServerPokemon
 	): ReadonlyArray<TypeName> {
+		if (clientPokemon?.volatiles.formechange) {
+			return this.getPokemonTypes(clientPokemon, true);
+		}
 		if (serverPokemon?.types?.length) {
 			return serverPokemon.types as TypeName[];
 		}
@@ -1680,6 +1686,8 @@ if (pokemon.status === 'frb') {
 				moveType = 'Fairy';
 			} else if (this.battle.hasPseudoWeather('Psychic Terrain')) {
 				moveType = 'Psychic';
+			} else if (this.battle.hasPseudoWeather('Dark Terrain')) {
+				moveType = 'Dark';
 			}
 		}
 		if (move.id === 'terablast' && pokemon.terastallized) {
@@ -2004,7 +2012,8 @@ if (pokemon.status === 'frb') {
 				this.battle.hasPseudoWeather('Electric Terrain') ||
 				this.battle.hasPseudoWeather('Grassy Terrain') ||
 				this.battle.hasPseudoWeather('Misty Terrain') ||
-				this.battle.hasPseudoWeather('Psychic Terrain')
+				this.battle.hasPseudoWeather('Psychic Terrain') ||
+				this.battle.hasPseudoWeather('Dark Terrain')
 			) {
 				value.modify(2, 'Terrain Pulse boost');
 			}

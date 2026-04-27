@@ -476,6 +476,10 @@ License: GPLv2
 	background: #CCAAEE url(../fx/weather-psychicterrain.png) no-repeat scroll left top;
 	color: #441155;
 }
+.darkterrainweather {
+	background: #3b3566 url(../fx/weather-darkterrain.png) no-repeat scroll left top;
+	color: #e1daf7;
+}
 .allterrainweather {
 	background: #444444 url(../fx/weather-allterrain.png) no-repeat scroll left top;
 }

@@ -179,27 +179,9 @@ const Dex = new class implements ModdedDex {
 
 	pokeballs: string[] | null = null;
 
-	
 	readonly modResourcePrefix = 'https://raw.githubusercontent.com/scoopapa/dh2/master/data/mods/';
-
-/**
-
-	resourcePrefix = (() => {
-		let prefix = '';
-		if (window.document?.location?.protocol !== 'http:') prefix = 'https:';
-		return `${prefix}//${'play.pokemonshowdown.com'}/`;
-	})();
-	*/
-	resourcePrefix = 'https://raw.githubusercontent.com/jrodparker-dev/pokemon-sprites/main/'
-
-	/**
-
-	fxPrefix = (() => {
-		const protocol = (window.document?.location?.protocol !== 'http:') ? 'https:' : '';
-		return `${protocol}//${'play.pokemonshowdown.com'}/fx/`;
-	})();
-	*/
-	fxPrefix = 'https://raw.githubusercontent.com/jrodparker-dev/pokemon-sprites/main/fx/'
+	resourcePrefix = 'https://raw.githubusercontent.com/jrodparker-dev/pokemon-sprites/main/';
+	fxPrefix = 'https://raw.githubusercontent.com/jrodparker-dev/pokemon-sprites/main/fx/';
 
 	loadedSpriteData = {xy: 1, bw: 0};
 	moddedDexes: {[mod: string]: ModdedDex} = {};
@@ -486,10 +468,12 @@ const Dex = new class implements ModdedDex {
 		if ((!optionsMod || !window.ModSprites[spriteId][optionsMod]) && !overrideStandard) { // for custom elements only, it will use sprites from another mod if the mod provided doesn't have one
 			for (const modName in window.ModSprites[spriteId]) {
 				if (window.ModSprites[spriteId][modName].includes(filepath)) return modName;
+				if (window.ModSprites[spriteId][modName].includes('ani-' + filepath)) return modName;
 				if (window.ModSprites[spriteId][modName].includes('ani' + filepath)) return modName;
 			}
 		}
 		if (optionsMod && window.ModSprites[spriteId][optionsMod]) {		
+			if (window.ModSprites[spriteId][optionsMod].includes('ani-' + filepath)) return optionsMod;
 			if (window.ModSprites[spriteId][optionsMod].includes('ani' + filepath)) return optionsMod;
 			if (window.ModSprites[spriteId][optionsMod].includes(filepath)) return optionsMod;
 		}
@@ -685,7 +669,10 @@ const Dex = new class implements ModdedDex {
 		}
 		
 		let hasCustomAnim = false;
-		if (hasCustomSprite && window.ModSprites[modSpriteId][options.mod].includes('ani' + facing)){
+		if (hasCustomSprite && (
+			window.ModSprites[modSpriteId][options.mod].includes('ani-' + facing) ||
+			window.ModSprites[modSpriteId][options.mod].includes('ani' + facing)
+		)){
 			hasCustomAnim = true;
 			animationData[facing] = {};
 			animationData[facing].w = 192;
@@ -701,7 +688,6 @@ const Dex = new class implements ModdedDex {
 			spriteData.w = animationData[facing].w;
 			spriteData.h = animationData[facing].h;
 			spriteData.url += dir + '/' + name + '.gif';
-			console.log(animationData[facing]);
 		} else {
 			// There is no entry or enough data in pokedex-mini.js
 			// Handle these in case-by-case basis; either using BW sprites or matching the played gen.
@@ -720,6 +706,15 @@ const Dex = new class implements ModdedDex {
 				}
 			}
 
+			const shouldUseGen5PngFallback = (
+				!hasCustomSprite &&
+				allowAnim &&
+				spriteData.gen >= 5 &&
+				(baseDir === '' || baseDir === 'gen5')
+			);
+			if (shouldUseGen5PngFallback) {
+				dir = 'gen5' + dir.slice('gen5'.length);
+			}
 			spriteData.url += dir + '/' + name + '.png';
 		}
 

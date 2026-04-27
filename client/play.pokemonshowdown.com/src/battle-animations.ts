@@ -830,11 +830,15 @@ export class BattleScene implements BattleSceneStub {
 				if (textBuf) textBuf += ' / ';
 				textBuf += pokemon.speciesForme;
 				let url = spriteData.url;
-				var placeholderSprite = spriteData.isFrontSprite // Pet Mods placeholder sprites
-				? "https://play.pokemonshowdown.com/sprites/gen5/substitute.png"
-				: "https://play.pokemonshowdown.com/sprites/gen5-back/substitute.png";
+				const fallbackSpriteId = (url.split('/').pop() || 'substitute.png').replace(/\.(gif|png)$/, '');
+				const sideSuffix = spriteData.isFrontSprite ? '' : '-back';
+				const aniFallback = `${Dex.resourcePrefix}sprites/ani${sideSuffix}/${fallbackSpriteId}.gif`;
+				const gen5PngFallback = `${Dex.resourcePrefix}sprites/gen5${sideSuffix}/${fallbackSpriteId}.png`;
+				const gen5AniFallback = `${Dex.resourcePrefix}sprites/gen5ani${sideSuffix}/${fallbackSpriteId}.gif`;
+				const placeholderSprite = `${Dex.resourcePrefix}sprites/gen5${sideSuffix}/substitute.png`; // Pet Mods placeholder sprites
+				const fallbackHandler = `if(!this.dataset.aniFallback){this.dataset.aniFallback='1';this.src='${aniFallback}';}else if(!this.dataset.gen5PngFallback){this.dataset.gen5PngFallback='1';this.src='${gen5PngFallback}';}else if(!this.dataset.gen5AniFallback){this.dataset.gen5AniFallback='1';this.src='${gen5AniFallback}';}else{this.onerror=null;this.src='${placeholderSprite}';}`;
 				// if (this.paused) url.replace('/xyani', '/xy').replace('.gif', '.png');
-				buf += '<img src="' + url + '" width="' + spriteData.w + '" height="' + spriteData.h + '" style="position:absolute;top:' + Math.floor(y - spriteData.h / 2) + 'px;left:' + Math.floor(x - spriteData.w / 2) + 'px" onerror="this.src=\'' + placeholderSprite + '\'"/>';
+				buf += '<img src="' + url + '" width="' + spriteData.w + '" height="' + spriteData.h + '" style="position:absolute;top:' + Math.floor(y - spriteData.h / 2) + 'px;left:' + Math.floor(x - spriteData.w / 2) + 'px" onerror="' + BattleLog.escapeHTML(fallbackHandler) + '"/>';
 				buf2 += '<div style="position:absolute;top:' + (y + 45) + 'px;left:' + (x - 40) + 'px;width:80px;font-size:10px;text-align:center;color:#FFF;">';
 				const gender = pokemon.gender;
 				if (gender === 'M' || gender === 'F') {
@@ -1220,6 +1224,33 @@ export class BattleScene implements BattleSceneStub {
   this.sideConditions[siden][id] = undefined!;
   break;
 }
+
+		case 'puddle':
+			const puddle = new Sprite(BattleEffects.puddle, {
+				display: 'block',
+				x: x + side.leftof(5),
+				y: y - 8,
+				z: side.z,
+				scale: 0.7,
+				opacity: 0.4,
+			}, this);
+			this.$spritesFront[spriteIndex].append(puddle.$el!);
+			this.sideConditions[siden][id] = [puddle];
+			puddle.anim({
+				opacity: 0.7,
+				time: instant ? 0 : 400,
+			}).anim({
+				opacity: 0.3,
+				time: instant ? 0 : 300,
+			});
+			break;
+			case 'puddle': {
+	const ref = this.sideConditions[siden][id];
+	if (ref && ref[0]) ref[0].destroy();
+	this.sideConditions[siden][id] = undefined!;
+	break;
+}
+			
 		case 'stealthrock':
 			const rock1 = new Sprite(BattleEffects.rock1, {
 				display: 'block',
@@ -1391,6 +1422,47 @@ case 'gasoline': {
 				spikeArray.push(spike3);
 			}
 			break;
+		case 'serratedspikes':
+			let serratedSpikeArray = this.sideConditions[siden]['serratedspikes'];
+			if (!serratedSpikeArray) {
+				serratedSpikeArray = [];
+				this.sideConditions[siden]['serratedspikes'] = serratedSpikeArray;
+			}
+			let serratedLevels = this.battle.sides[siden].sideConditions['serratedspikes'][1];
+			if (serratedSpikeArray.length < 1 && serratedLevels >= 1) {
+				const serrated1 = new Sprite(BattleEffects.serratedspike, {
+					display: 'block',
+					x: x - 65,
+					y: y - 52,
+					z: side.z,
+					scale: 0.3,
+				}, this);
+				this.$spritesFront[spriteIndex].append(serrated1.$el!);
+				serratedSpikeArray.push(serrated1);
+			}
+			if (serratedSpikeArray.length < 2 && serratedLevels >= 2) {
+				const serrated2 = new Sprite(BattleEffects.serratedspike, {
+					display: 'block',
+					x: x + 65,
+					y: y - 56,
+					z: side.z,
+					scale: 0.3,
+				}, this);
+				this.$spritesFront[spriteIndex].append(serrated2.$el!);
+				serratedSpikeArray.push(serrated2);
+			}
+			if (serratedSpikeArray.length < 3 && serratedLevels >= 3) {
+				const serrated3 = new Sprite(BattleEffects.serratedspike, {
+					display: 'block',
+					x: x + 15,
+					y: y - 60,
+					z: side.z,
+					scale: 0.3,
+				}, this);
+				this.$spritesFront[spriteIndex].append(serrated3.$el!);
+				serratedSpikeArray.push(serrated3);
+			}
+			break;
 		case 'toxicspikes':
 			let tspikeArray = this.sideConditions[siden]['toxicspikes'];
 			if (!tspikeArray) {
@@ -1401,8 +1473,8 @@ case 'gasoline': {
 			if (tspikeArray.length < 1 && tspikeLevels >= 1) {
 				const tspike1 = new Sprite(BattleEffects.poisoncaltrop, {
 					display: 'block',
-					x: x + 5,
-					y: y - 40,
+					x: x - 55,
+					y: y - 26,
 					z: side.z,
 					scale: 0.3,
 				}, this);
@@ -1412,8 +1484,8 @@ case 'gasoline': {
 			if (tspikeArray.length < 2 && tspikeLevels >= 2) {
 				const tspike2 = new Sprite(BattleEffects.poisoncaltrop, {
 					display: 'block',
-					x: x - 15,
-					y: y - 35,
+					x: x + 5,
+					y: y - 20,
 					z: side.z,
 					scale: .3,
 				}, this);
@@ -1790,6 +1862,46 @@ interface InitScenePos {
 	display?: string;
 }
 
+function setGen5PngFallback($img: JQuery, spriteURL: string) {
+	$img.each(function () {
+		const img = this as HTMLImageElement;
+		delete img.dataset.gen5AniFallbackTried;
+		delete img.dataset.gen5PngFallbackTried;
+	});
+	let gen5PngFallbackURL = '';
+	let gen5AniFallbackURL = '';
+	if (spriteURL.includes('/sprites/ani-back/')) {
+		gen5PngFallbackURL = spriteURL.replace('/sprites/ani-back/', '/sprites/gen5-back/').replace(/\.gif($|\?)/, '.png$1');
+		gen5AniFallbackURL = spriteURL.replace('/sprites/ani-back/', '/sprites/gen5ani-back/');
+	} else if (spriteURL.includes('/sprites/ani/')) {
+		gen5PngFallbackURL = spriteURL.replace('/sprites/ani/', '/sprites/gen5/').replace(/\.gif($|\?)/, '.png$1');
+		gen5AniFallbackURL = spriteURL.replace('/sprites/ani/', '/sprites/gen5ani/');
+	} else if (spriteURL.includes('/sprites/gen5-back/')) {
+		gen5AniFallbackURL = spriteURL.replace('/sprites/gen5-back/', '/sprites/gen5ani-back/').replace(/\.png($|\?)/, '.gif$1');
+	} else if (spriteURL.includes('/sprites/gen5/')) {
+		gen5AniFallbackURL = spriteURL.replace('/sprites/gen5/', '/sprites/gen5ani/').replace(/\.png($|\?)/, '.gif$1');
+	} else if (spriteURL.includes('/sprites/gen5ani-back/')) {
+		gen5PngFallbackURL = spriteURL.replace('/sprites/gen5ani-back/', '/sprites/gen5-back/').replace(/\.gif($|\?)/, '.png$1');
+	} else if (spriteURL.includes('/sprites/gen5ani/')) {
+		gen5PngFallbackURL = spriteURL.replace('/sprites/gen5ani/', '/sprites/gen5/').replace(/\.gif($|\?)/, '.png$1');
+	}
+	if (!gen5PngFallbackURL && !gen5AniFallbackURL) return;
+	$img.off('error.gen5pngfallback').on('error.gen5pngfallback', function () {
+		const img = this as HTMLImageElement;
+		if (!img.dataset.gen5PngFallbackTried && gen5PngFallbackURL) {
+			img.dataset.gen5PngFallbackTried = '1';
+			img.src = gen5PngFallbackURL;
+			return;
+		}
+		if (!img.dataset.gen5AniFallbackTried && gen5AniFallbackURL) {
+			img.dataset.gen5AniFallbackTried = '1';
+			img.src = gen5AniFallbackURL;
+			return;
+		}
+		img.onerror = null;
+	});
+}
+
 export class Sprite {
 	scene: BattleScene;
 	$el: JQuery = null!;
@@ -1805,6 +1917,7 @@ export class Sprite {
 			let rawHTML = sp.rawHTML ||
 				'<img src="' + sp.url + '" style="display:none;position:absolute"' + (sp.pixelated ? ' class="pixelated"' : '') + ' />';
 			this.$el = $(rawHTML);
+			setGen5PngFallback(this.$el, sp.url);
 		} else {
 			sp = {
 				w: 0,
@@ -1971,6 +2084,7 @@ export class PokemonSprite extends Sprite {
 		lightscreen: ['Light Screen', 'good'],
 		reflect: ['Reflect', 'good'],
 		steamfield: ['Steam Field', 'bad'],
+		puddle: ['Puddle', 'bad'],
 	};
 	forme = '';
 	cryurl: string | undefined = undefined;
@@ -2053,6 +2167,7 @@ export class PokemonSprite extends Sprite {
 
 		const $el = this.isSubActive ? this.$sub! : this.$el;
 		$el.attr('src', sp.url!);
+		setGen5PngFallback($el, sp.url!);
 		$el.css(this.scene.pos({
 			x: this.x,
 			y: this.y,
@@ -2069,6 +2184,7 @@ export class PokemonSprite extends Sprite {
 		});
 		this.subsp = subsp;
 		this.$sub = $('<img src="' + subsp.url + '" style="display:block;opacity:0;position:absolute"' + (subsp.pixelated ? ' class="pixelated"' : '') + ' />');
+		setGen5PngFallback(this.$sub, subsp.url);
 		this.scene.$spritesFront[+this.isFrontSprite].append(this.$sub);
 		this.isSubActive = true;
 		if (instant) {
@@ -2201,6 +2317,7 @@ export class PokemonSprite extends Sprite {
 			this.$el.stop(true, false);
 			this.$el.remove();
 			const $newEl = $('<img src="' + this.sp.url + '" style="display:none;position:absolute"' + (this.sp.pixelated ? ' class="pixelated"' : '') + ' />');
+			setGen5PngFallback($newEl, this.sp.url);
 			this.$el = $newEl;
 		}
 
@@ -2629,6 +2746,7 @@ export class PokemonSprite extends Sprite {
 		}
 		// Constructing here gives us 300ms extra time to preload the new sprite
 		let $newEl = $('<img src="' + sp.url + '" style="display:block;opacity:0;position:absolute"' + (sp.pixelated ? ' class="pixelated"' : '') + ' />');
+		setGen5PngFallback($newEl, sp.url);
 		$newEl.css(this.scene.pos({
 			x: this.x,
 			y: this.y,
@@ -3057,6 +3175,10 @@ const BattleEffects: {[k: string]: SpriteData} = {
 		url: 'caltrop.png', // by Pokemon Showdown user SailorCosmos
 		w: 80, h: 80,
 	},
+	serratedspike: {
+		url: 'serratedspike.png',
+		w: 80, h: 80,
+	},
 	greenmetal1: {
 		url: 'greenmetal1.png', // by Pokemon Showdown user Kalalokki
 		w: 45, h: 45,
@@ -3223,6 +3345,10 @@ const BattleEffects: {[k: string]: SpriteData} = {
 	},
 	steamfield: {
 		url: 'steamfield.png',
+		w: 100, h: 100,
+	},
+	puddle: {
+		url: 'puddle.png',
 		w: 100, h: 100,
 	},
 	gasoline: {

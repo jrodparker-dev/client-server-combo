@@ -691,7 +691,172 @@ blindteampreview: {
 	name: 'Blind Team Preview',
 	desc: 'Players choose a lead without seeing the opponent\u2019s team.',
 },
+/*
+custom player mods go here. Allows for extra crit ratio, extra damage, lower accuracy, etc
+kronkifycrit: {
+  name: "Kronkify Always Crit",
+  desc: "All damaging attacks against the player Kronkify always result in critical hits.",
+  effectType: 'Rule',
 
+  onModifyCritRatio(critRatio, source, target, move) {
+    if (this.toID(target.side.name) === 'kronkify' && move.category !== 'Status') {
+      return 6; // guaranteed crit
+    }
+  },
+},
+*/
+kokillshuffle: {
+	name: "KO Kill Shuffle",
+	desc: "After a Pokemon gets a KO, it becomes a random fully evolved Pokemon, gains a random ability, and receives a new custom moveset.",
+	effectType: 'Rule',
+
+	onFaint(target, source, effect) {
+		if (!source || source === target || source.fainted) return;
+		if (source.side === target.side) return;
+
+		const battle = this;
+
+		// Random fully evolved species
+		const pool = battle.dex.species.all().filter(species =>
+			species.exists &&
+			!species.nfe &&
+			!species.isNonstandard &&
+			!species.battleOnly &&
+			!species.requiredItem &&
+			!species.requiredItems
+		);
+
+		const newSpecies = battle.sample(pool);
+		if (!newSpecies) return;
+
+		// Change form/species
+		source.formeChange(newSpecies, this.effect, true);
+
+		// Random ability
+		const abilityPool = battle.dex.abilities.all().filter(ability =>
+			ability.exists &&
+			!ability.isNonstandard &&
+			ability.id !== 'noability'
+		);
+
+		const newAbility = battle.sample(abilityPool);
+		if (newAbility) {
+			source.setAbility(newAbility.id, source, this.effect);
+			battle.add('-ability', source, newAbility.name, '[from] KO Kill Shuffle');
+		}
+
+		const types = source.getTypes();
+		const attackingCategory =
+			newSpecies.baseStats.atk >= newSpecies.baseStats.spa ? 'Physical' : 'Special';
+
+		const allMoves = battle.dex.moves.all().filter(move =>
+			move.exists &&
+			!move.isNonstandard &&
+			!move.isZ &&
+			!move.isMax &&
+			move.id !== 'struggle'
+		);
+
+		const damagingMoves = allMoves.filter(move =>
+			move.category === attackingCategory &&
+			move.basePower > 0
+		);
+
+		const stabPool = damagingMoves.filter(move => types.includes(move.type));
+		const nonStabPool = damagingMoves.filter(move => !types.includes(move.type));
+
+		const statusMoves = allMoves.filter(move =>
+			move.category === 'Status' &&
+			move.id !== 'metronome'
+		);
+
+		function sampleNoRepeat<T extends {id: string}>(
+			pool: T[],
+			chosen: Set<string>
+		): T | null {
+			const legal = pool.filter(x => !chosen.has(x.id));
+			if (!legal.length) return null;
+			return battle.sample(legal);
+		}
+
+		const chosen = new Set<string>();
+		const newMoves: string[] = [];
+
+		// 2 STAB moves
+		for (let i = 0; i < 2; i++) {
+			const move =
+				sampleNoRepeat(stabPool, chosen) ||
+				sampleNoRepeat(damagingMoves, chosen);
+			if (move) {
+				chosen.add(move.id);
+				newMoves.push(move.id);
+			}
+		}
+
+		// 1 non-STAB move
+		const coverage =
+			sampleNoRepeat(nonStabPool, chosen) ||
+			sampleNoRepeat(damagingMoves, chosen);
+
+		if (coverage) {
+			chosen.add(coverage.id);
+			newMoves.push(coverage.id);
+		}
+
+		// 1 weighted status move
+		const weightedStatusPool: typeof statusMoves = [];
+		for (const move of statusMoves) {
+			if (chosen.has(move.id)) continue;
+			const weight = types.includes(move.type) ? 4 : 1;
+			for (let i = 0; i < weight; i++) weightedStatusPool.push(move);
+		}
+
+		const status = battle.sample(weightedStatusPool);
+		if (status) {
+			chosen.add(status.id);
+			newMoves.push(status.id);
+		}
+
+		// Fallback if fewer than 4
+		while (newMoves.length < 4) {
+			const move = sampleNoRepeat(allMoves, chosen);
+			if (!move) break;
+			chosen.add(move.id);
+			newMoves.push(move.id);
+		}
+
+		const newMoveSlots = newMoves.map(id => {
+			const move = battle.dex.moves.get(id);
+			return {
+				move: move.name,
+				id: move.id,
+				pp: move.pp,
+				maxpp: move.pp,
+				target: move.target,
+				disabled: false,
+				used: false,
+			};
+		});
+
+		// Important for your fork: don't assign source.moves directly
+		// @ts-ignore
+		source.moveSlots = newMoveSlots;
+		// @ts-ignore
+		source.baseMoveSlots = newMoveSlots.map(slot => ({...slot}));
+
+		battle.add(
+			'-message',
+			`${source.name} transformed into ${newSpecies.name} after getting a KO!`
+		);
+		battle.add(
+			'-start',
+			source,
+			'typechange',
+			source.getTypes().join('/'),
+			'[silent]'
+		);
+	},
+},
 
 bst600: {
     name: "BST 600",

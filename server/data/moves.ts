@@ -1912,6 +1912,12 @@ export const Moves: import('../sim/dex-moves').MoveDataTable = {
 			pokemon.side.removeSideCondition('reflect');
 			pokemon.side.removeSideCondition('lightscreen');
 			pokemon.side.removeSideCondition('auroraveil');
+			pokemon.side.removeSideCondition('clarityveil');
+			pokemon.side.removeSideCondition('darkmoon');
+			pokemon.side.removeSideCondition('hallofmirrors');
+			pokemon.side.removeSideCondition('phantomguard');
+			pokemon.side.removeSideCondition('pyrokinesis');
+			pokemon.side.removeSideCondition('retaliationscreen'); 
 		},
 		secondary: null,
 		target: "normal",
@@ -3164,7 +3170,10 @@ export const Moves: import('../sim/dex-moves').MoveDataTable = {
 		flags: { mirror: 1, metronome: 1 },
 		onHitField(target, source) {
 			const sideConditions = [
-				'mist', 'lightscreen', 'reflect', 'spikes', 'safeguard', 'tailwind', 'toxicspikes', 'poop', 'stealthrock', 'waterpledge', 'firepledge', 'grasspledge', 'stickyweb', 'auroraveil', 'luckychant', 'gmaxsteelsurge', 'gmaxcannonade', 'gmaxvinelash', 'gmaxwildfire', 'gmaxvolcalith',
+				'mist', 'lightscreen', 'reflect', 'spikes', 'safeguard', 'tailwind', 'toxicspikes', 'poop', 'serratedspikes', 
+				'puddle', 'stealthrock', 'waterpledge', 'firepledge', 'grasspledge', 'stickyweb', 'auroraveil', 'luckychant',
+				 'gmaxsteelsurge', 'gmaxcannonade', 'gmaxvinelash', 'gmaxwildfire', 'gmaxvolcalith', 'gasoline', 'twinvines',
+				'clarityveil', 'darkmoon', 'hallofmirrors', 'phantomguard', 'pyrokinesis', 'retaliationscreen',
 			];
 			let success = false;
 			if (this.gameType === "freeforall") {
@@ -3595,7 +3604,7 @@ export const Moves: import('../sim/dex-moves').MoveDataTable = {
 		onHit(target, source, move) {
 			let success = false;
 			if (!target.volatiles['substitute'] || move.infiltrates) success = !!this.boost({ evasion: -1 });
-			const removeAll = ['spikes', 'toxicspikes', 'poop', 'stealthrock', 'stickyweb', 'gmaxsteelsurge'];
+			const removeAll = ['spikes', 'toxicspikes', 'poop', 'serratedspikes', 'puddle', 'stealthrock', 'stickyweb', 'gmaxsteelsurge', 'gasoline', 'twinvines', 'clarityveil', 'darkmoon', 'hallofmirrors', 'phantomguard', 'pyrokinesis', 'retaliationscreen',];
 			const removeTarget = ['reflect', 'lightscreen', 'auroraveil', 'safeguard', 'mist', ...removeAll];
 			for (const targetCondition of removeTarget) {
 				if (target.side.removeSideCondition(targetCondition)) {
@@ -4567,7 +4576,7 @@ export const Moves: import('../sim/dex-moves').MoveDataTable = {
 	},
 	earthquake: {
 		num: 89,
-		accuracy: 100,
+		accuracy: 90,
 		basePower: 100,
 		category: "Physical",
 		name: "Earthquake",
@@ -7798,7 +7807,7 @@ export const Moves: import('../sim/dex-moves').MoveDataTable = {
 		self: {
 			onHit(source) {
 				let success = false;
-				const removeAll = ['spikes', 'toxicspikes', 'stealthrock', 'stickyweb', 'gmaxsteelsurge'];
+				const removeAll = ['spikes', 'toxicspikes', 'poop', 'serratedspikes', 'puddle', 'stealthrock', 'stickyweb', 'gmaxsteelsurge', 'gasoline', 'twinvines', 'clarityveil', 'darkmoon', 'hallofmirrors', 'phantomguard', 'pyrokinesis', 'retaliationscreen',];
 				const removeTarget = ['reflect', 'lightscreen', 'auroraveil', 'safeguard', 'mist', ...removeAll];
 				for (const targetCondition of removeTarget) {
 					if (source.side.foe.removeSideCondition(targetCondition)) {
@@ -12791,7 +12800,7 @@ export const Moves: import('../sim/dex-moves').MoveDataTable = {
 				if (pokemon.hp && pokemon.removeVolatile('leechseed')) {
 					this.add('-end', pokemon, 'Leech Seed', '[from] move: Mortal Spin', `[of] ${pokemon}`);
 				}
-				const sideConditions = ['spikes', 'toxicspikes', 'poop', 'stealthrock', 'stickyweb', 'gmaxsteelsurge'];
+				const sideConditions = ['spikes', 'toxicspikes', 'poop', 'serratedspikes', 'puddle', 'stealthrock', 'stickyweb', 'gmaxsteelsurge', 'gasoline', 'twinvines'];
 				for (const condition of sideConditions) {
 					if (pokemon.hp && pokemon.side.removeSideCondition(condition)) {
 						this.add('-sideend', pokemon.side, this.dex.conditions.get(condition).name, '[from] move: Mortal Spin', `[of] ${pokemon}`);
@@ -12807,7 +12816,7 @@ export const Moves: import('../sim/dex-moves').MoveDataTable = {
 				if (pokemon.hp && pokemon.removeVolatile('leechseed')) {
 					this.add('-end', pokemon, 'Leech Seed', '[from] move: Mortal Spin', `[of] ${pokemon}`);
 				}
-				const sideConditions = ['spikes', 'toxicspikes', 'stealthrock', 'stickyweb', 'gmaxsteelsurge'];
+				const sideConditions = ['spikes', 'toxicspikes', 'poop', 'serratedspikes', 'puddle', 'stealthrock', 'stickyweb', 'gmaxsteelsurge', 'gasoline', 'twinvines'];
 				for (const condition of sideConditions) {
 					if (pokemon.hp && pokemon.side.removeSideCondition(condition)) {
 						this.add('-sideend', pokemon.side, this.dex.conditions.get(condition).name, '[from] move: Mortal Spin', `[of] ${pokemon}`);
@@ -14410,7 +14419,7 @@ export const Moves: import('../sim/dex-moves').MoveDataTable = {
 	},
 	precipiceblades: {
 		num: 619,
-		accuracy: 85,
+		accuracy: 95,
 		basePower: 120,
 		category: "Physical",
 		name: "Precipice Blades",
@@ -14618,6 +14627,12 @@ export const Moves: import('../sim/dex-moves').MoveDataTable = {
 			pokemon.side.removeSideCondition('reflect');
 			pokemon.side.removeSideCondition('lightscreen');
 			pokemon.side.removeSideCondition('auroraveil');
+			pokemon.side.removeSideCondition('clarityveil');
+			pokemon.side.removeSideCondition('darkmoon');
+			pokemon.side.removeSideCondition('hallofmirrors');
+			pokemon.side.removeSideCondition('phantomguard');
+			pokemon.side.removeSideCondition('pyrokinesis');
+			pokemon.side.removeSideCondition('retaliationscreen'); 
 		},
 		secondary: null,
 		target: "normal",
@@ -15185,6 +15200,12 @@ export const Moves: import('../sim/dex-moves').MoveDataTable = {
 			pokemon.side.removeSideCondition('reflect');
 			pokemon.side.removeSideCondition('lightscreen');
 			pokemon.side.removeSideCondition('auroraveil');
+			pokemon.side.removeSideCondition('clarityveil');
+			pokemon.side.removeSideCondition('darkmoon');
+			pokemon.side.removeSideCondition('hallofmirrors');
+			pokemon.side.removeSideCondition('phantomguard');
+			pokemon.side.removeSideCondition('pyrokinesis');
+			pokemon.side.removeSideCondition('retaliationscreen'); 
 		},
 		onModifyType(move, pokemon) {
 			switch (pokemon.species.name) {
@@ -15249,7 +15270,7 @@ export const Moves: import('../sim/dex-moves').MoveDataTable = {
 				if (pokemon.hp && pokemon.removeVolatile('leechseed')) {
 					this.add('-end', pokemon, 'Leech Seed', '[from] move: Rapid Spin', `[of] ${pokemon}`);
 				}
-				const sideConditions = ['spikes', 'toxicspikes','poop', 'stealthrock', 'stickyweb', 'gmaxsteelsurge'];
+				const sideConditions = ['spikes', 'toxicspikes', 'poop', 'serratedspikes', 'puddle', 'stealthrock', 'stickyweb', 'gmaxsteelsurge', 'gasoline', 'twinvines'];
 				for (const condition of sideConditions) {
 					if (pokemon.hp && pokemon.side.removeSideCondition(condition)) {
 						this.add('-sideend', pokemon.side, this.dex.conditions.get(condition).name, '[from] move: Rapid Spin', `[of] ${pokemon}`);
@@ -15265,7 +15286,7 @@ export const Moves: import('../sim/dex-moves').MoveDataTable = {
 				if (pokemon.hp && pokemon.removeVolatile('leechseed')) {
 					this.add('-end', pokemon, 'Leech Seed', '[from] move: Rapid Spin', `[of] ${pokemon}`);
 				}
-				const sideConditions = ['spikes', 'toxicspikes', 'stealthrock', 'stickyweb', 'gmaxsteelsurge'];
+				const sideConditions = ['spikes', 'toxicspikes', 'poop', 'serratedspikes', 'puddle', 'stealthrock', 'stickyweb', 'gmaxsteelsurge', 'gasoline', 'twinvines'];
 				for (const condition of sideConditions) {
 					if (pokemon.hp && pokemon.side.removeSideCondition(condition)) {
 						this.add('-sideend', pokemon.side, this.dex.conditions.get(condition).name, '[from] move: Rapid Spin', `[of] ${pokemon}`);
@@ -20015,12 +20036,15 @@ export const Moves: import('../sim/dex-moves').MoveDataTable = {
 		pp: 10,
 		priority: 0,
 		flags: { protect: 1, mirror: 1, metronome: 1, pulse: 1 },
-		onModifyType(move, pokemon) {
-			if (!pokemon.isGrounded()) return;
-			switch (this.field.terrain) {
-			case 'electricterrain':
-				move.type = 'Electric';
-				break;
+			onModifyType(move, pokemon) {
+				if (!pokemon.isGrounded()) return;
+				switch (this.field.terrain) {
+				case 'darkterrain':
+					move.type = 'Dark';
+					break;
+				case 'electricterrain':
+					move.type = 'Electric';
+					break;
 			case 'grassyterrain':
 				move.type = 'Grass';
 				break;
@@ -20389,7 +20413,7 @@ export const Moves: import('../sim/dex-moves').MoveDataTable = {
 			for (const active of this.getAllActive()) {
 				if (active.removeVolatile('substitute')) success = true;
 			}
-			const removeAll = ['spikes', 'toxicspikes', 'poop', 'stealthrock', 'stickyweb', 'gmaxsteelsurge'];
+			const removeAll = ['spikes', 'toxicspikes', 'poop', 'serratedspikes', 'puddle', 'stealthrock', 'stickyweb', 'gmaxsteelsurge', 'gasoline', 'twinvines'];
 			const sides = [pokemon.side, ...pokemon.side.foeSidesWithConditions()];
 			for (const side of sides) {
 				for (const sideCondition of removeAll) {
@@ -24884,7 +24908,7 @@ soulrend: {
   flags: {protect: 1, mirror: 1},
   onModifyMove(move) {
     // Support both 'snow' (Gen 9) and 'hail' just in case
-    const snowy = this.field.isWeather('snow') || this.field.isWeather('hail');
+    const snowy = this.field.isWeather('snowscape') || this.field.isWeather('hail');
     if (snowy) {
       move.accuracy = true;
       // raise any freeze secondary on this move to 30%
@@ -24982,7 +25006,7 @@ soulrend: {
     flags: {protect: 1, contact: 1, wind: 1},
     onAfterHit(target, source) {
       const side = target.side;
-      for (const cond of ['spikes','toxicspikes','stealthrock','stickyweb','reflect','lightscreen','auroraveil']) {
+      for (const cond of ['spikes', 'toxicspikes', 'poop', 'serratedspikes', 'puddle', 'stealthrock', 'stickyweb', 'gmaxsteelsurge', 'gasoline', 'twinvines', 'reflect', 'lightscreen', 'auroraveil', 'clarityveil', 'darkmoon', 'hallofmirrors', 'phantomguard', 'pyrokinesis', 'retaliationscreen',]) {
         if (side.removeSideCondition(cond)) {
           this.add('-sideend', side, this.dex.conditions.get(cond).name, '[from] move: Cyclone Wing');
         }
@@ -25236,7 +25260,7 @@ soulrend: {
   
   lifesap: {
   name: "Life Sap",
-  shortDesc: "Drains 50% of target's current HP and heals the user.",
+  shortDesc: "Drains 50% of target's current HP and heals the user for half that amount.",
   accuracy: 100,
   basePower: 0,
   priority: 0,
@@ -25249,7 +25273,7 @@ soulrend: {
     const amount = Math.floor(target.hp / 2);
     if (amount <= 0) return false;
     this.damage(amount, target, source);
-    this.heal(amount, source);
+    this.heal(amount / 2, source);
   },
   target: "normal",
   type: "Grass",
@@ -26152,8 +26176,8 @@ evaporate: {
 		basePower: 80,
 		shortDesc: 'Also super effective against water types.',
 		category: "Special",
-		name: "Overwhelm",
-		pp: 20,
+		name: "Evaporate",
+		pp: 10,
 		priority: 0,
 		flags: { protect: 1, mirror: 1, metronome: 1 },
 		onEffectiveness(typeMod, target, type) {
@@ -27091,8 +27115,11 @@ serratedspikes: {
         target: "foeSide",
         sideCondition: 'serratedspikes',
         condition: {
-            onStart(side) {
-                this.add('-sidestart', side, 'Serrated Spikes');
+            onSideStart(side) {
+                this.add('-sidestart', side, 'move: Serrated Spikes');
+            },
+            onSideRestart() {
+                return false;
             },
             onSwitchIn(pokemon) {
                 if (!pokemon.isGrounded() || pokemon.hasItem('heavydutyboots')) return;
@@ -27101,8 +27128,8 @@ serratedspikes: {
                     this.add('-message', `${pokemon.name} started bleeding due to Serrated Spikes!`);
                 }
             },
-            onEnd(side) {
-                this.add('-sideend', side, 'Serrated Spikes');
+            onSideEnd(side) {
+                this.add('-sideend', side, 'move: Serrated Spikes');
             },
         },
     },
@@ -27434,7 +27461,7 @@ bloodoath: {
             }
             for (const weather of [
                 'raindance', 'primordialsea', 'sunnyday', 'desolateland',
-                'sandstorm', 'hail', 'snow',
+                'sandstorm', 'hail', 'snowscape',
             ] as ID[]) {
                 if (this.field.isWeather(weather)) {
                     this.field.clearWeather();
@@ -27974,41 +28001,60 @@ chromaticclaw: {
 
 
     explosivespores: {
-        name: "Explosive Spores",
-        shortDesc: "Consumes all stat boosts. BP = 40×#boosts; heal 1/16 max per boost. Combines Ground effectiveness.",
-        type: "Grass",
-        category: "Special",
-        accuracy: true,
-        basePower: 0,
-        pp: 5,
-        priority: 0,
-        flags: {protect: 1, mirror: 1, bullet: 1},
-        onEffectiveness(typeMod, target, type) {
-            if (!target) return;
-            return typeMod + this.dex.getEffectiveness('Ground', type);
-        },
-        onModifyMove(move, pokemon) {
-            const boosts = pokemon.boosts;
-            let count = 0;
-            for (const stat of ['atk','def','spa','spd','spe','accuracy','evasion'] as const) {
-                if ((boosts[stat] || 0) !== 0) count += Math.abs(boosts[stat]!);
-            }
-            move.basePower = Math.max(0, 40 * count);
-        },
-        onAfterHit(_target, pokemon) {
-            const boosts = pokemon.boosts;
-            let count = 0;
-            for (const stat of ['atk','def','spa','spd','spe','accuracy','evasion'] as const) {
-                if ((boosts[stat] || 0) !== 0) count += Math.abs(boosts[stat]!);
-            }
-            if (count > 0) {
-                this.heal(Math.floor(pokemon.baseMaxhp / 16) * count, pokemon);
-            }
-            pokemon.clearBoosts();
-            this.add('-clearboost', pokemon);
-        },
-        target: "normal",
-    },
+	name: "Explosive Spores",
+	shortDesc: "BP = 40x all stat changes; heals 1/16 max HP per stat change. Combines Ground effectiveness. Halves boosts after use.",
+	type: "Grass",
+	category: "Special",
+	accuracy: true,
+	basePower: 20,
+	pp: 5,
+	priority: 0,
+	flags: {protect: 1, mirror: 1, bullet: 1},
+
+	onEffectiveness(typeMod, target, type) {
+		if (!target) return;
+		return typeMod + this.dex.getEffectiveness('Ground', type);
+	},
+
+	onModifyMove(move, pokemon) {
+		let count = 0;
+		for (const stat of ['atk', 'def', 'spa', 'spd', 'spe', 'accuracy', 'evasion'] as const) {
+			const boost = pokemon.boosts[stat] || 0;
+			if (boost !== 0) count += Math.abs(boost);
+		}
+		move.basePower = 40 * count;
+	},
+
+	onAfterHit(_target, pokemon) {
+		let count = 0;
+		const boostTable: SparseBoostsTable = {};
+
+		for (const stat of ['atk', 'def', 'spa', 'spd', 'spe', 'accuracy', 'evasion'] as const) {
+			const boost = pokemon.boosts[stat] || 0;
+
+			if (boost !== 0) {
+				count += Math.abs(boost);
+
+				// Build the delta needed to cut the boost in half, rounding toward 0
+				if (boost > 0) {
+					boostTable[stat] = -Math.ceil(boost / 2);
+				} else {
+					boostTable[stat] = Math.ceil(Math.abs(boost) / 2);
+				}
+			}
+		}
+
+		if (count > 0) {
+			this.heal(Math.floor(pokemon.baseMaxhp / 16) * count, pokemon);
+		}
+
+		if (Object.keys(boostTable).length) {
+			this.boost(boostTable, pokemon, pokemon, null, true);
+		}
+	},
+
+	target: "normal",
+},
 capcrush: {
 		accuracy: 100,
 		basePower: 70,
@@ -28097,6 +28143,555 @@ serenefocus: {
 		volatileStatus: 'serenefocus',
 	},
 },
+	agonizingbeam: {
+		name: "Agonizing Beam",
+		type: "Light",
+		category: "Special",
+		basePower: 50,
+		accuracy: 100,
+		pp: 5,
+		priority: 0,
+		shortDesc: "Turns target's moves into recoil moves temporarily.",
+		flags: {protect: 1, mirror: 1, metronome: 1},
+		volatileStatus: 'agonizingbeam',
+		condition: {
+			duration: 2,
+			onModifyMove(move, pokemon) {
+				if (move.category !== 'Status' && !move.recoil && !move.id.startsWith('max')) {
+					move.recoil = [1, 4];
+				}
+			},
+		},
+		target: "normal",
+	},
+	anchorsweep: {
+	name: "Anchor Sweep",
+	type: "Water",
+	category: "Physical",
+	basePower: 70,
+	accuracy: 100,
+	pp: 15,
+	priority: 0,
+	shortDesc: "If target switches, strikes before it leaves at 2x power. Clears a hazard on the user's side.",
+	flags: {protect: 1, mirror: 1, metronome: 1, contact: 1},
+
+	basePowerCallback(pokemon, target, move) {
+		if (target.beingCalledBack || target.switchFlag) {
+			this.debug('Anchor Sweep damage boost');
+			return move.basePower * 2;
+		}
+		return move.basePower;
+	},
+
+	beforeTurnCallback(pokemon) {
+		for (const side of this.sides) {
+			if (side.hasAlly(pokemon)) continue;
+			side.addSideCondition('anchorsweep', pokemon);
+			const data = side.getSideConditionData('anchorsweep');
+			if (!data.sources) data.sources = [];
+			data.sources.push(pokemon);
+		}
+	},
+
+	onModifyMove(move, source, target) {
+		if (target?.beingCalledBack || target?.switchFlag) move.accuracy = true;
+	},
+
+	onTryHit(target, pokemon) {
+		target.side.removeSideCondition('anchorsweep');
+	},
+
+	onAfterHit(target, source) {
+		const hazards = [
+			'spikes',
+			'toxicspikes',
+			'poop',
+			'serratedspikes',
+			'puddle',
+			'stealthrock',
+			'stickyweb',
+			'gmaxsteelsurge',
+			'gasoline',
+			'twinvines',
+		] as const;
+
+		for (const hz of hazards) {
+			if (source.side.removeSideCondition(hz as ID)) break;
+		}
+	},
+
+	onEffectiveness(typeMod, target, type) {
+		return typeMod + this.dex.getEffectiveness('Steel', type);
+	},
+
+	condition: {
+		duration: 1,
+		onBeforeSwitchOut(pokemon) {
+			this.debug('Anchor Sweep start');
+			let alreadyAdded = false;
+			pokemon.removeVolatile('destinybond');
+
+			for (const source of this.effectState.sources) {
+				if (!source.isAdjacent(pokemon) || !this.queue.cancelMove(source) || !source.hp) continue;
+
+				if (!alreadyAdded) {
+					this.add('-activate', pokemon, 'move: Anchor Sweep');
+					alreadyAdded = true;
+				}
+
+				if (source.canMegaEvo || source.canUltraBurst || source.canTerastallize) {
+					for (const [actionIndex, action] of this.queue.entries()) {
+						if (action.pokemon === source) {
+							if (action.choice === 'megaEvo') {
+								this.actions.runMegaEvo(source);
+							} else if (action.choice === 'terastallize') {
+								this.actions.terastallize(source);
+							} else {
+								continue;
+							}
+							this.queue.list.splice(actionIndex, 1);
+							break;
+						}
+					}
+				}
+
+				this.actions.runMove('anchorsweep', source, source.getLocOf(pokemon));
+			}
+		},
+	},
+
+	target: "normal",
+},
+	embercurrent: {
+		name: "Ember Current",
+		type: "Fire",
+		category: "Special",
+		basePower: 70,
+		accuracy: 100,
+		pp: 15,
+		priority: 0,
+		shortDesc: "Boosted in Burning Field; generally faster in Rain/Steam Field.",
+		flags: {protect: 1, mirror: 1, metronome: 1},
+		onModifyPriority(priority, source, target, move) {
+			if (this.field.isWeather(['raindance', 'primordialsea']) || source.side.sideConditions['steamfield'] || target?.side.sideConditions['steamfield']) {
+				return priority + 1;
+			}
+		},
+		onBasePower(basePower, source, target) {
+			if (source.side.sideConditions['burningfield'] || target?.side.sideConditions['burningfield']) {
+				return this.chainModify(1.5);
+			}
+		},
+		onAfterHit(target) {
+			target.side.removeSideCondition('burningfield');
+			target.side.foe.removeSideCondition('burningfield');
+		},
+		onEffectiveness(typeMod, target, type) {
+			return typeMod + this.dex.getEffectiveness('Water', type);
+		},
+		target: "normal",
+	},
+	falloutfield: {
+		name: "Fallout Field",
+		type: "Gamma",
+		category: "Status",
+		basePower: 0,
+		accuracy: true,
+		pp: 5,
+		priority: 0,
+		shortDesc: "Sets Fallout for 5 turns (chip + stat drops on switch-in).",
+		flags: {metronome: 1},
+		sideCondition: 'falloutfield',
+		condition: {
+			duration: 5,
+			onSideStart(side) {
+				this.add('-sidestart', side, 'move: Fallout Field');
+			},
+			onSwitchIn(pokemon) {
+				if (pokemon.hasType('Gamma')) return;
+				this.damage(pokemon.baseMaxhp / 8, pokemon);
+				this.boost({spe: -1}, pokemon);
+				if (pokemon.hasType('Steel')) this.boost({spd: -1}, pokemon);
+			},
+			onSideEnd(side) {
+				this.add('-sideend', side, 'move: Fallout Field');
+			},
+		},
+		target: "foeSide",
+	},
+	fategnaw: {
+		name: "Fategnaw",
+		type: "Psychic",
+		category: "Special",
+		basePower: 110,
+		accuracy: 85,
+		pp: 5,
+		priority: -6,
+		shortDesc: "Always goes last; bypasses Protect; stronger vs boosted foes.",
+		flags: {bypasssub: 1, mirror: 1, metronome: 1},
+		breaksProtect: true,
+		basePowerCallback(pokemon, target, move) {
+			let boosted = false;
+			for (const stat in target.boosts) {
+				if (target.boosts[stat as BoostID]! > 0) boosted = true;
+			}
+			return boosted ? move.basePower * 2 : move.basePower;
+		},
+		target: "normal",
+	},
+	gravebind: {
+		name: "Gravebind",
+		type: "Dark",
+		category: "Physical",
+		basePower: 85,
+		accuracy: 90,
+		pp: 10,
+		priority: 0,
+		shortDesc: "Lowers the target's Defense by 2 stages.",
+		flags: {protect: 1, mirror: 1, metronome: 1, contact: 1},
+		secondary: {chance: 100, boosts: {def: -2}},
+		target: "normal",
+	},
+	hallofmirrors: {
+		name: "Hall of Mirrors",
+		type: "Rock",
+		category: "Status",
+		basePower: 0,
+		accuracy: true,
+		pp: 5,
+		priority: 0,
+		shortDesc: "Sets a 3-turn reflective screen effect.",
+		flags: {snatch: 1, metronome: 1},
+		sideCondition: 'hallofmirrors',
+		condition: {
+			duration: 3,
+			onStart(side) {
+				this.add('-sidestart', side, 'move: Hall of Mirrors');
+				this.effectState.usedThisTurn = false;
+			},
+			onBeforeMovePriority: 101,
+			onBeforeMove() {
+				this.effectState.usedThisTurn = false;
+			},
+			onSourceModifyDamage(damage, source, target, move) {
+				if (this.effectState.usedThisTurn || move?.flags['sound']) return;
+				this.effectState.usedThisTurn = true;
+				return this.chainModify(0.667);
+			},
+			onSideEnd(side) {
+				this.add('-sideend', side, 'move: Hall of Mirrors');
+			},
+		},
+		target: "allySide",
+	},
+	hemorrhagebite: {
+		name: "Hemorrhage Bite",
+		type: "Blood",
+		category: "Physical",
+		basePower: 80,
+		accuracy: 95,
+		pp: 10,
+		priority: 0,
+		shortDesc: "Inflicts Bleeding; user takes recoil. 2x power against bleeding targets",
+		flags: {bite: 1, contact: 1, protect: 1, mirror: 1, metronome: 1},
+		recoil: [1, 16],
+		basePowerCallback(pokemon, target, move) {
+			return target.volatiles['bleeding'] ? move.basePower * 2 : move.basePower;
+		},
+		secondary: {chance: 100, volatileStatus: 'bleeding'},
+		target: "normal",
+	},
+	moonpetalveil: {
+	name: "Moonpetal Veil",
+	type: "Fairy",
+	category: "Status",
+	basePower: 0,
+	accuracy: true,
+	pp: 10,
+	priority: 0,
+	shortDesc: "5 turns of passive healing and status protection.",
+	flags: {snatch: 1, metronome: 1},
+	target: "self",
+
+	onHit(pokemon) {
+		pokemon.side.addSideCondition('moonpetalveil');
+	},
+
+	condition: {
+		duration: 5,
+
+		onStart(side) {
+			this.add('-sidestart', side, 'Moonpetal Veil');
+		},
+
+		onResidualOrder: 5,
+		onResidualSubOrder: 3,
+		onResidual(side) {
+			for (const pokemon of this.getAllActive()) {
+	if (!pokemon || pokemon.fainted) continue;
+	if (pokemon.side !== (side as any)) continue;
+
+	this.heal(pokemon.baseMaxhp / 16, pokemon);
+}
+		},
+
+		onSetStatus(status, target, source, effect) {
+			// Block status conditions (like Safeguard)
+			if (target.side === this.effectState.target) {
+				this.add('-activate', target, 'move: Moonpetal Veil');
+				return false;
+			}
+		},
+
+		onEnd(side) {
+			this.add('-sideend', side, 'Moonpetal Veil');
+		},
+	},
+},
+	nullpulse: {
+		name: "Null Pulse",
+		type: "Ghost",
+		category: "Special",
+		basePower: 70,
+		accuracy: 100,
+		pp: 15,
+		priority: 0,
+		shortDesc: "Ignores Normal/Ghost immunities; may Disable target's last move.",
+		flags: {protect: 1, mirror: 1, metronome: 1},
+		ignoreImmunity: true,
+		secondaries: [{chance: 10, volatileStatus: 'disable'}],
+		onEffectiveness(typeMod, target, type) {
+			return typeMod + this.dex.getEffectiveness('Normal', type);
+		},
+		target: "normal",
+	},
+	permafrostpulse: {
+		name: "Permafrost Pulse",
+		type: "Ice",
+		category: "Special",
+		basePower: 75,
+		accuracy: 100,
+		pp: 10,
+		priority: 0,
+		shortDesc: "Ground coverage; may freeze. Priority in snow or sandstorm",
+		flags: {protect: 1, mirror: 1, metronome: 1},
+		onModifyPriority(priority) {
+			if (this.field.isWeather(['snowscape', 'sandstorm'])) return priority + 1;
+		},
+		secondary: {chance: 10, status: 'frz'},
+		onEffectiveness(typeMod, target, type) {
+			return typeMod + this.dex.getEffectiveness('Ground', type);
+		},
+		target: "normal",
+	},
+	prismbreak: {
+		name: "Prism Break",
+		type: "Light",
+		category: "Special",
+		basePower: 95,
+		accuracy: 100,
+		pp: 10,
+		priority: 0,
+		shortDesc: "Breaks screens before damage; 10% chance to confuse.",
+		flags: {protect: 1, mirror: 1, metronome: 1},
+		onTryHit(target) {
+			const screens = ['reflect', 'lightscreen', 'auroraveil', 'clarityveil', 'darkmoon', 'clarityveil', 'darkmoon', 'hallofmirrors', 'phantomguard', 'pyrokinesis', 'retaliationscreen',];
+			for (const sc of screens) target.side.removeSideCondition(sc);
+		},
+		secondary: {chance: 10, volatileStatus: 'confusion'},
+		target: "normal",
+	},
+	puddle: {
+		name: "Puddle",
+		type: "Water",
+		category: "Status",
+		basePower: 0,
+		accuracy: 100,
+		pp: 5,
+		priority: 0,
+		shortDesc: "Sets Puddle on the opposing side.",
+		flags: {metronome: 1},
+		sideCondition: 'puddle',
+		condition: {
+			duration: 0,
+			onStart(side) {
+				this.effectState.electrifiedTurns = 0;
+				this.effectState.fireSpent = false;
+				this.add('-sidestart', side, 'move: Puddle');
+			},
+			onDamagingHit(damage, target, source, move) {
+				if (move.type === 'Electric') {
+					this.effectState.electrifiedTurns = 3;
+					this.add('-message', `${target.side.name}'s puddle became electrified!`);
+				}
+			},
+			onSwap(target) {
+				if (this.effectState.electrifiedTurns > 0) {
+					target.trySetStatus('par', target.side.foe.active[0], this.dex.conditions.get('puddle'));
+					return;
+				}
+				if (target.hasType('Ground')) {
+					target.side.removeSideCondition('puddle');
+					this.add('-message', `${target.side.name}'s puddle was absorbed by the ground!`);
+				}
+			},
+			onSwitchIn(target) {
+				if (this.effectState.electrifiedTurns > 0) {
+					target.trySetStatus('par', target.side.foe.active[0], this.dex.conditions.get('puddle'));
+					return;
+				}
+				if (target.hasType('Ground')) {
+					target.side.removeSideCondition('puddle');
+					this.add('-message', `${target.side.name}'s puddle was absorbed by the ground!`);
+				}
+			},
+			onAnyBasePower(basePower, attacker, defender, move) {
+				if (!move || move.category === 'Status') return;
+				const affectedSide = this.effectState.target as any;
+				if (move.type === 'Water' && (attacker.side === affectedSide || defender.side === affectedSide)) {
+					return this.chainModify([5, 4]); // 1.25x
+				}
+				if (
+					move.type === 'Fire' &&
+					!this.effectState.fireSpent &&
+					this.effectState.electrifiedTurns <= 0 &&
+					(attacker.side === affectedSide || defender.side === affectedSide)
+				) {
+					this.effectState.fireSpent = true;
+					affectedSide.removeSideCondition('puddle');
+					return this.chainModify(0.5);
+				}
+			},
+			onAnyDamagingHit(damage, target, source, move) {
+				if (this.effectState.electrifiedTurns > 0) return;
+				if (move?.type === 'Flying' && target.side === this.effectState.target) {
+					target.side.removeSideCondition('puddle');
+					this.add('-message', `${target.side.name}'s puddle was blown away!`);
+				}
+			},
+			onResidualOrder: 26,
+			onResidual(side) {
+				if (this.effectState.electrifiedTurns > 0) {
+					this.effectState.electrifiedTurns--;
+					if (this.effectState.electrifiedTurns === 0) {
+						this.add('-message', `${side.name}'s puddle returned to normal.`);
+					}
+				}
+			},
+			onEnd(side) {
+				this.add('-sideend', side, 'move: Puddle');
+			},
+		},
+		target: "foeSide",
+	},
+	seedsiphon: {
+		name: "Seed Siphon",
+		type: "Grass",
+		category: "Special",
+		basePower: 60,
+		accuracy: 100,
+		pp: 15,
+		priority: 0,
+		shortDesc: "Heals user for 50% of damage dealt. Deals extra damage if target switches next turn",
+		flags: {protect: 1, mirror: 1, metronome: 1},
+		drain: [1, 2],
+		volatileStatus: 'seedsiphon',
+		condition: {
+			duration: 2,
+			onSwitchOut(pokemon) {
+				this.damage(pokemon.baseMaxhp / 6, pokemon);
+			},
+		},
+		target: "normal",
+	},
+		skyhook: {
+		name: "Skyhook",
+		type: "Flying",
+		category: "Physical",
+		basePower: 60,
+		accuracy: 100,
+		pp: 15,
+		priority: 0,
+		shortDesc: "Removes target item; sets Tailwind if successful.",
+			flags: {contact: 1, protect: 1, mirror: 1, metronome: 1},
+			onEffectiveness(typeMod, target, type) {
+				return typeMod + this.dex.getEffectiveness('Steel', type);
+			},
+			onHit(target, source) {
+				if (target.takeItem(source)) {
+					source.side.addSideCondition('tailwind', source);
+				}
+			},
+			target: "normal",
+		},
+	voltagebloom: {
+		name: "Voltage Bloom",
+		type: "Electric",
+		category: "Special",
+		basePower: 90,
+		accuracy: 95,
+		pp: 10,
+		priority: 0,
+		shortDesc: "Grass coverage. Terrain-dependent bonus effects.",
+		flags: {protect: 1, mirror: 1, metronome: 1},
+		onEffectiveness(typeMod, target, type) {
+			return typeMod + this.dex.getEffectiveness('Grass', type);
+		},
+		onAfterHit(target, source) {
+			if (this.field.isTerrain('grassyterrain')) target.trySetStatus('par', source);
+			if (this.field.isTerrain('electricterrain')) this.heal(source.baseMaxhp / 4, source);
+		},
+		target: "normal",
+	},
+	whirlpoolmaw: {
+		name: "Whirlpool Maw",
+		type: "Water",
+		category: "Special",
+		basePower: 80,
+		accuracy: 100,
+		pp: 10,
+		priority: 0,
+		shortDesc: "Lowers the target's Speed.",
+		flags: {protect: 1, mirror: 1, metronome: 1},
+		secondary: {chance: 100, boosts: {spe: -1}},
+		target: "normal",
+	},
+	tidalslice: {
+		name: "Tidal Slice",
+		type: "Water",
+		category: "Physical",
+		basePower: 75,
+		accuracy: 100,
+		pp: 10,
+		priority: 0,
+		shortDesc: "Breaks through screens. Slicing.",
+		flags: {protect: 1, mirror: 1, metronome: 1, slicing: 1},
+		onTryHit(pokemon) {
+			// will shatter screens through sub, before you hit
+			pokemon.side.removeSideCondition('reflect');
+			pokemon.side.removeSideCondition('lightscreen');
+			pokemon.side.removeSideCondition('auroraveil');
+			pokemon.side.removeSideCondition('clarityveil');
+			pokemon.side.removeSideCondition('darkmoon');
+			pokemon.side.removeSideCondition('hallofmirrors');
+			pokemon.side.removeSideCondition('phantomguard');
+			pokemon.side.removeSideCondition('pyrokinesis');
+			pokemon.side.removeSideCondition('retaliationscreen');
+		},
+		target: "normal",
+	},
+	lowpitch: {
+		name: "Low Pitch",
+		type: "Dark",
+		category: "Special",
+		basePower: 85,
+		accuracy: 100,
+		pp: 10,
+		priority: 0,
+		target: "normal",
+		shortDesc: "Sound based dark move",
+		flags: {protect: 1, mirror: 1, metronome: 1, sound: 1, bypasssub: 1},
 
 
+	}
 };

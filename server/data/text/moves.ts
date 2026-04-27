@@ -6863,7 +6863,7 @@ export const MovesText: { [id: IDEntry]: MoveText } = {
 	},
 	terrainpulse: {
 		name: "Terrain Pulse",
-		desc: "Power doubles if the user is grounded and a terrain is active, and this move's type changes to match. Electric type during Electric Terrain, Grass type during Grassy Terrain, Fairy type during Misty Terrain, and Psychic type during Psychic Terrain.",
+		desc: "Power doubles if the user is grounded and a terrain is active, and this move's type changes to match. Dark type during Dark Terrain, Electric type during Electric Terrain, Grass type during Grassy Terrain, Fairy type during Misty Terrain, and Psychic type during Psychic Terrain.",
 		shortDesc: "User on terrain: power doubles, type varies.",
 	},
 	thief: {

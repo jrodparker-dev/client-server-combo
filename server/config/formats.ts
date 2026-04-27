@@ -33,9 +33,31 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		bestOfDefault: true,
 		ruleset: ['PotD', 'Obtainable', 'Species Clause', 'Team Preview', 'Blind Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Sleep Clause Mod', 'Illusion Level Mod'],
 	},
+	{
+	name: "[Gen 9] 24v24 Hackmons Cup",
+	desc: `Hackmons Cup, but with 24 random Pokémon per side.`,
+	mod: 'gen9',
+	team: 'randomHC',
+	searchShow: true,
+	bestOfDefault: true,
+	ruleset: [
+		'Max Team Size = 24',
+		'Picked Team Size = 24',
+		'HP Percentage Mod',
+		'Cancel Mod',
+	],
+	banlist: [
+		'CAP', 'LGPE', 'MissingNo.', 'Pikachu-Cosplay', 'Pichu-Spiky-eared',
+		'Pokestar Smeargle', 'Pokestar UFO', 'Pokestar UFO-2', 'Pokestar Brycen-Man',
+		'Pokestar MT', 'Pokestar MT2', 'Pokestar Transport', 'Pokestar Giant',
+		'Pokestar Humanoid', 'Pokestar Monster', 'Pokestar F-00', 'Pokestar F-002',
+		'Pokestar Spirit', 'Pokestar Black Door', 'Pokestar White Door',
+		'Pokestar Black Belt', 'Pokestar UFO-PropU2', 'Xerneas-Neutral',
+	],
+},
 
 	//Comment out these custom ones before building the client or it throws errors
-	
+	/*
 	{
 		name: "[Custom] Random Battle",
 		desc: 'Random Teams of Pokemon with Jordans sets',
@@ -57,7 +79,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		team: 'randomCamo',
 		ruleset: ['Obtainable', 'Species Clause', 'Team Preview', 'Camomons Mod', 'HP Percentage Mod', 'Cancel Mod', 'Sleep Clause Mod', 'Illusion Level Mod']
 	},
-
+*/
 	 // End comment
 	{
 		name: "[Gen 9] Unrated Random Battle",
@@ -184,7 +206,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		debug: true,
 		battle: { trunc: Math.trunc },
 		// no restrictions, for serious (other than team preview)
-		ruleset: ['Team Preview', 'Cancel Mod', 'Max Team Size = 24', 'Max Move Count = 24', 'Max Level = 9999', 'Default Level = 100'],
+		ruleset: ['Team Preview', 'Cancel Mod', '+pokemontag:past', 'Max Team Size = 24', 'Max Move Count = 24', 'Max Level = 9999', 'Default Level = 100'],
 	},
 
 	// S/V Doubles
@@ -273,7 +295,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		battle: { trunc: Math.trunc },
 		debug: true,
 		// no restrictions, for serious (other than team preview)
-		ruleset: ['Team Preview', 'Cancel Mod', 'Max Team Size = 24', 'Max Move Count = 24', 'Max Level = 9999', 'Default Level = 100'],
+		ruleset: ['Team Preview', 'Cancel Mod', '+pokemontag:past', 'Max Team Size = 24', 'Max Move Count = 24', 'Max Level = 9999', 'Default Level = 100'],
 	},
 
 	// S/V Doubles

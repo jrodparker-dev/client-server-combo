@@ -1322,7 +1322,7 @@ antiswitchertrap: {
   // punishes opposing switches
   onSwitchOut(pokemon) {
     if (pokemon.hp > 0) {
-      const dmg = Math.max(1, Math.floor(pokemon.baseMaxhp / 3));
+      const dmg = Math.max(1, Math.floor(pokemon.baseMaxhp / 4));
       const source = this.effectState.source; // the mon that set the side condition
       this.damage(dmg, pokemon, source, {id: 'antiswitcher'} as any);
 
@@ -1775,12 +1775,18 @@ sting: {
   attractionvolatile: {
   // Uncopyable (no Baton Pass)
   noCopy: true,
+  onUpdate(pokemon) {
+	const source = this.effectState.source;
+	if (!source || !source.isActive || source.fainted) {
+		this.debug(`Removing attractionvolatile on ${pokemon}`);
+		pokemon.removeVolatile('attractionvolatile');
+	}
+},
 
-  // No gender check, no immunity checks, does not fall off when source leaves
   onBeforeMovePriority: 2,
   onBeforeMove(pokemon) {
     // Mirror standard Attract 50% fail chance; tweak if you want different odds
-    this.add('-activate', pokemon, 'move: Attract');
+    this.add('-activate', pokemon, 'move: Attract', '[of] ' + this.effectState.source);
     if (this.randomChance(1, 2)) {
       this.add('cant', pokemon, 'Attract');
       return false;
@@ -1957,11 +1963,23 @@ serenefocus: {
 	},
 },
 echomessengerhalfpower: {
-	name: "Echo Messenger (Half Power)",
+	name: "Echo Danger (Half Power)",
 	onBasePower(basePower) {
 		return this.chainModify(0.5);
 	}
 },
+nightvisionweak: {
+		name: 'Night Vision Weakness',
 
+		onEffectiveness(typeMod, target, type, move) {
+			if (!move || move.type !== 'Dark') return;
+
+			// Make Dark always at least super effective (+1 stage)
+			if (typeMod <= 0) return 1;
+
+			// If already super effective, amplify it further
+			return typeMod + 1;
+		},
+	},
 
 };

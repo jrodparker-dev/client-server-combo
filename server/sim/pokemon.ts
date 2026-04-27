@@ -1102,7 +1102,7 @@ export class Pokemon {
 			if (this.canMegaEvo) data.canMegaEvo = true;
 			if (this.canMegaEvoX) data.canMegaEvoX = true;
 			if (this.canMegaEvoY) data.canMegaEvoY = true;
-			if (this.hasAbility('echomessenger')) {
+			if (this.hasAbility('echodanger')) {
 	// @ts-ignore
 	const m = ((this as any).m ??= {});
 	if (m.echoMessengerBattleFirstMoveUsed && !m.echoMessengerEntryMoveUsed) {
