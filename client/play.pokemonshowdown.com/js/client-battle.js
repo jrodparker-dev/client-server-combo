@@ -85,7 +85,9 @@
 		events: {
 			'click .replayDownloadButton': 'clickReplayDownloadButton',
 			'change input[name=zmove]': 'updateZMove',
-			'change input[name=dynamax]': 'updateMaxMove'
+			'change input[name=dynamax]': 'updateMaxMove',
+			'change input[name=megaevo]': 'updateMegaTeraMove',
+			'change input[name=terastallize]': 'updateMegaTeraMove'
 		},
 		battleEnded: false,
 		join: function () {
@@ -564,6 +566,12 @@
 				this.$('.movebuttons-z').hide();
 			}
 		},
+		updateMegaTeraMove: function (e) {
+			var checkbox = e.currentTarget;
+			if (!checkbox.checked) return;
+			if (checkbox.name === 'megaevo') this.$('input[name=terastallize]').prop('checked', false);
+			if (checkbox.name === 'terastallize') this.$('input[name=megaevo]').prop('checked', false);
+		},
 		updateTimer: function () {
 			this.$('.timerbutton').replaceWith(this.getTimerHTML());
 		},
@@ -888,6 +896,9 @@ try {
 				}
 				if (canMegaEvo) {
 					moveMenu += '<br /><label class="megaevo"><input type="checkbox" name="megaevo" />&nbsp;Mega&nbsp;Evolution</label>';
+				}
+				if (canMegaEvo && canTerastallize) {
+					moveMenu += '<br /><label class="megaevo"><input type="checkbox" name="terastallize" />&nbsp;Terastallize<br />' + Dex.getTypeIcon(canTerastallize) + '</label>';
 				} else if (canZMove) {
 					moveMenu += '<br /><label class="megaevo"><input type="checkbox" name="zmove" />&nbsp;Z-Power</label>';
 				} else if (canUltraBurst) {
