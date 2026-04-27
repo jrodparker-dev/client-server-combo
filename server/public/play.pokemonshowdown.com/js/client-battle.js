@@ -56,7 +56,9 @@
 			'change input[name=megaevox]': 'uncheckMegaEvoY',
 			'change input[name=megaevoy]': 'uncheckMegaEvoX',
 			'change input[name=zmove]': 'updateZMove',
-			'change input[name=dynamax]': 'updateMaxMove'
+			'change input[name=dynamax]': 'updateMaxMove',
+			'change input[name=megaevo]': 'updateMegaTeraMove',
+			'change input[name=terastallize]': 'updateMegaTeraMove'
 		},
 		battleEnded: false,
 		join: function () {
@@ -513,11 +515,13 @@
 			}
 			return '<button name="openTimer" class="button timerbutton' + timerTicking + '"><i class="fa fa-hourglass-start"></i> ' + time + '</button>';
 		},
-		uncheckMegaEvoX: function () {
+		uncheckMegaEvoX: function (e) {
 			this.$('input[name=megaevox]').prop('checked', false);
+			if ((e.currentTarget || '').checked) this.$('input[name=terastallize]').prop('checked', false);
 		},
-		uncheckMegaEvoY: function () {
+		uncheckMegaEvoY: function (e) {
 			this.$('input[name=megaevoy]').prop('checked', false);
+			if ((e.currentTarget || '').checked) this.$('input[name=terastallize]').prop('checked', false);
 		},
 		updateMaxMove: function () {
 			var dynaChecked = this.$('input[name=dynamax]')[0].checked;
@@ -537,6 +541,16 @@
 			} else {
 				this.$('.movebuttons-noz').show();
 				this.$('.movebuttons-z').hide();
+			}
+		},
+		updateMegaTeraMove: function (e) {
+			var checkbox = e.currentTarget;
+			if (!checkbox.checked) return;
+			if (checkbox.name === 'megaevo') this.$('input[name=terastallize]').prop('checked', false);
+			if (checkbox.name === 'terastallize') {
+				this.$('input[name=megaevo]').prop('checked', false);
+				this.$('input[name=megaevox]').prop('checked', false);
+				this.$('input[name=megaevoy]').prop('checked', false);
 			}
 		},
 		updateTimer: function () {
