@@ -1977,7 +1977,7 @@ return finalDamage;
 	runMegaEvoY?: (this: BattleActions, pokemon: Pokemon) => boolean;
 
 	canTerastallize(pokemon: Pokemon) {
-		if (pokemon.getItem().zMove || pokemon.canMegaEvo || this.dex.gen !== 9) {
+		if (pokemon.getItem().zMove || this.dex.gen !== 9) {
 			return null;
 		}
 		return pokemon.teraType;
