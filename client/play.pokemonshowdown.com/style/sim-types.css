@@ -496,3 +496,12 @@
 .movemenu button .eff-immune{ background: rgba(180,30,30,0.25); font-weight: 600; }
 .movemenu button .eff-varies{ background: rgba(120,120,120,0.22); }
 
+.switchmenu button.target-eff-se {
+	background: rgba(20, 180, 20, 0.12);
+}
+.switchmenu button.target-eff-nve {
+	background: rgba(180, 120, 0, 0.12);
+}
+.switchmenu button.target-eff-immune {
+	background: rgba(180, 30, 30, 0.12);
+}
