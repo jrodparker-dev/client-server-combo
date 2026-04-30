@@ -630,6 +630,40 @@
 				requestTitle += '<button name="clearChoice">Back</button> ';
 			}
 
+			function getEffectivenessClassForTarget(moveType, targetPokemon) {
+				try {
+					if (!moveType || !targetPokemon || targetPokemon.fainted) return '';
+					var CHART = window._EFF_CHART;
+					if (!CHART) return '';
+					var atkName = Dex.types.get(moveType).name;
+					if (!atkName) return '';
+					var targetTypes = [];
+					if (Array.isArray(targetPokemon.types) && targetPokemon.types.length) {
+						targetTypes = targetPokemon.types.slice();
+					} else if (typeof targetPokemon.getTypes === 'function') {
+						var resolvedTypes = targetPokemon.getTypes();
+						if (Array.isArray(resolvedTypes)) targetTypes = resolvedTypes.slice();
+					}
+					var mult = 1;
+					var saw = false;
+					for (var ti = 0; ti < targetTypes.length; ti++) {
+						var defId = String(targetTypes[ti] || '').toLowerCase().trim();
+						var row = CHART[defId];
+						if (!row || !row.damageTaken) continue;
+						var code = row.damageTaken[atkName];
+						if (code === undefined) continue;
+						saw = true;
+						if (code === 3) return 'target-eff-immune';
+						if (code === 2) mult *= 0.5;
+						else if (code === 1) mult *= 2;
+					}
+					if (!saw || mult === 1) return '';
+					return mult > 1 ? 'target-eff-se' : 'target-eff-nve';
+				} catch (e) {
+					return '';
+				}
+			}
+
 			// Target selector
 			if (type === 'movetarget') {
 				requestTitle += 'At who? ';
@@ -640,6 +674,8 @@
 				var nearActive = this.battle.nearSide.active;
 				var farActive = this.battle.farSide.active;
 				var farSlot = farActive.length - 1 - activePos;
+				var selectedMove = this.battle.dex.moves.get(this.choice.choices[pos].move);
+				var selectedMoveType = this.tooltips.getMoveType(selectedMove, new ModifiableValue(this.battle, this.battle.nearSide.active[activePos], this.battle.myPokemon[pos]))[0];
 
 				if ((moveTarget === 'adjacentAlly' || moveTarget === 'adjacentFoe') && this.battle.gameType === 'freeforall') {
 					moveTarget = 'normal';
@@ -661,7 +697,8 @@
 					} else if (!pokemon || pokemon.fainted) {
 						targetMenus[0] += '<button name="chooseMoveTarget" value="' + (i + 1) + '"><span class="picon" style="' + Dex.getPokemonIcon('missingno') + '"></span></button> ';
 					} else {
-						targetMenus[0] += '<button name="chooseMoveTarget" value="' + (i + 1) + '" class="has-tooltip" data-tooltip="' + BattleLog.escapeHTML(tooltipArgs) + '"><span class="picon" style="' + Dex.getPokemonIcon(pokemon, false, this.battle.mod || '') + '"></span>' + (this.battle.ignoreOpponent || this.battle.ignoreNicks ? pokemon.speciesForme : BattleLog.escapeHTML(pokemon.name)) + '<span class="' + pokemon.getHPColorClass() + '"><span style="width:' + (Math.round(pokemon.hp * 92 / pokemon.maxhp) || 1) + 'px"></span></span>' + (pokemon.status ? '<span class="status ' + pokemon.status + '"></span>' : '') + '</button> ';
+						var farTargetEffClass = getEffectivenessClassForTarget(selectedMoveType, pokemon);
+						targetMenus[0] += '<button name="chooseMoveTarget" value="' + (i + 1) + '" class="has-tooltip ' + farTargetEffClass + '" data-tooltip="' + BattleLog.escapeHTML(tooltipArgs) + '"><span class="picon" style="' + Dex.getPokemonIcon(pokemon, false, this.battle.mod || '') + '"></span>' + (this.battle.ignoreOpponent || this.battle.ignoreNicks ? pokemon.speciesForme : BattleLog.escapeHTML(pokemon.name)) + '<span class="' + pokemon.getHPColorClass() + '"><span style="width:' + (Math.round(pokemon.hp * 92 / pokemon.maxhp) || 1) + 'px"></span></span>' + (pokemon.status ? '<span class="status ' + pokemon.status + '"></span>' : '') + '</button> ';
 					}
 				}
 				for (var i = 0; i < nearActive.length; i++) {
@@ -681,7 +718,8 @@
 					} else if (!pokemon || pokemon.fainted) {
 						targetMenus[1] += '<button name="chooseMoveTarget" value="' + (-(i + 1)) + '"><span class="picon" style="' + Dex.getPokemonIcon('missingno') + '"></span></button> ';
 					} else {
-						targetMenus[1] += '<button name="chooseMoveTarget" value="' + (-(i + 1)) + '" class="has-tooltip" data-tooltip="' + BattleLog.escapeHTML(tooltipArgs) + '"><span class="picon" style="' + Dex.getPokemonIcon(pokemon, false, this.battle.mod || '') + '"></span>' + BattleLog.escapeHTML(pokemon.name) + '<span class="' + pokemon.getHPColorClass() + '"><span style="width:' + (Math.round(pokemon.hp * 92 / pokemon.maxhp) || 1) + 'px"></span></span>' + (pokemon.status ? '<span class="status ' + pokemon.status + '"></span>' : '') + '</button> ';
+						var nearTargetEffClass = getEffectivenessClassForTarget(selectedMoveType, pokemon);
+						targetMenus[1] += '<button name="chooseMoveTarget" value="' + (-(i + 1)) + '" class="has-tooltip ' + nearTargetEffClass + '" data-tooltip="' + BattleLog.escapeHTML(tooltipArgs) + '"><span class="picon" style="' + Dex.getPokemonIcon(pokemon, false, this.battle.mod || '') + '"></span>' + BattleLog.escapeHTML(pokemon.name) + '<span class="' + pokemon.getHPColorClass() + '"><span style="width:' + (Math.round(pokemon.hp * 92 / pokemon.maxhp) || 1) + 'px"></span></span>' + (pokemon.status ? '<span class="status ' + pokemon.status + '"></span>' : '') + '</button> ';
 					}
 				}
 
@@ -701,9 +739,9 @@
 				var moveMenu = '';
 				var movebuttons = '';
 				// Normalize foe types: handles ["Water","Psychic"] or ["Water,Psychic"] or ["Water/Psychic"]
-function getFoeTypeIdsSafe(battle) {
+function getFoeTypeIdsSafe(battle, activePos) {
   var foe =
-    (battle.farSide && battle.farSide.active && battle.farSide.active[0]) ||
+    (battle.farSide && battle.farSide.active && battle.farSide.active[(typeof activePos === 'number' ? Math.max(0, battle.farSide.active.length - 1 - activePos) : 0)]) ||
     (battle.foeSide && battle.foeSide.active && battle.foeSide.active[0]) ||
     (battle.sides && battle.sides[1] && battle.sides[1].active && battle.sides[1].active[0]) ||
     null;
@@ -798,7 +836,7 @@ try {
         return out;
       }
 
-      var defIds = getFoeTypeIdsSafe(this.battle); // -> ["water","psychic"]
+      var defIds = getFoeTypeIdsSafe(this.battle, activePos); // -> ["water","psychic"]
 
       if (!defIds.length) {
         effHtml = '<small class="eff-tag eff-debug">Types?</small> ';
